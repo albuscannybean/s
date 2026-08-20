@@ -2,25 +2,59 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#14261f"><title>LMN Knowledge System</title>
+  <meta name="theme-color" content="#fafaf7"><title>LMN Knowledge System</title>
   <link rel="stylesheet" href="styles.css"><link rel="manifest" href="manifest.webmanifest">
 </head>
 <body>
-  <header><div><b>LMN</b><span>Knowledge System</span></div><nav id="breadcrumbs"></nav><div class="header-actions"><button id="importBtn">导入</button><button id="exportBtn">导出</button></div></header>
-  <main>
-    <aside class="explorer"><div class="pane-title"><span>Knowledge</span><button id="newKnowledge" title="新建 (Ctrl+N)">＋</button></div><input id="search" placeholder="搜索… (Ctrl+K)"><div id="knowledgeList"></div></aside>
-    <section class="workspace">
-      <div class="toolbar"><div class="tabs"><button data-view="text">文本</button><button data-view="graph">关系图</button><button data-view="lmn">LMN 4·3·2</button><button data-view="structure">结构</button></div><span id="status">本地优先 · 自动保存</span></div>
-      <div id="empty" class="empty"><h1>从一个词开始</h1><p>创建 Knowledge，随后逐步连接关系、添加表述并形式化结构。</p><button id="emptyCreate">创建第一个 Knowledge</button></div>
-      <div id="textView" class="view hidden"><input id="title" class="title" aria-label="标题"><div class="editor-grid"><textarea id="content" placeholder="支持 Markdown 与 $LaTeX$…"></textarea><article id="preview"></article></div></div>
-      <div id="graphView" class="view hidden"><div class="graph-tools"><button id="connectBtn">连接已有 Knowledge</button><label>深度 <select id="depth"><option>1</option><option selected>2</option><option>3</option><option>4</option></select></label></div><svg id="graph" viewBox="0 0 900 560" role="img"></svg></div>
-      <div id="lmnView" class="view hidden"><div class="lmn-help">点击位置选择或创建引用。位置保存 Knowledge UUID；递归打开不会复制实体。</div><div id="lmnGrid"></div></div>
-      <div id="structureView" class="view hidden"><div class="structure-tools"><select id="structureType"><option value="generic">Generic Graph</option><option value="tree">Tree / Mind Map</option><option value="poset">Poset / Hasse</option></select><button id="createStructure">从当前局部关系生成</button></div><div id="structureResult"></div></div>
-    </section>
-    <aside class="inspector"><div class="pane-title">Inspector</div><div id="inspector"><p class="muted">选择一个 Knowledge。</p></div></aside>
-  </main>
-  <footer><span id="footerCount">0 Knowledge · 0 Relations</span><span>Ctrl+N 新建 · Ctrl+K 搜索 · Esc 返回</span></footer>
-  <dialog id="dialog"><form method="dialog"><h2 id="dialogTitle"></h2><div id="dialogBody"></div><div class="dialog-actions"><button value="cancel">取消</button><button id="dialogConfirm" value="default">确认</button></div></form></dialog>
-  <input type="file" id="fileInput" accept="application/json" hidden>
+  <div id="appShell">
+    <header class="topbar">
+      <div class="brand"><button id="toggleExplorer" class="icon-button" title="折叠知识库">☰</button><span class="brand-mark">LMN</span></div>
+      <div class="navigation"><button id="backBtn" class="icon-button" title="返回 (Alt+←)">‹</button><button id="forwardBtn" class="icon-button" title="前进 (Alt+→)">›</button><nav id="breadcrumbs" aria-label="递归路径"></nav></div>
+      <button id="globalSearch" class="search-trigger"><span>⌕</span><span>搜索 Knowledge、Relation 或命令</span><kbd>Ctrl K</kbd></button>
+      <div class="top-actions"><button id="viewBtn">视图⌄</button><button id="connectBtn" title="连接模式 (C)">连接</button><button id="exportBtn">导出</button><button id="toggleInspector" class="icon-button" title="切换 Inspector">◫</button></div>
+    </header>
+
+    <aside id="explorer" class="explorer">
+      <div class="pane-heading"><strong>知识库</strong><div><button id="newKnowledge" class="icon-button" title="新建 Knowledge (N)">＋</button><button id="collapseExplorer" class="icon-button">‹</button></div></div>
+      <div class="explorer-search"><span>⌕</span><input id="search" placeholder="筛选 Knowledge"></div>
+      <section><button class="section-toggle" data-section="recent"><span>⌄ 最近打开</span><small id="recentCount"></small></button><div id="recentList" class="knowledge-list"></div></section>
+      <section><button class="section-toggle" data-section="favorites"><span>› 收藏</span><small id="favoriteCount"></small></button><div id="favoriteList" class="knowledge-list collapsed"></div></section>
+      <section><button class="section-toggle" data-section="orphans"><span>› 未连接</span><small id="orphanCount"></small></button><div id="orphanList" class="knowledge-list collapsed"></div></section>
+      <section><button class="section-toggle" data-section="all"><span>⌄ 全部 Knowledge</span><small id="allCount"></small></button><div id="allList" class="knowledge-list"></div></section>
+      <div class="shortcut-legend"><b>快速操作</b><span><kbd>N</kbd> 新建</span><span><kbd>C</kbd> 连接</span><span><kbd>Space</kbd> 展开</span><span><kbd>Esc</kbd> 返回</span></div>
+    </aside>
+
+    <main id="workspace" class="workspace">
+      <div class="canvas-toolbar">
+        <div><h1 id="workspaceTitle">LMN 4–3–2</h1><button id="presentationButton" class="subtle-button">默认 LMN⌄</button></div>
+        <div class="canvas-actions"><button id="undoBtn" class="icon-button" title="撤销 Ctrl+Z">↶</button><button id="redoBtn" class="icon-button" title="重做 Ctrl+Shift+Z">↷</button><button id="fitBtn">适应视图</button><button id="focusBtn">专注</button></div>
+      </div>
+      <div id="welcome" class="welcome hidden"><span class="welcome-mark">LMN</span><h2>从一个具名的知识结构开始</h2><p>每个 Knowledge 都自动拥有完整的 4–3–2 骨架。</p><button id="welcomeCreate">新建 Knowledge</button></div>
+      <div id="canvasViewport" class="canvas-viewport">
+        <div id="canvasStage" class="canvas-stage" data-density="work">
+          <svg id="relationLayer" class="relation-layer" aria-hidden="true"></svg>
+          <div id="lmnColumns" class="lmn-columns"></div>
+          <div id="expandedLMNs" class="expanded-lmns"></div>
+        </div>
+        <div id="selectionBox" class="selection-box hidden"></div>
+        <div class="zoom-controls"><button id="zoomOut">−</button><button id="zoomReset">100%</button><button id="zoomIn">＋</button></div>
+        <div id="inlinePicker" class="popover hidden"></div>
+        <div id="contextMenu" class="context-menu hidden"></div>
+        <div id="connectPanel" class="connect-panel hidden"><b>连接模式</b><span id="connectHint">选择起点 Knowledge</span><button id="cancelConnect">取消</button></div>
+      </div>
+    </main>
+
+    <aside id="inspector" class="inspector">
+      <div class="inspector-tabs"><button data-tab="info" class="active">信息</button><button data-tab="relations">关系</button><button data-tab="presentation">呈现</button><button data-tab="notes">笔记</button></div>
+      <div id="inspectorContent" class="inspector-content"></div>
+    </aside>
+
+    <footer class="statusbar"><span id="pathStatus">Recursive Depth: 0</span><span id="selectionStatus">未选择 Position</span><span id="uuidStatus"></span><span id="saveStatus"><i></i> 本地数据已就绪</span></footer>
+  </div>
+
+  <dialog id="commandPalette" class="command-palette"><input id="commandInput" placeholder="搜索 Knowledge、Relation 或执行命令…"><div id="commandResults"></div></dialog>
+  <dialog id="riskDialog"><form method="dialog"><h2 id="riskTitle"></h2><div id="riskBody"></div><div class="dialog-actions"><button value="cancel">取消</button><button id="riskConfirm" class="danger" value="confirm">确认</button></div></form></dialog>
+  <dialog id="importDialog"><form method="dialog"><h2>导入预览</h2><div id="importPreview"></div><div class="dialog-actions"><button value="cancel">取消</button><button id="importConfirm" value="confirm">导入</button></div></form></dialog>
+  <input type="file" id="fileInput" accept="application/json,text/markdown,.md,.json" hidden>
   <script type="module" src="app.js"></script>
 </body></html>
