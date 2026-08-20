@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#14261f"><title>LMN Knowledge System</title>
+  <link rel="stylesheet" href="styles.css"><link rel="manifest" href="manifest.webmanifest">
+</head>
+<body>
+  <header><div><b>LMN</b><span>Knowledge System</span></div><nav id="breadcrumbs"></nav><div class="header-actions"><button id="importBtn">导入</button><button id="exportBtn">导出</button></div></header>
+  <main>
+    <aside class="explorer"><div class="pane-title"><span>Knowledge</span><button id="newKnowledge" title="新建 (Ctrl+N)">＋</button></div><input id="search" placeholder="搜索… (Ctrl+K)"><div id="knowledgeList"></div></aside>
+    <section class="workspace">
+      <div class="toolbar"><div class="tabs"><button data-view="text">文本</button><button data-view="graph">关系图</button><button data-view="lmn">LMN 4·3·2</button><button data-view="structure">结构</button></div><span id="status">本地优先 · 自动保存</span></div>
+      <div id="empty" class="empty"><h1>从一个词开始</h1><p>创建 Knowledge，随后逐步连接关系、添加表述并形式化结构。</p><button id="emptyCreate">创建第一个 Knowledge</button></div>
+      <div id="textView" class="view hidden"><input id="title" class="title" aria-label="标题"><div class="editor-grid"><textarea id="content" placeholder="支持 Markdown 与 $LaTeX$…"></textarea><article id="preview"></article></div></div>
+      <div id="graphView" class="view hidden"><div class="graph-tools"><button id="connectBtn">连接已有 Knowledge</button><label>深度 <select id="depth"><option>1</option><option selected>2</option><option>3</option><option>4</option></select></label></div><svg id="graph" viewBox="0 0 900 560" role="img"></svg></div>
+      <div id="lmnView" class="view hidden"><div class="lmn-help">点击位置选择或创建引用。位置保存 Knowledge UUID；递归打开不会复制实体。</div><div id="lmnGrid"></div></div>
+      <div id="structureView" class="view hidden"><div class="structure-tools"><select id="structureType"><option value="generic">Generic Graph</option><option value="tree">Tree / Mind Map</option><option value="poset">Poset / Hasse</option></select><button id="createStructure">从当前局部关系生成</button></div><div id="structureResult"></div></div>
+    </section>
+    <aside class="inspector"><div class="pane-title">Inspector</div><div id="inspector"><p class="muted">选择一个 Knowledge。</p></div></aside>
+  </main>
+  <footer><span id="footerCount">0 Knowledge · 0 Relations</span><span>Ctrl+N 新建 · Ctrl+K 搜索 · Esc 返回</span></footer>
+  <dialog id="dialog"><form method="dialog"><h2 id="dialogTitle"></h2><div id="dialogBody"></div><div class="dialog-actions"><button value="cancel">取消</button><button id="dialogConfirm" value="default">确认</button></div></form></dialog>
+  <input type="file" id="fileInput" accept="application/json" hidden>
+  <script type="module" src="app.js"></script>
+</body></html>
