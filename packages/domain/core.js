@@ -37,6 +37,18 @@ export function createLMN(knowledgeId) {
   };
 }
 
+export function createNamedKnowledge(title, content = '') {
+  const knowledge = createKnowledge(title, content);
+  return { knowledge, lmn: createLMN(knowledge.id) };
+}
+
+export function ensureRootLMNs(knowledge, lmns) {
+  const result = [...lmns];
+  const existing = new Set(result.map(l => l.knowledgeId));
+  for (const item of knowledge) if (!existing.has(item.id)) result.push(createLMN(item.id));
+  return result;
+}
+
 export function validateLMN(lmn) {
   const keys = Object.keys(lmn?.positions ?? {}).sort();
   const expected = LMN_POSITIONS.map(p => p.id).sort();
