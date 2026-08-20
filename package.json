@@ -1,0 +1,13 @@
+{
+  "name": "lmn-knowledge-system",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "web": "npx serve apps/web",
+    "desktop": "powershell -ExecutionPolicy Bypass -File apps/desktop/build.ps1",
+    "build:windows": "powershell -ExecutionPolicy Bypass -File apps/desktop/build.ps1"
+  },
+  "engines": { "node": ">=18" }
+}
