@@ -6,12 +6,15 @@ A local-first, recursive knowledge workspace where a single word can become stab
 
 LMN combines the immediacy of mind maps, depth of notes, identity and reuse of knowledge graphs, and precision of formal structures. It implements the Layer–Mediation–Nexus 4·3·2 model while keeping structure emergent rather than mandatory at capture time.
 
-## What works
+## What works — V2
 
 - Create, edit, search and reuse UUID-based Knowledge; duplicate titles are allowed.
 - Create persistent Relations and reconstruct bounded connected neighborhoods.
 - Edit Markdown and inline/display LaTeX source with offline preview.
-- Use strict L1–L4, M1–M3, N1–N2 typed LMN positions and recursive references.
+- Enter a unified three-pane LMN Workspace with vertical L/M/N columns, recursive Breadcrumb, Back/Forward history, semantic zoom and Focus Mode.
+- Every newly named Knowledge automatically receives a strict L1–L4, M1–M3, N1–N2 Root LMN; existing V1 data is migrated non-destructively.
+- Select, multi-select, drag, connect, inline-assign, context-click, enter or expand Position Cards while keeping Presentation separate from semantics.
+- Edit Information, Relations, Presentation and GoodNotes-style Markdown/LaTeX Notes in the Inspector with autosave and global Undo/Redo.
 - Create Generic Graph, Tree/Mind Map and Poset Structures; derive a Hasse view by transitive reduction.
 - Autosave to IndexedDB, review deletion impact, import/export versioned JSON, and work offline.
 - Run the same UI and domain engine as a PWA or Windows `.exe` host.
