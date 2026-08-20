@@ -1,0 +1,10 @@
+bin/
+obj/
+.vs/
+.idea/
+*.user
+*.db
+*.log
+dist/
+artifacts/
+node_modules/
