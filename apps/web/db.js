@@ -1,57 +1,10 @@
-const DB_NAME = 'lmn-knowledge-system';
-const DB_VERSION = 1;
-const STORES = ['knowledge', 'relations', 'representations', 'lmns', 'structures', 'settings'];
-
-export function openDatabase() {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, DB_VERSION);
-    request.onupgradeneeded = () => {
-      const db = request.result;
-      for (const name of STORES) if (!db.objectStoreNames.contains(name)) db.createObjectStore(name, { keyPath: 'id' });
-    };
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
-  });
-}
-
-export async function list(store) {
-  const db = await openDatabase();
-  return new Promise((resolve, reject) => {
-    const req = db.transaction(store, 'readonly').objectStore(store).getAll();
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
-  });
-}
-
-export async function put(store, value) {
-  const db = await openDatabase();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(store, 'readwrite');
-    tx.objectStore(store).put(value);
-    tx.oncomplete = () => resolve(value);
-    tx.onerror = () => reject(tx.error);
-  });
-}
-
-export async function remove(store, id) {
-  const db = await openDatabase();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(store, 'readwrite');
-    tx.objectStore(store).delete(id);
-    tx.oncomplete = resolve;
-    tx.onerror = () => reject(tx.error);
-  });
-}
-
-export async function replaceAll(state) {
-  const db = await openDatabase();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORES.slice(0, 5), 'readwrite');
-    for (const store of STORES.slice(0, 5)) {
-      const target = tx.objectStore(store); target.clear();
-      for (const value of state[store]) target.put(value);
-    }
-    tx.oncomplete = resolve;
-    tx.onerror = () => reject(tx.error);
-  });
-}
+const DB_NAME='lmn-knowledge-system',DB_VERSION=3;
+export const STORES=['knowledge','relations','representations','structureTemplates','structureInstances','settings','migrationState','lmns','structures'];
+export function openDatabase(){return new Promise((resolve,reject)=>{const r=indexedDB.open(DB_NAME,DB_VERSION);r.onupgradeneeded=()=>{const db=r.result;for(const name of STORES)if(!db.objectStoreNames.contains(name))db.createObjectStore(name,{keyPath:'id'})};r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)})}
+export async function list(store){const database=await openDatabase();return new Promise((resolve,reject)=>{const r=database.transaction(store).objectStore(store).getAll();r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)})}
+export async function get(store,id){const database=await openDatabase();return new Promise((resolve,reject)=>{const r=database.transaction(store).objectStore(store).get(id);r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)})}
+export async function put(store,value){const database=await openDatabase();return new Promise((resolve,reject)=>{const tx=database.transaction(store,'readwrite');tx.objectStore(store).put(value);tx.oncomplete=()=>resolve(value);tx.onerror=()=>reject(tx.error)})}
+export async function remove(store,id){const database=await openDatabase();return new Promise((resolve,reject)=>{const tx=database.transaction(store,'readwrite');tx.objectStore(store).delete(id);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)})}
+export async function replaceAll(state,stores=Object.keys(state).filter(x=>STORES.includes(x))){const database=await openDatabase();return new Promise((resolve,reject)=>{const tx=database.transaction(stores,'readwrite');for(const store of stores){const target=tx.objectStore(store);target.clear();for(const value of state[store]??[])target.put(value)}tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)})}
+export async function loadV3State(){const keys=['knowledge','relations','representations','structureTemplates','structureInstances'];const values=await Promise.all(keys.map(list));return Object.fromEntries(keys.map((k,i)=>[k,values[i]]))}
+export async function transaction(stores,callback){const database=await openDatabase();return new Promise((resolve,reject)=>{const tx=database.transaction(stores,'readwrite');callback(Object.fromEntries(stores.map(s=>[s,tx.objectStore(s)])));tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error)})}
