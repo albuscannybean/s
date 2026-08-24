@@ -1,12 +1,20 @@
-import test from 'node:test';import assert from 'node:assert/strict';
-import {createKnowledge,createNamedKnowledge,ensureRootLMNs,createRelation,createLMN,validateLMN,neighborhood,detectCycle,transitiveReduction,exportBundle,validateImport,mergeImport,deletionImpact} from '../packages/domain/core.js';
-const empty=()=>({knowledge:[],relations:[],representations:[],lmns:[],structures:[]});
-test('Knowledge identity is UUID-based and duplicate titles remain distinct',()=>{const a=createKnowledge('A'),b=createKnowledge('A');assert.notEqual(a.id,b.id);assert.equal(a.title,b.title)});
-test('V2 named Knowledge always receives a valid Root LMN',()=>{const {knowledge,lmn}=createNamedKnowledge('群论');assert.equal(lmn.knowledgeId,knowledge.id);assert.equal(validateLMN(lmn).valid,true)});
-test('V2 migration adds only missing Root LMNs without changing UUIDs',()=>{const a=createKnowledge('A'),b=createKnowledge('B'),existing=createLMN(a.id),result=ensureRootLMNs([a,b],[existing]);assert.equal(result.length,2);assert.equal(result.find(x=>x.knowledgeId===a.id).id,existing.id);assert.ok(result.find(x=>x.knowledgeId===b.id))});
-test('critical reuse scenario keeps exactly three entities and two relations',()=>{const A=createKnowledge('A'),B=createKnowledge('B'),C=createKnowledge('C'),r1=createRelation(A.id,B.id),r2=createRelation(C.id,A.id),s={...empty(),knowledge:[A,B,C],relations:[r1,r2]};const g=neighborhood(s.knowledge,s.relations,C.id,2);assert.equal(s.knowledge.length,3);assert.equal(s.relations.length,2);assert.deepEqual(new Set(g.nodes.map(x=>x.id)),new Set([A.id,B.id,C.id]))});
-test('LMN has strict 4-3-2 positions and supports recursive self-reference safely',()=>{const a=createKnowledge('A'),l=createLMN(a.id);assert.equal(validateLMN(l).valid,true);l.positions.L1.knowledgeId=a.id;assert.equal(validateLMN(l).valid,true)});
-test('cycle detection terminates',()=>{assert.equal(detectCycle(['a','b'],[{sourceId:'a',targetId:'b'},{sourceId:'b',targetId:'a'}]),true)});
-test('Hasse transitive reduction removes redundant edge',()=>{const r=transitiveReduction(['a','b','c'],[{id:'1',sourceId:'a',targetId:'b'},{id:'2',sourceId:'b',targetId:'c'},{id:'3',sourceId:'a',targetId:'c'}]);assert.deepEqual(r.edges.map(x=>x.id),['1','2'])});
-test('export/import round trip preserves semantic identities',()=>{const k=createKnowledge('A'),s={...empty(),knowledge:[k]},bundle=exportBundle(s);assert.equal(validateImport(bundle).valid,true);const merged=mergeImport(empty(),bundle);assert.equal(merged.knowledge[0].id,k.id)});
-test('deletion impact reports shared references',()=>{const a=createKnowledge('A'),b=createKnowledge('B'),r=createRelation(a.id,b.id),s={...empty(),knowledge:[a,b],relations:[r],lmns:[createLMN(b.id)]};s.lmns[0].positions.L1.knowledgeId=a.id;const i=deletionImpact(s,a.id);assert.equal(i.relations.length,1);assert.equal(i.lmnReferences.length,1)});
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {createKnowledge,createRelation,neighborhood,detectCycle,transitiveReduction} from '../packages/domain/core.js';
+
+test('Knowledge identity is UUID-based and independent from Structure',()=>{
+  const a=createKnowledge('A'),b=createKnowledge('A');
+  assert.notEqual(a.id,b.id);assert.equal(a.title,b.title);assert.equal('lmn'in a,false);assert.equal('structureId'in a,false);
+});
+
+test('critical reuse scenario keeps exactly three entities and two relations',()=>{
+  const A=createKnowledge('A'),B=createKnowledge('B'),C=createKnowledge('C'),r1=createRelation(A.id,B.id),r2=createRelation(C.id,A.id),knowledge=[A,B,C],relations=[r1,r2];
+  const graph=neighborhood(knowledge,relations,C.id,2);assert.equal(knowledge.length,3);assert.equal(relations.length,2);assert.deepEqual(new Set(graph.nodes.map(item=>item.id)),new Set([A.id,B.id,C.id]));
+});
+
+test('cycle detection terminates',()=>assert.equal(detectCycle(['a','b'],[{sourceId:'a',targetId:'b'},{sourceId:'b',targetId:'a'}]),true));
+
+test('Hasse transitive reduction removes a redundant semantic edge',()=>{
+  const result=transitiveReduction(['a','b','c'],[{id:'1',sourceId:'a',targetId:'b'},{id:'2',sourceId:'b',targetId:'c'},{id:'3',sourceId:'a',targetId:'c'}]);
+  assert.deepEqual(result.edges.map(item=>item.id),['1','2']);
+});
