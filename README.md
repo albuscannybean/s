@@ -1,69 +1,78 @@
-# LMN Knowledge System V3
+# LMN Knowledge System V4
 
-LMN V3 is a local-first knowledge workspace in which **Knowledge is semantic identity** and **Structure is a reusable, nestable and optionally executable formal system**. LMN 4–3–2 is now one built-in Structure Template—not a mandatory container created for every Knowledge.
+LMN V4 是一个 local-first 的递归知识工作空间。Knowledge 保持稳定语义身份；LMN 与其他 Structure 作为可编辑、可计算、可嵌套的结构实例；Notes 是内容；Representation/Layout 只改变观察方式。
 
-## V3 capabilities
+V4 的核心变化不是换肤，而是统一了场景几何、交互语法和结构执行模型：
 
-- Create UUID-based Knowledge without automatically creating an LMN or any other Structure.
-- Insert multiple Structure Instances into one Knowledge and bind a Slot to Knowledge, values, variables or another heterogeneous Structure.
-- Use built-in LMN 4–3–2, directed/undirected graphs, Tree, Poset/Hasse, Mod‑12, two/three-set Venn, Cartesian coordinates and custom structures.
-- Use the expanded geometry/algebra library: parameterized regular n-gons, cyclic groups `Zₙ`, finite Cayley operation tables and vector-space bases.
-- Edit parameters and run dependency-ordered JSON-AST rules without `eval` or `new Function`; errors remain visible in runtime state.
-- Search text, formal Structure semantics and edge patterns.
-- Migrate V2 Root LMNs to LMN Structure Instances non-destructively while preserving UUIDs and a legacy copy.
-- Export/import a complete `schemaVersion: 3` bundle.
-- Work in the same UI on GitHub Pages/PWA and in a real, independent Windows WebView2 window.
+- Navigator + Canvas 双栏工作区；属性编辑改为上下文菜单与浮动面板。
+- 节点和边使用同一个世界坐标 Scene Geometry Model，缩放与平移仅作用于 Scene Root。
+- 边界锚点支持矩形、圆角矩形、圆与 pill；路由支持 straight、Bezier、orthogonal、radial arc。
+- 浏览 / 编辑 / 连接三种明确模式；支持拖动、框选、Shift 多选、右键操作、Undo/Redo、专注模式和真实 Minimap。
+- 每个 Structure Instance 可局部新增、删除、重命名节点和边，不修改共享模板。
+- Boolean Algebra `Bₙ` 动态生成 `2ⁿ` 个元素与 Hasse 覆盖边，支持 meet、join、complement。
+- 通用 Mod‑N 结构与安全公式 AST；Zi Wei 示例以 `hour=7` 驱动文昌、文曲位置。
+- `.lkl` 结构语言包含 lexer、parser、AST/Domain validation 和稳定 serializer；JSON 继续作为完整备份格式。
+- 结构库还包含正 n 边形、循环群、Cayley 表、Venn、坐标系、矩阵、函数映射、交换图、DAG、状态机、时间轴、格、证明树、笛卡尔积、置换、变换群、动力系统与流网络等模板。
 
-## Repository map
+## 使用
 
-```text
-apps/web                 V3 browser/PWA shell and IndexedDB adapter
-apps/desktop             native WebView2 host, build and Setup.exe source
-packages/domain          Knowledge and Relation identity
-packages/structure-engine templates, instances, bindings, evaluator, migration
-packages/search-engine   text / structure / pattern search
-packages/persistence     repository boundaries
-packages/ui              canvas renderer and workspace controller
-docs/schema              V3 schema contract
-tests                    domain, engine and browser acceptance checks
+Web 部署入口（合并到 `master` 并完成 Pages 后）：
+
+`https://albuscannybean.github.io/s/apps/web/`
+
+本地运行需要静态服务器，因为浏览器 ES Modules 不能直接从 `file://` 加载：
+
+```powershell
+python -m http.server 4174
 ```
 
-See [V3 architecture](docs/architecture-v3.md), [Structure schema](docs/schema/structure-schema-v3.md), [migration](docs/migration-v2-v3.md), and the [pre-implementation product specification](docs/v3-implementation-plan.md).
+然后访问 `http://127.0.0.1:4174/apps/web/`。
 
-## Develop and test
-
-Node.js 18+ is required for unit tests. Serve the repository root (not only `apps/web`) because browser modules are shared from `packages/`.
-
-```bash
-npm test
-npm run web
-```
-
-Then open `/apps/web/`.
-
-## Windows build
+Windows 安装包：
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File apps/desktop/build.ps1
 ```
 
-The build pins Microsoft WebView2 SDK `1.0.4129.50`, downloads it from the official NuGet feed, and produces:
+产物位于：
 
-```text
-outputs/windows/portable/LMN.exe
-outputs/windows/LMN_x64_Setup.exe
+- `outputs/windows/LMN_V4_x64_Setup.exe`
+- `outputs/windows/portable/LMN.exe`
+
+## 快捷键
+
+| 快捷键 | 行为 |
+| --- | --- |
+| `V` / `E` / `C` | 浏览 / 编辑 / 连接模式 |
+| `N` | 新建 Knowledge |
+| `Ctrl+K` | 搜索与命令面板 |
+| `Enter` | 打开选中节点 |
+| `Space` | 预览 / 属性 |
+| `Delete` | 在编辑模式删除当前实例对象 |
+| `Ctrl+Z` / `Ctrl+Shift+Z` | Undo / Redo |
+| `Alt+←` / `Alt+→` | 导航后退 / 前进 |
+| `Esc` | 关闭浮层、取消选择或退出专注模式 |
+
+## 数据兼容
+
+IndexedDB 升级到版本 4，但沿用原有 store。V2/V3 Knowledge、Relation、Representation、Structure UUID、Binding 和 Notes 均原样保留；V4 只为 Structure Instance 添加 `overrides`、`variables`、`layoutState.nodePositions` 与 `objectHistory` 默认字段。详见 `docs/migration-v3-v4.md`。
+
+## 验证
+
+```powershell
+npm test
 ```
 
-`LMN.exe` is a native WinForms host with an embedded WebView2 control and a stable local virtual origin. It does not start a localhost server or open the default browser. Current Windows installations normally include the WebView2 Runtime.
+当前自动化覆盖场景几何、坐标变换、锚点与路由、Boolean Bₙ、动态图覆盖、公式解析、Mod‑N、LKL 往返、导航路径、V2/V3 迁移和 Bundle 身份保持。浏览器验收脚本为 `tests/qa-v4.mjs`。
 
-## Deployment
+## 目录
 
-Pushes to `master` run tests, build the Windows artifact, and deploy `apps/` plus `packages/` to GitHub Pages. The deployed application entry is `/apps/web/`. Cache generation is V3-specific, so the service worker replaces V2 assets after reload.
+- `apps/web`：Web/PWA 外壳、IndexedDB 与 V4 UI。
+- `apps/desktop`：Windows WebView2 宿主与安装器。
+- `packages/geometry`：Scene Geometry、Layout、Routing、Animation Coordinator。
+- `packages/structure-engine`：模板、实例覆盖、公式、执行器、迁移与 Bundle。
+- `packages/lkl`：LKL lexer/parser/validator/serializer。
+- `packages/navigation`：递归路径与浏览器式历史。
+- `packages/ui`：场景渲染器与统一工作区控制器。
 
-## Security and data
-
-- No arbitrary JavaScript execution is used for Structure rules.
-- Knowledge, Relations and Structure bindings are semantic data; zoom, pan and layout offsets are presentation data.
-- Deleting a Relation never deletes endpoint Knowledge.
-- V2 migration preserves old Knowledge/Relation/LMN UUIDs and leaves legacy stores intact.
-- IndexedDB and the desktop WebView2 profile are local to the user.
+MIT License

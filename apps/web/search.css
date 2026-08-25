@@ -1,5 +1,0 @@
-.structure-query{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
-.structure-query input,.pattern-query input,.pattern-query select,#searchForm>input{min-width:0;border:1px solid var(--border);border-radius:8px;padding:9px}
-.pattern-query{display:grid;grid-template-columns:1fr auto 1fr auto 1fr 120px;gap:8px;align-items:center;background:#f7f8f5;border:1px solid var(--border);border-radius:12px;margin:14px 18px;padding:18px!important}
-.pattern-query span{font-size:20px;color:var(--L)}
-@media(max-width:700px){.pattern-query{grid-template-columns:1fr auto 1fr}.pattern-query select{grid-column:1/-1}}

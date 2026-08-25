@@ -41,8 +41,8 @@ test('dependency cycles become runtime errors instead of executing arbitrary cod
   const result=evaluateRules([{target:'A',expression:{var:'B'}},{target:'B',expression:{var:'A'}}],{});assert.equal(result.errors.A,'cyclic dependency');assert.equal(result.errors.B,'cyclic dependency');
 });
 
-test('Mod-12 acceptance scenario computes B=8 and A=5 produces 10',()=>{
-  const template=getBuiltinTemplate('builtin:mod-12'),instance=createStructureInstance(template);let result=runInstance(instance,template);assert.equal(instance.parameters.A,3);assert.equal(result.results.B,8);instance.parameters.A=5;result=runInstance(instance,template);assert.equal(result.results.B,10);
+test('Zi Wei Mod-12 acceptance scenario safely derives Wen Chang and Wen Qu',()=>{
+  const template=getBuiltinTemplate('builtin:mod-12'),instance=createStructureInstance(template);let result=runInstance(instance,template);assert.equal(instance.parameters.hour,7);assert.equal(result.results.wenchang,3);assert.equal(result.results.wenqu,11);instance.parameters.hour=5;result=runInstance(instance,template);assert.equal(result.results.wenchang,5);assert.equal(result.results.wenqu,9);
 });
 
 test('Hasse structural rule computes a transitive reduction without expression errors',()=>{

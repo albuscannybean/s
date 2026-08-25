@@ -15,7 +15,7 @@ jobs:
       - uses: actions/checkout@v4
       - run: powershell -ExecutionPolicy Bypass -File apps/desktop/build.ps1
       - uses: actions/upload-artifact@v4
-        with: { name: LMN-V3-Windows-x64, path: outputs/windows }
+        with: { name: LMN-V4-Windows-x64, path: outputs/windows }
   pages:
     runs-on: ubuntu-latest
     steps:
