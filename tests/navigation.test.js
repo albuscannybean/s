@@ -1,0 +1,6 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {NavigationHistory,appendPath,knowledgeSegment,pathLabel,slotSegment,structureSegment,truncatePath,validateNavigatorPath} from '../packages/navigation/path.js';
+
+test('recursive navigator path preserves exact Knowledge / slot / Structure identity',()=>{const knowledge={id:'k1',title:'群论'},instance={id:'i1'},template={id:'t1',name:'LMN'},slot={id:'L2',label:'存在',role:'existence'},path=appendPath([knowledgeSegment(knowledge)],slotSegment(instance.id,slot),structureSegment(instance,template));assert.equal(pathLabel(path),'群论 › 存在 › LMN');assert.deepEqual(truncatePath(path,1).map(item=>item.kind),['knowledge','slot']);assert.equal(validateNavigatorPath(path,{knowledge:[knowledge],structureInstances:[instance]}).valid,true)});
+test('navigation history supports browser-like back and forward without mixing object history',()=>{const history=new NavigationHistory({knowledgeId:'a'});history.push({knowledgeId:'b'});history.push({knowledgeId:'c'});assert.deepEqual(history.back(),{knowledgeId:'b'});assert.deepEqual(history.back(),{knowledgeId:'a'});assert.deepEqual(history.forward(),{knowledgeId:'b'});history.push({knowledgeId:'d'});assert.equal(history.canForward,false)});

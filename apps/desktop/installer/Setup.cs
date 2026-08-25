@@ -8,30 +8,30 @@ using Microsoft.Win32;
 
 internal static class Setup
 {
-    private const string AppName = "LMN Knowledge System V3";
+    private const string AppName = "LMN Knowledge System V4";
     private static readonly string InstallDirectory = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Programs", "LMN Knowledge System");
     private static readonly string StartShortcut = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.StartMenu), "Programs", "LMN Knowledge System V3.lnk");
+        Environment.GetFolderPath(Environment.SpecialFolder.StartMenu), "Programs", "LMN Knowledge System V4.lnk");
     private static readonly string DesktopShortcut = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory), "LMN Knowledge System V3.lnk");
+        Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory), "LMN Knowledge System V4.lnk");
 
     [STAThread]
     private static void Main(string[] args)
     {
         if (args.Length > 0 && args[0].Equals("/uninstall", StringComparison.OrdinalIgnoreCase)) { Uninstall(); return; }
         DialogResult answer = MessageBox.Show(
-            "Install LMN Knowledge System V3 for this Windows user?\n\nLocation:\n" + InstallDirectory,
+            "Install LMN Knowledge System V4 for this Windows user?\n\nLocation:\n" + InstallDirectory,
             AppName + " Setup", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
         if (answer != DialogResult.Yes) return;
-        try { Install(); MessageBox.Show("LMN V3 was installed successfully.", AppName, MessageBoxButtons.OK, MessageBoxIcon.Information); Process.Start(Path.Combine(InstallDirectory, "LMN.exe")); }
+        try { Install(); MessageBox.Show("LMN V4 was installed successfully.", AppName, MessageBoxButtons.OK, MessageBoxIcon.Information); Process.Start(Path.Combine(InstallDirectory, "LMN.exe")); }
         catch (Exception error) { MessageBox.Show(error.ToString(), "Installation failed", MessageBoxButtons.OK, MessageBoxIcon.Error); }
     }
 
     private static void Install()
     {
         Directory.CreateDirectory(InstallDirectory);
-        string temporary = Path.Combine(Path.GetTempPath(), "lmn-v3-setup-" + Guid.NewGuid().ToString("N"));
+        string temporary = Path.Combine(Path.GetTempPath(), "lmn-v4-setup-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(temporary);
         try
         {
@@ -46,9 +46,9 @@ internal static class Setup
             File.Copy(Application.ExecutablePath, Path.Combine(InstallDirectory, "Uninstall.exe"), true);
             CreateShortcut(StartShortcut, Path.Combine(InstallDirectory, "LMN.exe"));
             CreateShortcut(DesktopShortcut, Path.Combine(InstallDirectory, "LMN.exe"));
-            using (RegistryKey key = Registry.CurrentUser.CreateSubKey(@"Software\Microsoft\Windows\CurrentVersion\Uninstall\LMNKnowledgeSystemV3"))
+            using (RegistryKey key = Registry.CurrentUser.CreateSubKey(@"Software\Microsoft\Windows\CurrentVersion\Uninstall\LMNKnowledgeSystemV4"))
             {
-                key.SetValue("DisplayName", AppName); key.SetValue("DisplayVersion", "3.0.0"); key.SetValue("Publisher", "LMN Knowledge System");
+                key.SetValue("DisplayName", AppName); key.SetValue("DisplayVersion", "4.0.0"); key.SetValue("Publisher", "LMN Knowledge System");
                 key.SetValue("InstallLocation", InstallDirectory); key.SetValue("DisplayIcon", Path.Combine(InstallDirectory, "LMN.exe"));
                 key.SetValue("UninstallString", "\"" + Path.Combine(InstallDirectory, "Uninstall.exe") + "\" /uninstall");
                 key.SetValue("NoModify", 1, RegistryValueKind.DWord); key.SetValue("NoRepair", 1, RegistryValueKind.DWord);
@@ -59,8 +59,8 @@ internal static class Setup
 
     private static void Uninstall()
     {
-        if (MessageBox.Show("Remove LMN Knowledge System V3?\n\nYour browser workspace data is stored separately in the WebView2 profile.", AppName, MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes) return;
-        TryDelete(StartShortcut); TryDelete(DesktopShortcut); Registry.CurrentUser.DeleteSubKeyTree(@"Software\Microsoft\Windows\CurrentVersion\Uninstall\LMNKnowledgeSystemV3", false);
+        if (MessageBox.Show("Remove LMN Knowledge System V4?\n\nYour workspace data is stored separately in the WebView2 profile.", AppName, MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes) return;
+        TryDelete(StartShortcut); TryDelete(DesktopShortcut); Registry.CurrentUser.DeleteSubKeyTree(@"Software\Microsoft\Windows\CurrentVersion\Uninstall\LMNKnowledgeSystemV4", false);
         string command = "/C ping 127.0.0.1 -n 3 > nul & rmdir /S /Q \"" + InstallDirectory + "\"";
         Process.Start(new ProcessStartInfo("cmd.exe", command) { CreateNoWindow = true, WindowStyle = ProcessWindowStyle.Hidden });
     }

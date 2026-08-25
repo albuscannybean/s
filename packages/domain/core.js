@@ -1,4 +1,4 @@
-export const SCHEMA_VERSION = 3;
+export const SCHEMA_VERSION = 4;
 
 const uid = () => globalThis.crypto?.randomUUID?.() ?? `lmn-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 const now = () => new Date().toISOString();

@@ -1,16 +1,86 @@
-<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#faf9f5"><title>LMN Knowledge System V3</title><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="search.css"><link rel="manifest" href="manifest.webmanifest"></head>
-<body><div id="appShell">
-<header class="topbar"><div class="brand"><button id="toggleExplorer" class="icon-button">☰</button><b>LMN</b><span class="version">V3</span></div><nav id="breadcrumbs"></nav><button id="globalSearch" class="search-trigger">⌕ 搜索 Knowledge、Structure 或 Pattern <kbd>Ctrl K</kbd></button><button id="insertStructure" class="primary">＋ Insert Structure</button><button id="exportBtn">导出</button><button id="toggleInspector" class="icon-button">◫</button></header>
-<aside id="explorer" class="explorer"><div class="pane-heading"><strong>Workspace</strong><button id="newKnowledge" class="icon-button">＋</button></div><div class="side-search"><input id="filterKnowledge" placeholder="筛选 Knowledge"></div><button class="nav-section active" data-nav="knowledge">◇ Knowledge <small id="knowledgeCount">0</small></button><div id="knowledgeList" class="item-list"></div><button class="nav-section" data-nav="structures">⬡ Structures <small id="structureCount">0</small></button><div id="structureList" class="item-list"></div><button class="nav-section" data-nav="recent">◷ Recent</button><button class="nav-section" data-nav="favorites">☆ Favorites</button><button class="nav-section" id="savedSearchNav">⌕ Saved Search</button><div class="side-actions"><button id="browseLibrary">结构库</button><button id="importBtn">导入 Bundle</button></div></aside>
-<main id="workspace" class="workspace"><div class="workspace-head"><div><span id="workspaceKind" class="eyebrow">KNOWLEDGE</span><h1 id="workspaceTitle">Knowledge Workspace</h1></div><div id="instanceTabs" class="instance-tabs"></div><div class="canvas-actions"><button id="undoBtn">↶</button><button id="redoBtn">↷</button><button id="fitBtn">Fit</button><button id="focusBtn">Focus</button></div></div>
-<section id="welcome" class="welcome"><div><span class="welcome-logo">LMN</span><h2>让知识进入可运行的结构</h2><p>Knowledge 是语义实体；Structure 是可复用、可嵌套、可计算的形式骨架。</p><div class="welcome-actions"><button data-welcome="knowledge">Create Knowledge</button><button data-welcome="library" class="primary">Insert Structure</button><button data-welcome="import">Import Bundle</button></div><div class="welcome-demos"><button data-template="builtin:lmn-432"><b>4·3·2</b><span>Try LMN</span></button><button data-template="builtin:mod-12"><b>0—11</b><span>Try Mod-12</span></button><button data-template="builtin:poset-hasse"><b>≤</b><span>Try Hasse</span></button><button data-template="builtin:regular-polygon"><b>⬡</b><span>Try n-gon</span></button></div></div></section>
-<section id="canvasViewport" class="canvas-viewport hidden"><div id="canvasStage" class="canvas-stage"><svg id="edgeLayer"></svg><div id="structureCanvas"></div><div id="nestedCanvas"></div></div><div id="minimap" class="minimap"></div><div class="zoom-controls"><button id="zoomOut">−</button><button id="zoomReset">100%</button><button id="zoomIn">＋</button></div></section></main>
-<aside id="inspector" class="inspector"><div class="inspector-tabs"><button data-tab="semantics" class="active">语义</button><button data-tab="relations">关系</button><button data-tab="rules">规则</button><button data-tab="notes">笔记</button><button data-tab="appearance">外观</button></div><div id="inspectorContent"></div></aside>
-<footer class="statusbar"><span id="pathStatus">Knowledge</span><span id="selectionStatus">未选择</span><span id="runtimeStatus">Runtime ready</span><span id="saveStatus">● 已保存</span></footer></div>
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f8f7f2">
+  <title>LMN Knowledge System V4</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232f7658'/%3E%3Ctext x='32' y='42' text-anchor='middle' font-size='30' fill='white' font-family='Georgia'%3EL%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="manifest" href="manifest.webmanifest">
+</head>
+<body>
+<div id="appShell">
+  <header class="topbar">
+    <div class="brand"><button id="toggleNavigator" class="icon-button" aria-label="切换导航器">☰</button><b>LMN</b><span>Knowledge System</span><em>V4</em></div>
+    <div class="history-controls"><button id="backBtn" title="返回 (Alt+←)">‹</button><button id="forwardBtn" title="前进 (Alt+→)">›</button></div>
+    <nav id="breadcrumbs" aria-label="递归知识路径"></nav>
+    <div id="modeSwitch" class="mode-switch" aria-label="工作模式"><button data-mode="browse" class="active" title="Browse (V)">浏览</button><button data-mode="edit" title="Edit (E)">编辑</button><button data-mode="connect" title="Connect (C)">连接</button></div>
+    <button id="globalSearch" class="command-trigger"><span>搜索或执行命令</span><kbd>Ctrl K</kbd></button>
+    <button id="insertStructure" class="primary">＋ 结构</button>
+    <button id="exportBtn">导出⌄</button>
+    <button id="moreBtn" class="icon-button" aria-label="更多">•••</button>
+  </header>
 
-<dialog id="structureLibrary" class="library-dialog"><header><div><span class="eyebrow">REUSABLE FORMAL SYSTEMS</span><h2>Structure Library</h2></div><button class="dialog-close" value="cancel">×</button></header><div class="library-tools"><input id="librarySearch" placeholder="搜索 LMN、几何、代数、集合…"><select id="libraryCategory"><option value="">全部类别</option><option value="lmn">LMN</option><option value="graph">Graph</option><option value="poset">Poset</option><option value="modular">Modular</option><option value="venn">Venn</option><option value="geometry">Geometry</option><option value="algebra">Algebra</option><option value="coordinate">Coordinate</option><option value="custom">Custom</option></select><button id="newTemplate">Structure Builder</button></div><div id="templateGrid" class="template-grid"></div></dialog>
-<dialog id="pickerDialog"><header><h2 id="pickerTitle">Bind Slot</h2><button class="dialog-close" value="cancel">×</button></header><input id="pickerSearch" placeholder="搜索 Knowledge 或 Structure"><div id="pickerResults" class="picker-results"></div><div class="dialog-actions"><button id="pickerNewKnowledge">＋ New Knowledge</button><button id="pickerNestedStructure">＋ Nested Structure</button></div></dialog>
-<dialog id="searchDialog" class="search-dialog"><header><h2>Search</h2><button class="dialog-close" value="cancel">×</button></header><div class="search-tabs"><button data-search-tab="text" class="active">Text</button><button data-search-tab="structure">Structure</button><button data-search-tab="pattern">Pattern</button></div><div id="searchForm"></div><div id="searchResults"></div></dialog>
-<dialog id="builderDialog"><header><div><span class="eyebrow">FORMAL SEMANTICS</span><h2>Structure Builder</h2></div><button class="dialog-close" value="cancel">×</button></header><div class="builder-grid"><label>模板名称<input id="builderName" value="Existence precedes Essence"></label><label>类别<select id="builderCategory"><option>custom</option><option>geometry</option><option>algebra</option><option>graph</option></select></label><label>布局<select id="builderLayout"><option>manual</option><option>grid</option><option>radial</option><option>layered</option><option>tree</option><option>hasse</option></select></label><label>Slot 数量<input id="builderSlots" type="number" min="1" max="30" value="2"></label><label>Source Slot role<input id="builderSourceRole" value="existence"></label><label>Edge relation type<input id="builderRelationType" value="precedes"></label><label>Target Slot role<input id="builderTargetRole" value="essence"></label><label>Direction<select id="builderDirection"><option>directed</option><option>undirected</option><option>bidirectional</option><option>cyclic</option></select></label></div><button id="saveTemplate" class="primary">Save as Structure Template</button></dialog>
-<dialog id="importDialog"><header><h2>Import · Validate · Preview</h2><button class="dialog-close" value="cancel">×</button></header><div id="importPreview"></div><div class="dialog-actions"><button value="cancel">取消</button><button id="confirmImport" class="primary">Merge Bundle</button></div></dialog><input id="fileInput" type="file" accept=".json" hidden>
-<script type="module" src="app.js"></script></body></html>
+  <aside id="navigator" class="navigator">
+    <div class="navigator-modes" role="tablist">
+      <button data-navigator="outline" class="active" title="大纲"><span>☷</span><small>大纲</small></button>
+      <button data-navigator="knowledge" title="知识"><span>◇</span><small>知识</small></button>
+      <button data-navigator="library" title="结构库"><span>⬡</span><small>结构库</small></button>
+      <button data-navigator="search" title="搜索"><span>⌕</span><small>搜索</small></button>
+    </div>
+    <div class="navigator-head"><div><span id="navigatorEyebrow" class="eyebrow">OUTLINE</span><h2 id="navigatorTitle">知识大纲</h2></div><button id="newKnowledge" class="icon-button" title="新建 Knowledge (N)">＋</button></div>
+    <div class="navigator-filter"><input id="navigatorFilter" placeholder="筛选当前列表"></div>
+    <div id="navigatorContent" class="navigator-content"></div>
+    <div class="navigator-footer"><button id="openLibrary">结构库</button><button id="importBtn">导入</button></div>
+  </aside>
+
+  <main id="workspace" class="workspace">
+    <div class="document-bar">
+      <div id="documentTabs" class="document-tabs"></div>
+      <div class="canvas-actions"><button id="undoBtn" title="Undo (Ctrl+Z)">↶</button><button id="redoBtn" title="Redo (Ctrl+Shift+Z)">↷</button><button id="fitBtn">适合窗口</button><button id="focusBtn">专注</button></div>
+    </div>
+    <section id="welcome" class="welcome">
+      <div class="welcome-mark"><span>L</span><span>M</span><span>N</span></div>
+      <p class="eyebrow">LOCAL-FIRST · RECURSIVE · FORMAL</p>
+      <h1>把知识放进可探索、可计算的结构</h1>
+      <p>从一个 Knowledge 开始。它的笔记、LMN 骨架、数学结构和关系在同一工作空间中自然展开。</p>
+      <div class="welcome-actions"><button data-welcome="knowledge" class="primary">新建 Knowledge</button><button data-welcome="library">浏览结构库</button><button data-welcome="import">导入 LKL / JSON</button></div>
+      <div class="welcome-suggestions"><button data-template="builtin:lmn-432"><i>4·3·2</i><b>LMN</b><small>递归知识骨架</small></button><button data-template="builtin:boolean-algebra"><i>B₄</i><b>Boolean Algebra</b><small>16 个格元素</small></button><button data-template="builtin:mod-12"><i>ℤ₁₂</i><b>Zi Wei</b><small>变量公式演示</small></button><button data-template="builtin:regular-polygon"><i>⬡</i><b>Regular n-gon</b><small>可参数化几何</small></button></div>
+    </section>
+    <section id="canvasViewport" class="canvas-viewport hidden" aria-label="结构画布">
+      <div id="sceneRoot" class="scene-root"><svg id="edgeLayer"></svg><div id="nodeLayer" class="node-layer"></div><div id="tokenLayer" class="token-layer"></div><div id="nestedLayer"></div></div>
+      <div id="contextToolbar" class="context-toolbar hidden"></div>
+      <div id="minimap" class="minimap" hidden></div>
+      <div class="zoom-controls"><button id="zoomOut">−</button><button id="zoomReset">100%</button><button id="zoomIn">＋</button></div>
+      <div id="sceneHint" class="scene-hint">双击节点进入 · 右键操作 · Space 预览</div>
+    </section>
+    <section id="notesDocument" class="notes-document hidden">
+      <div class="paper-toolbar"><button data-note-mode="edit" class="active">编辑</button><button data-note-mode="preview">预览</button><button data-note-mode="split">分屏</button><span></span><button data-insert="heading">H</button><button data-insert="bold"><b>B</b></button><button data-insert="formula">∑</button><button data-insert="quote">❝</button></div>
+      <div class="paper"><textarea id="notesEditor" spellcheck="true" placeholder="从这里开始书写… 输入 / 打开命令"></textarea><article id="notesPreview" class="markdown-preview"></article></div>
+    </section>
+  </main>
+
+  <aside id="floatingPanel" class="floating-panel hidden" aria-label="属性面板"><header><div><span id="panelEyebrow" class="eyebrow">PROPERTIES</span><h2 id="panelTitle">属性</h2></div><button id="closePanel" class="icon-button">×</button></header><div id="panelTabs" class="panel-tabs"></div><div id="panelContent" class="panel-content"></div></aside>
+  <div id="contextMenu" class="context-menu hidden" role="menu"></div>
+  <div id="quickCreate" class="quick-create hidden"><span>◇</span><input id="quickCreateInput" placeholder="Knowledge 名称"><kbd>Enter</kbd></div>
+  <footer class="statusbar"><span id="pathStatus">Workspace</span><span id="selectionStatus">未选择</span><span id="modeStatus">浏览模式</span><span id="runtimeStatus">Scene ready</span><span id="saveStatus">● 已保存</span></footer>
+</div>
+
+<dialog id="commandDialog" class="command-dialog"><header><span>⌕</span><input id="commandInput" placeholder="搜索 Knowledge、Structure，或输入 / 命令"><kbd>Esc</kbd></header><div id="commandResults" class="command-results"></div><footer>↑↓ 选择 · Enter 执行 · <kbd>/</kbd> 命令</footer></dialog>
+
+<dialog id="structureLibrary" class="sheet library-sheet"><header><div><span class="eyebrow">STRUCTURE LIBRARY</span><h2>选择一种观察与推理结构</h2></div><button class="dialog-close">×</button></header><div class="library-tools"><input id="librarySearch" placeholder="搜索 LMN、布尔代数、几何、证明树…"><select id="libraryCategory"><option value="">全部</option><option value="lmn">LMN</option><option value="graph">图</option><option value="algebra">代数</option><option value="geometry">几何</option><option value="modular">模结构</option><option value="poset">偏序</option><option value="logic">逻辑</option><option value="set">集合</option></select><button id="quickBuilder">快速构建</button><button id="advancedBuilder">高级构建</button></div><div id="templateGrid" class="template-grid"></div></dialog>
+
+<dialog id="pickerDialog" class="picker-dialog"><header><div><span class="eyebrow">BIND SLOT</span><h2 id="pickerTitle">引用 Knowledge 或嵌套 Structure</h2></div><button class="dialog-close">×</button></header><input id="pickerSearch" placeholder="搜索目标"><div id="pickerResults" class="picker-results"></div><footer><button id="pickerNewKnowledge">＋ 新建 Knowledge</button><button id="pickerNestedStructure">＋ 嵌套 Structure</button></footer></dialog>
+
+<dialog id="quickBuilderDialog" class="builder-dialog"><header><div><span class="eyebrow">QUICK BUILDER</span><h2>快速创建结构模板</h2></div><button class="dialog-close">×</button></header><div class="builder-form"><label>名称<input id="builderName" value="My Structure"></label><label>类别<select id="builderCategory"><option>custom</option><option>geometry</option><option>algebra</option><option>graph</option><option>logic</option></select></label><label>布局<select id="builderLayout"><option>grid</option><option>layered</option><option>tree</option><option>radial</option><option>manual</option></select></label><label>初始节点数<input id="builderSlots" type="number" min="1" max="40" value="3"></label></div><footer><button id="saveQuickTemplate" class="primary">创建并插入</button></footer></dialog>
+
+<dialog id="advancedBuilderDialog" class="sheet advanced-builder"><header><div><span class="eyebrow">ADVANCED BUILDER · LKL</span><h2>结构语言工作台</h2></div><button class="dialog-close">×</button></header><div class="advanced-layout"><aside><h3>工具箱</h3><button data-starter="graph">＋ Graph</button><button data-starter="tree">＋ Tree</button><button data-starter="algebra">＋ Algebra</button><p>编辑 LKL 后实时验证；保存后成为可复用模板。</p></aside><section><textarea id="advancedLkl" spellcheck="false"></textarea><div id="advancedValidation" class="validation-state"></div></section><aside id="advancedPreview"><h3>语义预览</h3><div id="advancedSummary"></div></aside></div><footer><button id="validateAdvanced">验证</button><button id="saveAdvanced" class="primary">保存并插入</button></footer></dialog>
+
+<dialog id="importDialog" class="sheet import-sheet"><header><div><span class="eyebrow">IMPORT PREVIEW</span><h2>导入、校验、解决身份</h2></div><button class="dialog-close">×</button></header><div class="import-tabs"><button data-import-type="lkl" class="active">LKL</button><button data-import-type="json">JSON Bundle</button></div><textarea id="importSource" placeholder="粘贴 .lkl 或 JSON 内容"></textarea><div id="importPreview"></div><footer><button id="chooseImportFile">选择文件</button><button id="validateImport">验证预览</button><button id="confirmImport" class="primary" disabled>确认导入</button></footer></dialog>
+
+<dialog id="exportDialog" class="export-dialog"><header><h2>导出</h2><button class="dialog-close">×</button></header><button data-export="lkl"><b>当前 Structure · LKL</b><small>可读、可编辑、可往返</small></button><button data-export="json"><b>完整 Workspace · JSON</b><small>V4 备份格式</small></button><button data-export="markdown"><b>当前 Knowledge · Markdown</b><small>标题与笔记</small></button></dialog>
+<input id="fileInput" type="file" accept=".lkl,.json,.md" hidden>
+<script type="module" src="app.js"></script>
+</body>
+</html>
