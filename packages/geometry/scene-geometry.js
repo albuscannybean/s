@@ -6,6 +6,12 @@ const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
 
 export const DEFAULT_NODE_SIZE=Object.freeze({width:188,height:92});
 
+export function estimateRelationLabelWidth(label){
+  const characters=Array.from(String(label??''));
+  const textWidth=characters.reduce((width,char)=>width+(/[\u2E80-\u9FFF\uF900-\uFAFF]/.test(char)?11:/[A-ZMW@#%]/.test(char)?8:6.5),0);
+  return clamp(Math.ceil(textWidth)+18,36,260);
+}
+
 const hash=value=>{let result=2166136261;for(const char of String(value)){result^=char.charCodeAt(0);result=Math.imul(result,16777619)}return result>>>0};
 const nodeGrammar=(definition,slot,shape='roundedRect')=>{
   const layout=definition.layout?.type??'grid',id=definition.id??'';
@@ -106,10 +112,10 @@ function radialLayout(definition,instance){
   return definition.slots.map((slot,index)=>{const modularIndex=slot.semanticCoordinate?.modularIndex??index,degrees=isModular?modularAngle(modularIndex,count,view):(slot.semanticCoordinate?.angle??index*360/count)-90,angle=degrees*Math.PI/180;return{...slot,x:center.x+radius*Math.cos(angle)-size.width/2,y:center.y+radius*Math.sin(angle)-size.height/2,width:size.width,height:size.height,...nodeGrammar(definition,slot,chart?'roundedRect':'circle'),visualKind:chart?'modular-chart-cell':nodeGrammar(definition,slot,'circle').visualKind,displayMode:view.displayMode,angleDegrees:degrees};});
 }
 
-function layeredLayout(definition){
+function layeredLayout(definition,{horizontal=false,compact=false}={}){
   const groups=new Map();
   for(const slot of definition.slots){const layer=Number(slot.semanticCoordinate?.rank??slot.semanticCoordinate?.layer??0);if(!groups.has(layer))groups.set(layer,[]);groups.get(layer).push(slot)}
-  const layers=[...groups.keys()].sort((a,b)=>b-a),maxCount=Math.max(1,...[...groups.values()].map(items=>items.length)),isBoolean=String(definition.id).includes('boolean-algebra'),width=isBoolean?(maxCount>16?54:68):(maxCount>10?108:132),height=isBoolean?42:(maxCount>10?58:66),gapX=isBoolean?(maxCount>16?10:18):(maxCount>10?18:30),gapY=isBoolean?62:74;
+  const layers=[...groups.keys()].sort((a,b)=>b-a),maxCount=Math.max(1,...[...groups.values()].map(items=>items.length)),isBoolean=String(definition.id).includes('boolean-algebra'),width=isBoolean?(maxCount>16?54:68):compact?(maxCount>10?108:132):(maxCount>10?176:188),height=isBoolean?42:compact?(maxCount>10?58:66):(maxCount>10?86:92),gapX=isBoolean?(maxCount>16?10:18):(maxCount>10?18:30),baseGapY=isBoolean?62:compact?74:94,maxLabelWidth=Math.max(0,...(definition.edges??[]).map(edge=>estimateRelationLabelWidth(edge.displayLabel??edge.label??edge.relationType))),gapY=horizontal?Math.max(baseGapY,width-height+maxLabelWidth+36):baseGapY;
   return layers.flatMap((layer,row)=>{const items=groups.get(layer).sort((a,b)=>(a.semanticCoordinate?.order??0)-(b.semanticCoordinate?.order??0)),total=items.length*width+(items.length-1)*gapX,start=Math.max(70,(1040-total)/2);return items.map((slot,index)=>({...slot,x:start+index*(width+gapX),y:112+row*(height+gapY),width,height,...nodeGrammar(definition,slot)}))});
 }
 
@@ -127,11 +133,11 @@ function forceLayout(definition){
   return slots.map(slot=>{const point=positions.get(slot.id),width=104,height=48;return{...slot,x:point.x-width/2,y:point.y-height/2,width,height,...nodeGrammar(definition,slot)}});
 }
 
-function treeLayout(definition){
+function treeLayout(definition,options={}){
   const incoming=new Map(definition.slots.map(slot=>[slot.id,0]));for(const edge of definition.edges)incoming.set(edge.targetSlotId,(incoming.get(edge.targetSlotId)??0)+1);
   const roots=definition.slots.filter(slot=>!incoming.get(slot.id)),depth=new Map(roots.map(slot=>[slot.id,0])),queue=roots.map(slot=>slot.id);
   while(queue.length){const id=queue.shift(),level=depth.get(id);for(const edge of definition.edges.filter(item=>item.sourceSlotId===id))if(!depth.has(edge.targetSlotId)){depth.set(edge.targetSlotId,level+1);queue.push(edge.targetSlotId)}}
-  const decorated={...definition,slots:definition.slots.map((slot,index)=>({...slot,semanticCoordinate:{...slot.semanticCoordinate,layer:depth.get(slot.id)??0,order:index}}))};return layeredLayout(decorated);
+  const decorated={...definition,slots:definition.slots.map((slot,index)=>({...slot,semanticCoordinate:{...slot.semanticCoordinate,layer:depth.get(slot.id)??0,order:index}}))};return layeredLayout(decorated,options);
 }
 
 export function projectCoordinate(coordinate={},instance={}){
@@ -215,20 +221,20 @@ function sceneTokens(definition,instance,nodes){
 }
 
 export function buildSceneGeometry(definition,instance={},options={}){
-  const layout=definition.layout?.type??'grid';let nodes;
+  const layout=definition.layout?.type??'grid',view=ensureStructureView(instance),baseAxis=['tree','hasse','layered'].includes(layout)?'vertical-reverse':['lmn-semantic','columns','timeline'].includes(layout)?'horizontal-forward':null,arrangement=view.arrangement??baseAxis,horizontalArrangement=arrangement?.startsWith('horizontal');let nodes;
   if(layout==='lmn-semantic')nodes=lmnSemanticLayout(definition);
   else if(layout==='manual')nodes=manualLayout(definition);
   else if(layout==='columns')nodes=columnsLayout(definition);
   else if(layout==='radial')nodes=radialLayout(definition,instance);
   else if(layout==='force')nodes=forceLayout(definition);
-  else if(layout==='hasse'||layout==='layered')nodes=layeredLayout(definition);
-  else if(layout==='tree')nodes=treeLayout(definition);
+  else if(layout==='hasse'||layout==='layered')nodes=layeredLayout(definition,{horizontal:horizontalArrangement,compact:layout==='hasse'});
+  else if(layout==='tree')nodes=treeLayout(definition,{horizontal:horizontalArrangement});
   else if(layout==='coordinate')nodes=coordinateLayout(definition,instance);
   else if(layout==='table')nodes=tableLayout(definition);
   else if(layout==='matrix')nodes=matrixLayout(definition);
   else if(layout==='venn')nodes=vennLayout(definition);
   else nodes=gridLayout(definition,{columns:layout==='timeline'?definition.slots.length:undefined});
-  const view=ensureStructureView(instance),baseAxis=['tree','hasse','layered'].includes(layout)?'vertical-reverse':['lmn-semantic','columns','timeline'].includes(layout)?'horizontal-forward':null,arrangement=view.arrangement??baseAxis;if(baseAxis&&arrangement){const desiredVertical=arrangement.startsWith('vertical'),baseVertical=baseAxis.startsWith('vertical'),reverse=arrangement.endsWith('reverse');nodes=nodes.map(node=>{const centerX=node.x+node.width/2,centerY=node.y+node.height/2,u=baseVertical?-(centerY-370):centerX-520,v=baseVertical?centerX-520:centerY-370,axis=reverse?-u:u,nextCenterX=desiredVertical?520+v:520+axis,nextCenterY=desiredVertical?370+axis:370+v,width=desiredVertical===baseVertical?node.width:node.height,height=desiredVertical===baseVertical?node.height:node.width;return{...node,x:nextCenterX-width/2,y:nextCenterY-height/2,width,height}})}nodes=applyOffsets(nodes,instance).filter(node=>instance.objectVisibility?.[`slot:${node.id}`]!==false);const byId=new Map(nodes.map(node=>[node.id,node]));
+  if(baseAxis&&arrangement){const desiredVertical=arrangement.startsWith('vertical'),baseVertical=baseAxis.startsWith('vertical'),reverse=arrangement.endsWith('reverse');nodes=nodes.map(node=>{const centerX=node.x+node.width/2,centerY=node.y+node.height/2,u=baseVertical?-(centerY-370):centerX-520,v=baseVertical?centerX-520:centerY-370,axis=reverse?-u:u,nextCenterX=desiredVertical?520+v:520+axis,nextCenterY=desiredVertical?370+axis:370+v,width=node.width,height=node.height;return{...node,x:nextCenterX-width/2,y:nextCenterY-height/2,width,height}})}nodes=applyOffsets(nodes,instance).filter(node=>instance.objectVisibility?.[`slot:${node.id}`]!==false);const byId=new Map(nodes.map(node=>[node.id,node]));
   const center=layout==='radial'?{x:500,y:390}:undefined;
   const edges=definition.edges.flatMap(edge=>{if(instance.objectVisibility?.[`edge:${edge.id}`]===false)return[];const source=byId.get(edge.sourceSlotId),target=byId.get(edge.targetSlotId);if(!source||!target)return[];const visual=resolveRelationStyle(edge,instance,{structureDefault:definition.relationStyle??definition.visual?.relationStyle??{routing:definition.visual?.edgeRouting}}),routing=visual.routing??(layout==='radial'?'radial-arc':'straight'),coordinateEndpoints=layout==='coordinate'?{start:{x:source.x+source.width/2,y:source.y+source.height/2},end:{x:target.x+target.width/2,y:target.y+target.height/2}}:null,routed=coordinateEndpoints?{...coordinateEndpoints,points:[coordinateEndpoints.start,coordinateEndpoints.end],path:`M ${coordinateEndpoints.start.x} ${coordinateEndpoints.start.y} L ${coordinateEndpoints.end.x} ${coordinateEndpoints.end.y}`} : routeEdge(source,target,routing,{center});return[{...edge,routing,visual,...routed}]});
   const minX=Math.min(0,...nodes.map(node=>node.x))-64,minY=Math.min(0,...nodes.map(node=>node.y))-64,maxX=Math.max(960,...nodes.map(node=>node.x+node.width))+64,maxY=Math.max(650,...nodes.map(node=>node.y+node.height))+64;
