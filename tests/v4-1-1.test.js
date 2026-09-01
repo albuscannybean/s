@@ -4,10 +4,10 @@ import {createKnowledge,createRelation,createRepresentation} from '../packages/d
 import {analyzeCyclicElement} from '../packages/structure-engine/cyclic-group.js';
 import {getBuiltinTemplate,materializeTemplate} from '../packages/structure-engine/templates.js';
 import {applyVariableScheme,createVariableScheme,ZI_WEI_BASIC_SCHEME} from '../packages/structure-engine/variable-schemes.js';
-import {createStructureInstance,duplicateVariable,moveVariable,removeVariable,updateVariable,variableDeletionImpact} from '../packages/structure-engine/model.js';
+import {bindTarget,createStructureInstance,duplicateVariable,moveVariable,removeVariable,updateVariable,variableDeletionImpact} from '../packages/structure-engine/model.js';
 import {runInstance} from '../packages/structure-engine/evaluator.js';
 import {deleteKnowledgeObject,deleteStructureObject,deleteUserTemplateObject,knowledgeDeletionImpact,structureDeletionImpact,userTemplateDeletionImpact} from '../packages/domain/object-management.js';
-import {cycleReferenceLabel,semanticNavigatorSearch,structureNavigatorSummary} from '../packages/navigation/navigator-model.js';
+import {cycleReferenceLabel,navigatorKnowledgeRoots,navigatorStructureRoots,semanticNavigatorSearch,structureNavigatorSummary} from '../packages/navigation/navigator-model.js';
 import {isParameterizedTemplate,libraryEntries,librarySection} from '../packages/ui/library-model.js';
 import {migrateV3ToV4} from '../packages/structure-engine/migration.js';
 import {parseFormula} from '../packages/structure-engine/formula.js';
@@ -39,6 +39,13 @@ test('custom template deletion reports instances and removes only dependent stru
 
 test('Navigator summaries suppress large cell lists and semantic search keeps ancestry',()=>{
   const knowledge=createKnowledge('紫微斗数'),tableTemplate=getBuiltinTemplate('builtin:operation-table'),table=createStructureInstance(tableTemplate,knowledge.id,{n:4}),tableDefinition=materializeTemplate(tableTemplate,table.parameters),tableSummary=structureNavigatorSummary(tableTemplate,table,tableDefinition);assert.deepEqual(tableSummary.rows.map(item=>item.label),['元素','运算','表格']);assert.equal(tableSummary.rows.some(item=>item.children?.length===16),false);const booleanTemplate=getBuiltinTemplate('builtin:boolean-algebra'),boolean=createStructureInstance(booleanTemplate,knowledge.id,{rank:4}),booleanSummary=structureNavigatorSummary(booleanTemplate,boolean,materializeTemplate(booleanTemplate,boolean.parameters));assert.equal(booleanSummary.rows.length,5);const modular=getBuiltinTemplate('builtin:mod-n'),ring=createStructureInstance(modular,knowledge.id);applyVariableScheme(ring,ZI_WEI_BASIC_SCHEME);const state={knowledge:[knowledge],structureTemplates:[tableTemplate,booleanTemplate,modular],structureInstances:[table,boolean,ring]};const search=semanticNavigatorSearch(state,'文昌');assert.equal(search[0].path.join(' › '),'紫微斗数 › 模结构 Modular Ring · ℤ/nℤ › 派生变量 › 文昌');assert.equal(cycleReferenceLabel('群'),'↻ 引用：群');
+});
+
+test('Navigator never loses package roots, self-contained knowledge, cycles, or orphan components',()=>{
+  const template=getBuiltinTemplate('builtin:directed-graph'),makeKnowledge=(id,title=id)=>({id,title}),a=makeKnowledge('a','A'),b=makeKnowledge('b','B'),c=makeKnowledge('c','C'),d=makeKnowledge('d','D'),self=createStructureInstance(template,a.id),fromA=createStructureInstance(template,a.id),fromB=createStructureInstance(template,b.id),cycleOne=createStructureInstance(template,c.id),cycleTwo=createStructureInstance(template,c.id);
+  bindTarget(self,template,'A','knowledge',a.id,{placementMode:'construct'});bindTarget(fromA,template,'A','knowledge',b.id,{placementMode:'construct'});bindTarget(fromB,template,'A','knowledge',a.id,{placementMode:'construct'});bindTarget(cycleOne,template,'A','structure',cycleTwo.id,{placementMode:'construct'});bindTarget(cycleTwo,template,'A','structure',cycleOne.id,{placementMode:'construct'});
+  const state={knowledge:[a,b,c,d],structureTemplates:[template],structureInstances:[self,fromA,fromB,cycleOne,cycleTwo],knowledgePackages:[{id:'package-a',rootKnowledgeId:a.id}],placements:[]},roots=navigatorKnowledgeRoots(state);
+  assert.deepEqual(roots.map(item=>item.id),['a','c','d']);assert.deepEqual(navigatorStructureRoots(state,c.id).map(item=>item.id),[cycleOne.id]);
 });
 
 test('Library hides legacy Zi Wei template and separates parameterized, completed, and custom entries',()=>{

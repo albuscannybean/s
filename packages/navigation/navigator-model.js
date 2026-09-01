@@ -15,4 +15,31 @@ export function semanticNavigatorSearch(state,query){
 
 export function cycleReferenceLabel(target,path=[]){return`↻ 引用：${target||path.at(-1)||'目标'}`}
 
+export function navigatorKnowledgeRoots(state){
+  const knowledge=(state.knowledge??[]).filter(item=>item?.id),byId=new Map(knowledge.map(item=>[item.id,item]));if(!knowledge.length)return[];
+  const graph=new Map(knowledge.map(item=>[item.id,new Set()]));
+  for(const instance of state.structureInstances??[]){const ownerId=instance.ownerKnowledgeId;if(!byId.has(ownerId))continue;for(const binding of instance.bindings??[]){if(binding.targetType!=='knowledge'||placementMode(binding)!=='construct'||!byId.has(binding.targetId)||binding.targetId===ownerId)continue;graph.get(ownerId).add(binding.targetId)}}
+  for(const placement of state.placements??[]){if(placement.mode==='reference'||placement.targetType!=='knowledge'||placement.parentType!=='structure'||!byId.has(placement.targetId))continue;const parent=(state.structureInstances??[]).find(item=>item.id===placement.parentId),ownerId=parent?.ownerKnowledgeId;if(byId.has(ownerId)&&placement.targetId!==ownerId)graph.get(ownerId).add(placement.targetId)}
+  const roots=[],rootIds=new Set(),addRoot=id=>{if(byId.has(id)&&!rootIds.has(id)){rootIds.add(id);roots.push(byId.get(id))}};
+  for(const record of state.knowledgePackages??[])addRoot(resolvePackageRoot(record,knowledge));
+  const incoming=new Map(knowledge.map(item=>[item.id,0]));for(const targets of graph.values())for(const targetId of targets)incoming.set(targetId,(incoming.get(targetId)??0)+1);
+  for(const item of knowledge)if(!incoming.get(item.id))addRoot(item.id);
+  const covered=new Set(),cover=start=>{const stack=[start];while(stack.length){const id=stack.pop();if(covered.has(id))continue;covered.add(id);for(const target of graph.get(id)??[])stack.push(target)}};for(const root of roots)cover(root.id);
+  for(const item of knowledge)if(!covered.has(item.id)){addRoot(item.id);cover(item.id)}
+  return roots.sort((a,b)=>String(a.title??a.id).localeCompare(String(b.title??b.id),'zh-CN'));
+}
+
+export function navigatorStructureRoots(state,knowledgeId){
+  const owned=(state.structureInstances??[]).filter(item=>item.ownerKnowledgeId===knowledgeId),byId=new Map(owned.map(item=>[item.id,item]));if(!owned.length)return[];
+  const graph=new Map(owned.map(item=>[item.id,new Set()]));
+  for(const instance of owned)for(const binding of instance.bindings??[]){if(binding.targetType!=='structure'||placementMode(binding)!=='construct'||!byId.has(binding.targetId)||binding.targetId===instance.id)continue;graph.get(instance.id).add(binding.targetId)}
+  for(const placement of state.placements??[]){if(placement.mode==='reference'||placement.targetType!=='structure'||placement.parentType!=='structure'||!byId.has(placement.targetId)||!byId.has(placement.parentId)||placement.targetId===placement.parentId)continue;graph.get(placement.parentId).add(placement.targetId)}
+  const incoming=new Map(owned.map(item=>[item.id,0]));for(const targets of graph.values())for(const targetId of targets)incoming.set(targetId,(incoming.get(targetId)??0)+1);
+  const roots=[],rootIds=new Set(),covered=new Set(),addRoot=item=>{if(!rootIds.has(item.id)){rootIds.add(item.id);roots.push(item)}},cover=start=>{const stack=[start];while(stack.length){const id=stack.pop();if(covered.has(id))continue;covered.add(id);for(const target of graph.get(id)??[])stack.push(target)}};
+  for(const item of owned)if(!incoming.get(item.id))addRoot(item);for(const root of roots)cover(root.id);for(const item of owned)if(!covered.has(item.id)){addRoot(item);cover(item.id)}return roots;
+}
+
+function placementMode(value){return value?.metadata?.placementMode==='reference'?'reference':'construct'}
+function resolvePackageRoot(record,knowledge){const direct=[record?.rootKnowledgeId,record?.rootInternalId].find(id=>knowledge.some(item=>item.id===id));if(direct)return direct;if(record?.root?.type!=='knowledge'||!record.root.id)return null;const stableId=record.root.id,packageId=record.packageId??record.stableId;return knowledge.find(item=>item.id===stableId||item.stableId===stableId&&(!packageId||item.packageId===packageId)||item.externalStableId===`${packageId}/knowledge:${stableId}`)?.id??null}
+
 function matches(needle,...values){return values.some(value=>String(value??'').toLowerCase().includes(needle))}
