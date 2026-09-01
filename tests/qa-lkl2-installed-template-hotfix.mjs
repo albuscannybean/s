@@ -6,7 +6,7 @@ page.on('pageerror',error=>errors.push(error.stack||error.message));page.on('con
 await page.goto(process.env.LMN_QA_URL??'http://127.0.0.1:4174/apps/web/',{waitUntil:'domcontentloaded'});try{await page.waitForFunction(()=>!!globalThis.lmnWorkspace,{timeout:10000})}catch(error){console.error(JSON.stringify({errors,body:await page.locator('body').innerText()},null,2));await browser.close();process.exit(1)}
 
 const imported=await page.evaluate(async()=>{
-  const[{importLkl},{buildImportPlan,commitImportPlan,importKnowledgePackage},{materializeInstanceDefinition}]=await Promise.all([import('/packages/lkl/index.js'),import('/packages/lkl2/index.js'),import('/packages/structure-engine/model.js')]),app=lmnWorkspace;
+  const moduleUrl=path=>new URL(`../../${path}`,location.href).href,[{importLkl},{buildImportPlan,commitImportPlan,importKnowledgePackage},{materializeInstanceDefinition}]=await Promise.all([import(moduleUrl('packages/lkl/index.js')),import(moduleUrl('packages/lkl2/index.js')),import(moduleUrl('packages/structure-engine/model.js'))]),app=lmnWorkspace;
   const lkl1=`lkl 1
 structure custom:german-idealism-four-axis "德国观念论四哲学家主轴"
 layout manual
