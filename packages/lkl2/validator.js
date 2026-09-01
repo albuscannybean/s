@@ -8,13 +8,20 @@ const nearest=(value,candidates)=>{let best=null,score=Infinity;for(const candid
 const levenshtein=(a,b)=>{const rows=Array.from({length:a.length+1},()=>Array(b.length+1).fill(0));for(let i=0;i<=a.length;i++)rows[i][0]=i;for(let j=0;j<=b.length;j++)rows[0][j]=j;for(let i=1;i<=a.length;i++)for(let j=1;j<=b.length;j++)rows[i][j]=Math.min(rows[i-1][j]+1,rows[i][j-1]+1,rows[i-1][j-1]+(a[i-1]===b[j-1]?0:1));return rows[a.length][b.length]};
 const refSet=(type,sets)=>type==='knowledge'?sets.knowledge:type==='structure'?sets.structure:type==='content'?sets.content:type==='board'?sets.board:new Set();
 
+export function resolveStructureTemplate(ref,{packageTemplates=[],installedTemplates=[]}={}){
+  if(!ref)return null;
+  if(String(ref).startsWith('builtin:')){const template=getBuiltinTemplate(ref);return template?{id:template.id,template,source:'builtin'}:null}
+  const packageTemplate=packageTemplates.find(item=>item.stableId===ref||item.id===ref);if(packageTemplate)return{id:packageTemplate.id??packageTemplate.stableId,template:packageTemplate,source:'package'};
+  const installedTemplate=installedTemplates.find(item=>item.id===ref||item.stableId===ref);return installedTemplate?{id:installedTemplate.id??installedTemplate.stableId,template:installedTemplate,source:'installed'}:null;
+}
+
 export function validateKnowledgePackage(model,{strict=true,templates=[]}={}){
   const diagnostics=[],groups={knowledge:model.knowledge??[],content:model.contents??[],'structure-template':model.structureTemplates??[],'structure-instance':model.structureInstances??[],relation:model.relations??[],variable:model.variables??[],view:model.views??[],board:model.boards??[],placement:model.placements??[],entry:model.entries??[],source:model.sources??[]};
   const declarationCount=Object.values(groups).reduce((sum,items)=>sum+items.length,1);
   if(declarationCount>LKL_LIMITS.maxDeclarations)diagnostics.push(diagnostic('error',`知识包包含 ${declarationCount} 个声明，超过上限 ${LKL_LIMITS.maxDeclarations}`,model.package,'package','拆分知识包后再导入'));
   for(const[kind,objects]of Object.entries(groups)){const seen=new Set();for(const object of objects){if(!object.stableId)diagnostics.push(diagnostic('error',`${kind} requires a stable id`,object,'id','为对象提供包内唯一且稳定的 id'));else if(seen.has(object.stableId))diagnostics.push(diagnostic('error',`Duplicate ${kind} id "${object.stableId}"`,object,'id','重命名重复 id'));seen.add(object.stableId)}}
   if(!model.package?.stableId)diagnostics.push(diagnostic('error','Package requires a stable id',model.package,'id'));
-  const sets={knowledge:new Set(groups.knowledge.map(item=>item.stableId)),content:new Set(groups.content.map(item=>item.stableId)),structure:new Set(groups['structure-instance'].map(item=>item.stableId)),board:new Set(groups.board.map(item=>item.stableId))},templateIds=new Set([...templates.map(item=>item.id),...groups['structure-template'].map(item=>item.stableId)]),variableIds=new Set(groups.variable.map(item=>item.stableId));
+  const sets={knowledge:new Set(groups.knowledge.map(item=>item.stableId)),content:new Set(groups.content.map(item=>item.stableId)),structure:new Set(groups['structure-instance'].map(item=>item.stableId)),board:new Set(groups.board.map(item=>item.stableId))},variableIds=new Set(groups.variable.map(item=>item.stableId));
   const requireRef=(ref,set,object,field,kind)=>{if(!ref)return;if(!set.has(ref)){const suggestion=nearest(ref,[...set]);diagnostics.push(diagnostic('error',`Unknown ${kind} reference "${ref}"`,object,field,suggestion?`是否想引用 ${suggestion}？`:'检查引用类型和稳定 ID'))}};
   const requireTyped=(ref,object,field)=>{if(!ref)return;const set=refSet(ref.type,sets);if(!set.size&&!['knowledge','structure','content','board'].includes(ref.type))diagnostics.push(diagnostic('error',`Unsupported reference type "${ref.type}"`,object,field,'使用 knowledge、structure、content 或 board'));else requireRef(ref.id,set,object,field,ref.type)};
   requireTyped(model.package?.root,model.package,'root');
@@ -22,9 +29,10 @@ export function validateKnowledgePackage(model,{strict=true,templates=[]}={}){
   if(groups.board.length>LKL_LIMITS.maxBoards)diagnostics.push(diagnostic('error',`组合页面数量超过 ${LKL_LIMITS.maxBoards}`,model.package,'boards'));
 
   for(const instance of groups['structure-instance']){
-    if(!instance.templateRef)diagnostics.push(diagnostic('error','Structure instance requires using <template>',instance,'using'));else if(!String(instance.templateRef).startsWith('builtin:'))requireRef(instance.templateRef,templateIds,instance,'using','structure-template');else if(!getBuiltinTemplate(instance.templateRef))diagnostics.push(diagnostic('error',`Unknown built-in template "${instance.templateRef}"`,instance,'using'));
+    const resolvedTemplate=resolveStructureTemplate(instance.templateRef,{packageTemplates:groups['structure-template'],installedTemplates:templates});
+    if(!instance.templateRef)diagnostics.push(diagnostic('error','Structure instance requires using <template>',instance,'using'));else if(!resolvedTemplate)diagnostics.push(diagnostic('error',`Unknown structure template reference: ${instance.templateRef}`,instance,'using','Install the required LKL 1 Structure Template first, or declare it inside the LKL 2 Package.'));
     if(instance.ownerRef)requireRef(instance.ownerRef,sets.knowledge,instance,'owner','knowledge');
-    const template=getBuiltinTemplate(instance.templateRef)??templates.find(item=>item.id===instance.templateRef)??groups['structure-template'].find(item=>item.stableId===instance.templateRef);let resolved=null;
+    const template=resolvedTemplate?.template;let resolved=null;
     try{resolved=template?materializeTemplate(template,instance.parameters):null}catch(error){diagnostics.push(diagnostic('error',`Invalid structure parameters: ${error.message}`,instance,'parameter'))}
     const nodeCount=Math.max(instance.containers?.length??0,resolved?.slots?.length??0);
     if(nodeCount>LKL_LIMITS.maxNodesPerStructure)diagnostics.push(diagnostic('error',`结构节点数 ${nodeCount} 超过上限 ${LKL_LIMITS.maxNodesPerStructure}`,instance,'container','降低结构规模或拆分为嵌套结构'));
