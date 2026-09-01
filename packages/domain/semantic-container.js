@@ -3,6 +3,9 @@ const clone=value=>structuredClone(value);
 
 export const CONTAINER_CONTENT_TYPES=Object.freeze(['knowledge','structure','content','variable','formula','link','attachment']);
 export const OBJECT_CONTENT_TYPES=Object.freeze(['note','definition','theorem','proof','example','counterexample','formula','reference','custom']);
+export const DIRECT_NAVIGABLE_CONTAINER_TYPES=Object.freeze(['knowledge','structure','content','formula']);
+
+const CONTAINER_ITEM_FALLBACK_LABELS=Object.freeze({knowledge:'知识',structure:'结构',content:'正文',variable:'变量',formula:'公式',link:'链接',attachment:'附件'});
 
 export const DEFAULT_OBJECT_CAPABILITIES=Object.freeze({
   canRenameDisplayLabel:true,
@@ -183,10 +186,48 @@ export function containerBadges(entry,{visibleRuntimeOnly=true}={}){
 }
 
 export function containerItemLabel(item,state={}){
-  if(item.content?.title)return item.content.title;
-  if(item.type==='knowledge')return(state.knowledge??[]).find(value=>value.id===item.targetId)?.title??'知识';
-  if(item.type==='structure'){const instance=(state.structureInstances??[]).find(value=>value.id===item.targetId),template=(state.structureTemplates??[]).find(value=>value.id===instance?.templateId);return template?.name??'结构'}
-  if(item.type==='variable')return item.metadata?.label??item.targetId??'变量';return item.type;
+  if(item?.type==='knowledge'){
+    const knowledge=(state.knowledge??[]).find(value=>value.id===item.targetId);
+    return String(knowledge?.title??knowledge?.objectContent?.title??item.content?.title??'').trim()||CONTAINER_ITEM_FALLBACK_LABELS.knowledge;
+  }
+  if(item?.type==='structure'){
+    const instance=(state.structureInstances??[]).find(value=>value.id===item.targetId),template=(state.structureTemplates??[]).find(value=>value.id===instance?.templateId);
+    return String(instance?.displayTitle??instance?.objectContent?.title??instance?.title??template?.name??item.content?.title??'').trim()||CONTAINER_ITEM_FALLBACK_LABELS.structure;
+  }
+  const embeddedTitle=String(item?.content?.title??'').trim();if(embeddedTitle)return embeddedTitle;
+  if(item?.type==='content'||item?.type==='formula'){
+    const content=(state.contentObjects??[]).find(value=>value.id===item.targetId),title=content?.title??content?.objectContent?.title;
+    if(String(title??'').trim())return String(title).trim();
+    if(item.type==='formula'&&String(item.content?.displayFormula??'').trim())return String(item.content.displayFormula).trim();
+  }
+  if(item?.type==='variable'){
+    const variable=(state.structureInstances??[]).flatMap(value=>value.variables??[]).find(value=>value.id===item.targetId),title=variable?.displayName??variable?.label??variable?.objectContent?.title??item.metadata?.label;
+    if(String(title??'').trim())return String(title).trim();
+  }
+  if(item?.type==='link'){
+    const link=item.content?.links?.[0],title=link?.label??link?.title??link?.url??item.content?.body;
+    if(String(title??'').trim())return String(title).trim();
+  }
+  if(item?.type==='attachment'){
+    const title=item.metadata?.fileName??item.metadata?.name??item.content?.body;
+    if(String(title??'').trim())return String(title).trim();
+  }
+  return CONTAINER_ITEM_FALLBACK_LABELS[item?.type]??String(item?.type??'内容');
+}
+
+export function persistentContainerItems(entry){return(entry?.persistentChildren??entry?.children??[]).filter(item=>item.persistence!=='runtime')}
+
+export function isDirectNavigableContainerItem(item,state={}){
+  if(!item||!DIRECT_NAVIGABLE_CONTAINER_TYPES.includes(item.type))return false;
+  if(item.type==='knowledge')return(state.knowledge??[]).some(value=>value.id===item.targetId);
+  if(item.type==='structure')return(state.structureInstances??[]).some(value=>value.id===item.targetId);
+  return!!item.content||(state.contentObjects??[]).some(value=>value.id===item.targetId);
+}
+
+export function resolveContainerOpenTarget(entry,state={}){
+  const persistent=persistentContainerItems(entry);
+  if(persistent.length===1&&isDirectNavigableContainerItem(persistent[0],state))return{kind:'item',item:persistent[0]};
+  return{kind:'container',item:null,count:persistent.length};
 }
 
 export function structuralParameterImpact(instance,oldDefinition,nextDefinition){

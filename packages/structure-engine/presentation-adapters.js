@@ -1,16 +1,26 @@
-import {containerBadges} from '../domain/semantic-container.js';
+import {containerBadges,containerItemLabel,persistentContainerItems} from '../domain/semantic-container.js';
 import {analyzePoset} from './poset.js';
 import {getEffectiveTitle} from '../domain/identity.js';
 
 const choose=(n,k)=>{let value=1;for(let index=1;index<=k;index++)value=value*(n-index+1)/index;return Math.round(value)};
+const itemTypeLabel=type=>({knowledge:'知识',structure:'结构',content:'正文',variable:'变量',formula:'公式',link:'链接',attachment:'附件'}[type]??'内容');
+const semanticSlotTitle=(slot,entry)=>[entry?.container?.localDisplayTitle,slot?.localDisplayTitle,slot?.displayLabel,slot?.canonicalDefaultLabel,slot?.label,slot?.id].map(value=>String(value??'').trim()).find(Boolean)??'';
+
+export function resolveContainerPresentation(slot,entry,state={},context={}){
+  const slotTitle=semanticSlotTitle(slot,entry),persistent=persistentContainerItems(entry),labels=persistent.map(item=>containerItemLabel(item,state)).filter(Boolean);
+  if(persistent.length===1){const item=persistent[0],primaryTitle=labels[0]||slotTitle;return{primaryTitle,secondaryTitle:`${slotTitle} · ${itemTypeLabel(item.type)}`,semanticTitle:slotTitle,itemType:item.type,mode:'singleton',lines:[],overflowCount:0}}
+  if(!persistent.length)return{primaryTitle:slotTitle,secondaryTitle:'空容器',semanticTitle:slotTitle,itemType:null,mode:'empty',lines:[],overflowCount:0};
+  return{primaryTitle:slotTitle,secondaryTitle:'',semanticTitle:slotTitle,itemType:null,mode:'collection',lines:labels.slice(0,4),overflowCount:Math.max(0,labels.length-4)};
+}
 
 export function getStructurePresentationAdapter(template){
-  const id=template?.id??'';
+  const id=template?.id??'',layout=template?.layout?.type??'';
   if(id==='builtin:boolean-algebra')return booleanPresentation;
   if(id==='builtin:mod-n'||id==='builtin:mod-12')return modularPresentation;
   if(id==='builtin:poset-hasse')return posetPresentation;
   if(id==='builtin:operation-table')return operationTablePresentation;
   if(id==='builtin:cyclic-group')return cyclicPresentation;
+  if(['matrix','coordinate','venn'].includes(layout))return semanticFixedPresentation;
   return genericPresentation;
 }
 
@@ -20,8 +30,10 @@ const genericPresentation={
   getContainerBadges:entry=>containerBadges(entry),
   getNavigatorSummary:()=>null,
   getSpecialBackground:()=>null,
-  getQuickPreview:({slot,entry,instance,state})=>{const title=getEffectiveTitle(slot,{kind:'slot',instance,state,container:entry?.container}),badges=containerBadges(entry);return{title,eyebrow:slot.role??'语义位置',lines:badges.items.slice(0,4).map(item=>item.content?.title).filter(Boolean),meta:badges.total?`${badges.total} 项内容 · 单击打开`:'空容器 · 单击添加内容',overflowCount:Math.max(0,badges.total-4)}}
+  getQuickPreview:({slot,entry,instance,state})=>{const presentation=resolveContainerPresentation(slot,entry,state,{instance}),badges=containerBadges(entry);return{title:presentation.primaryTitle,eyebrow:presentation.secondaryTitle||slot.role||'语义位置',lines:presentation.lines,meta:presentation.mode==='singleton'?`单击打开唯一${itemTypeLabel(presentation.itemType)}`:badges.total?`${badges.total} 项内容 · 单击打开`:'空容器 · 单击添加内容',overflowCount:presentation.overflowCount,presentation}}
 };
+
+const semanticFixedPresentation={...genericPresentation,id:'semantic-fixed'};
 
 const booleanPresentation={...genericPresentation,id:'boolean',getStructureTitle:(template,instance,definition)=>`布尔代数 B${instance.parameters.rank??definition.runtimeMetadata?.rank??4} · ${definition.slots.length} 个元素`,getNavigatorSummary:(template,instance,definition)=>{const rank=Number(instance.parameters.rank??definition.runtimeMetadata?.rank??4);return{kind:'boolean-ranks',rows:Array.from({length:rank+1},(_,level)=>({id:`rank:${level}`,label:`层级 ${level}`,meta:`${choose(rank,level)} 个元素`,children:definition.slots.filter(slot=>Number(slot.semanticCoordinate?.rank)===level).map(slot=>({id:`slot:${slot.id}`,label:slot.label,meta:slot.role,slotId:slot.id}))}))}}};
 
@@ -35,3 +47,4 @@ const cyclicPresentation={...genericPresentation,id:'cyclic',getStructureTitle:(
 export function structureNavigatorPresentation(template,instance,definition,index){return getStructurePresentationAdapter(template).getNavigatorSummary(template,instance,definition,index)}
 export function structureTitle(template,instance,definition){return getStructurePresentationAdapter(template).getStructureTitle(template,instance,definition)}
 export function objectQuickPreview(template,context){return getStructurePresentationAdapter(template).getQuickPreview(context)}
+export function nodeContainerPresentation(template,context){return getStructurePresentationAdapter(template).id==='generic'?resolveContainerPresentation(context.slot,context.entry,context.state,{instance:context.instance}):null}

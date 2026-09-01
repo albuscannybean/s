@@ -17,7 +17,7 @@ export function createCommandRegistry(app){
     command('structure.design','结构','打开结构设计','Open structure design',['style'],()=>app.openPanel('structure',app.currentInstanceId,'design'),hasStructure,'当前没有结构'),
     command('structure.rename','结构','重命名结构','Rename structure',['title'],()=>app.renameStructureInstance(app.currentInstanceId),hasStructure,'当前没有结构'),
     command('node.add','节点与关系','添加节点','Add node',['slot','point'],()=>app.executeCreateAction?.('add-node'),hasStructure,'当前没有结构'),
-    command('node.open','节点与关系','打开选中节点','Open node',['slot'],()=>{const value=[...app.selection].find(item=>item.startsWith('slot:'));if(value)app.openContainer(value.slice(5))},hasSlot,'请先选中节点'),
+    command('node.open','节点与关系','打开选中节点','Open node',['slot'],()=>{const value=[...app.selection].find(item=>item.startsWith('slot:'));if(value)app.openSlot(value.slice(5))},hasSlot,'请先选中节点'),
     command('node.delete','节点与关系','删除选中节点','Delete node',['remove'],()=>app.deleteSelection(),hasSlot,'请先选中可删除节点'),
     command('relation.connect','节点与关系','建立关系','Connect relation',['edge','line'],()=>{const value=[...app.selection].find(item=>item.startsWith('slot:'));if(value)app.startTemporaryConnection(value.slice(5))},hasSlot,'请先选中起点节点'),
     command('relation.style','节点与关系','设计关系','Style relation',['edge'],()=>app.openPanel('structure',app.currentInstanceId,'design'),hasStructure,'当前没有结构'),

@@ -1,6 +1,6 @@
 export function knowledgeSegment(knowledge){return{kind:'knowledge',id:knowledge.id,label:knowledge.title}}
 export function slotSegment(instanceId,slot){return{kind:'slot',id:slot.id,instanceId,label:slot.displayLabel??slot.label,role:slot.role}}
-export function structureSegment(instance,template){return{kind:'structure',id:instance.id,label:template.name,templateId:template.id}}
+export function structureSegment(instance,template){return{kind:'structure',id:instance.id,label:instance.displayTitle??instance.objectContent?.title??template.name,templateId:template.id}}
 export function appendPath(path,...segments){const next=[...(path??[])];for(const segment of segments){if(!segment)continue;const index=next.findIndex(item=>item.kind===segment.kind&&item.id===segment.id&&item.instanceId===segment.instanceId);if(index>=0)next[index]={...next[index],...segment};else next.push({...segment})}return next}
 export function truncatePath(path,index){return(path??[]).slice(0,index+1).map(item=>({...item}))}
 export function pathLabel(path){return(path??[]).map(segment=>segment.label).join(' › ')}
