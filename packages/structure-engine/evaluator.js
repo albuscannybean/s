@@ -1,3 +1,5 @@
+import {canonicalizeLegacyModExpression,normalizeVariableResult} from './variable-result-normalizer.js';
+
 const numeric=v=>{if(typeof v!=='number'||!Number.isFinite(v))throw new Error('expected finite number');return v};
 export function evaluateExpression(node,scope={}){
   if(node==null||typeof node!=='object')throw new Error('invalid expression');if('value'in node)return node.value;if('var'in node){if(!(node.var in scope))throw new Error(`missing variable: ${node.var}`);return scope[node.var]}
@@ -6,11 +8,11 @@ export function evaluateExpression(node,scope={}){
 export function expressionDependencies(node,result=new Set()){if(node&&typeof node==='object'){if('var'in node)result.add(node.var);for(const a of node.args??[])expressionDependencies(a,result)}return result}
 export function evaluateRules(rules,initialScope={}){
   const pending=new Map(rules.map(r=>[r.target,r])),scope={...initialScope},results={},errors={};let progressed=true;
-  while(pending.size&&progressed){progressed=false;for(const[target,rule]of[...pending]){const deps=expressionDependencies(rule.expression),unresolved=[...deps].filter(x=>pending.has(x));if(unresolved.length)continue;try{results[target]=scope[target]=evaluateExpression(rule.expression,scope)}catch(e){errors[target]=e.message}pending.delete(target);progressed=true}}
+  while(pending.size&&progressed){progressed=false;for(const[target,rule]of[...pending]){const deps=expressionDependencies(rule.expression),unresolved=[...deps].filter(x=>pending.has(x));if(unresolved.length)continue;try{const raw=evaluateExpression(rule.expression,scope);results[target]=scope[target]=normalizeVariableResult(raw,rule.resultSpace,scope)}catch(e){errors[target]=e.message}pending.delete(target);progressed=true}}
   if(pending.size)for(const target of pending.keys())errors[target]='cyclic dependency';return{scope,results,errors};
 }
 export function runInstance(instance,template){
-  const initial={...instance.parameters,...instance.runtimeState.variables},variableRules=(instance.variables??[]).filter(variable=>variable.kind==='derived'&&variable.expression).map(variable=>({target:variable.id,expression:variable.expression})),executable=[...(template.rules??[]),...variableRules].filter(rule=>rule.target&&rule.expression),out=evaluateRules(executable,initial);
+  const initial={...instance.parameters,...instance.runtimeState.variables},defaultResultSpace=instance.resultSpace??template.resultSpace,variableRules=(instance.variables??[]).filter(variable=>variable.kind==='derived'&&(variable.expression||variable.formula)).map(variable=>{const resultSpace=variable.resultSpace??defaultResultSpace,canonical=canonicalizeLegacyModExpression(variable.formula,resultSpace);return{target:variable.id,expression:canonical.expression??variable.expression,resultSpace}}),executable=[...(template.rules??[]),...variableRules].filter(rule=>rule.target&&rule.expression),out=evaluateRules(executable,initial);
   for(const rule of template.rules??[]){if(rule.type==='transitive-reduction')out.results.transitiveReduction=transitiveReduction(template.slots.map(slot=>slot.id),template.edges).map(edge=>edge.id)}
   instance.runtimeState={...instance.runtimeState,...out};instance.updatedAt=new Date().toISOString();return out;
 }

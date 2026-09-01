@@ -46,12 +46,12 @@ test('Zi Wei Mod-12 acceptance scenario safely derives Wen Chang and Wen Qu',()=
 });
 
 test('Hasse structural rule computes a transitive reduction without expression errors',()=>{
-  const template=getBuiltinTemplate('builtin:poset-hasse'),instance=createStructureInstance(template),result=runInstance(instance,template);assert.deepEqual(result.errors,{});assert.equal(result.results.transitiveReduction.length,4);
+  const template=getBuiltinTemplate('builtin:poset-hasse'),instance=createStructureInstance(template,null,{starter:'diamond'}),definition=materializeTemplate(template,instance.parameters),result=runInstance(instance,definition);assert.deepEqual(result.errors,{});assert.equal(result.results.transitiveReduction.length,4);
 });
 
 test('structure and pattern search use real slot/edge semantics',()=>{
   const lmn=createStructureInstance(getBuiltinTemplate('builtin:lmn-432')),mod=createStructureInstance(getBuiltinTemplate('builtin:mod-12')),state={knowledge:[],relations:[],structureTemplates:BUILTIN_TEMPLATES,structureInstances:[lmn,mod]};
-  assert.deepEqual(structureSearch({role:'existence'},state).map(hit=>hit.id),[lmn.id]);assert.deepEqual(structureSearch({modularIndex:4},state).map(hit=>hit.id),[mod.id]);assert.equal(patternSearch({relationType:'defines',sourceRole:'essence',targetRole:'definition'},state)[0].instanceId,lmn.id);
+  assert.deepEqual(structureSearch({role:'existence'},state).map(hit=>hit.id),[lmn.id]);assert.deepEqual(structureSearch({modularIndex:4},state).map(hit=>hit.id),[mod.id]);assert.equal(patternSearch({relationType:'mediates',sourceRole:'essence',targetRole:'definition'},state)[0].instanceId,lmn.id);
 });
 
 test('Scenario F matches Sartre Existence precedes Essence but not a different relation',()=>{

@@ -1,0 +1,57 @@
+lkl 2
+
+package pkg:calculus-example {
+  id "pkg:calculus-example"
+  title "微积分示例"
+  version "1.0"
+  root knowledge calculus
+  defaultEntry start
+}
+
+knowledge calculus {
+  title "微积分"
+  aliases ["Calculus"]
+  summary """研究连续变化的数学语言。"""
+  body markdown """从极限、导数与积分开始。
+
+$$
+\operatorname{D}f=\frac{\partial f}{\partial x}
+$$
+"""
+  tags ["分析", "示例"]
+}
+
+knowledge derivative {
+  title "导数"
+}
+
+content derivative_definition {
+  type definition
+  title "导数定义"
+  body markdown """导数描述函数的局部变化率。"""
+}
+
+structure-instance calculus_lmn {
+  using builtin:lmn-432
+  owner calculus
+  container M2 {
+    knowledge derivative
+    content derivative_definition
+  }
+}
+
+view calculus_view {
+  for calculus_lmn
+  mode structure
+  orientation {
+    zero top
+    direction clockwise
+    rotation 0deg
+  }
+  zoom-policy semantic
+}
+
+entry start {
+  title "开始阅读"
+  knowledge calculus
+}

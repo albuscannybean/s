@@ -1,0 +1,8 @@
+export class TransientOverlayManager{
+  constructor(documentRef){this.document=documentRef;this.registry=new Map();this.active=null;this.onPointerDown=event=>{if(!this.active)return;const entry=this.registry.get(this.active);if(!entry?.element.contains(event.target))this.close(this.active,'outside')};this.onKeyDown=event=>{if(event.key==='Escape'&&this.active){event.preventDefault();this.close(this.active,'escape')}};documentRef.addEventListener('pointerdown',this.onPointerDown,true);documentRef.addEventListener('keydown',this.onKeyDown,true)}
+  register(name,element,{onClose=null,emptyInput=null}={}){this.registry.set(name,{element,onClose,emptyInput});if(emptyInput)emptyInput.addEventListener('blur',event=>{const next=event.relatedTarget;queueMicrotask(()=>{if(this.active===name&&!String(emptyInput.value??'').trim()&&next&&!element.contains(next))this.close(name,'empty-blur')})});return this}
+  open(name){if(this.active&&this.active!==name)this.close(this.active,'superseded');const entry=this.registry.get(name);if(!entry)return false;this.active=name;entry.element.classList.remove('hidden');entry.element.dataset.transientOpen='true';return true}
+  close(name=this.active,reason='programmatic'){if(!name)return false;const entry=this.registry.get(name);if(!entry)return false;entry.element.classList.add('hidden');delete entry.element.dataset.transientOpen;if(this.active===name)this.active=null;entry.onClose?.(reason);return true}
+  closeAll(reason='navigation'){if(this.active)this.close(this.active,reason)}
+  destroy(){this.closeAll('destroy');this.document.removeEventListener('pointerdown',this.onPointerDown,true);this.document.removeEventListener('keydown',this.onKeyDown,true);this.registry.clear()}
+}

@@ -1,7 +1,7 @@
 export function knowledgeSegment(knowledge){return{kind:'knowledge',id:knowledge.id,label:knowledge.title}}
-export function slotSegment(instanceId,slot){return{kind:'slot',id:slot.id,instanceId,label:slot.label,role:slot.role}}
+export function slotSegment(instanceId,slot){return{kind:'slot',id:slot.id,instanceId,label:slot.displayLabel??slot.label,role:slot.role}}
 export function structureSegment(instance,template){return{kind:'structure',id:instance.id,label:template.name,templateId:template.id}}
-export function appendPath(path,...segments){const next=[...(path??[])];for(const segment of segments)if(segment&&!next.some(item=>item.kind===segment.kind&&item.id===segment.id&&item.instanceId===segment.instanceId))next.push({...segment});return next}
+export function appendPath(path,...segments){const next=[...(path??[])];for(const segment of segments){if(!segment)continue;const index=next.findIndex(item=>item.kind===segment.kind&&item.id===segment.id&&item.instanceId===segment.instanceId);if(index>=0)next[index]={...next[index],...segment};else next.push({...segment})}return next}
 export function truncatePath(path,index){return(path??[]).slice(0,index+1).map(item=>({...item}))}
 export function pathLabel(path){return(path??[]).map(segment=>segment.label).join(' › ')}
 export function validateNavigatorPath(path,state){const errors=[];for(const segment of path??[]){if(segment.kind==='knowledge'&&!state.knowledge?.some(item=>item.id===segment.id))errors.push(`Missing Knowledge ${segment.id}`);if(segment.kind==='structure'&&!state.structureInstances?.some(item=>item.id===segment.id))errors.push(`Missing Structure ${segment.id}`);if(segment.kind==='slot'&&!segment.instanceId)errors.push(`Slot ${segment.id} has no instance context`)}return{valid:!errors.length,errors}}

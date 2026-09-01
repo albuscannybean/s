@@ -1,0 +1,127 @@
+lkl 2
+
+package pkg:calculus-v4.3 {
+  id "pkg:calculus-v4.3"
+  title "微积分知识包"
+  description "含知识、结构、组合页面、构造位置与向量曲线的完整示例。"
+  version "1.0"
+  migrationVersion "4.3.0"
+  language "zh-CN"
+  root knowledge mathematics
+  defaultEntry calculus-board-entry
+}
+
+knowledge mathematics {
+  title "数学"
+  name-zh-CN "数学"
+  name-en "Mathematics"
+  summary "知识包的稳定根节点。"
+}
+
+knowledge calculus {
+  title "微积分"
+  name-zh-CN "微积分"
+  name-en "Calculus"
+  summary "极限、导数、积分与级数。"
+  body markdown """# 微积分
+
+从极限、导数、积分与级数开始。设 $f(x)=\sin x$。
+"""
+  tags ["分析", "示例"]
+}
+
+content derivative-definition {
+  type definition
+  title "导数定义"
+  body markdown """导数描述函数的局部变化率。"""
+}
+
+structure-instance calculus-lmn {
+  using builtin:lmn-432
+  owner mathematics
+  title "微积分 LMN"
+  container M2 {
+    knowledge calculus
+    content derivative-definition
+  }
+}
+
+structure-instance calculus-vector {
+  using builtin:coordinate-plane
+  owner calculus
+  title "函数与曲线"
+  parameter dimension = "2d"
+  parameter scale = 40
+  runtime "{\"runtimeState\":{\"variables\":{},\"results\":{},\"errors\":{}},\"plotExpressions\":[{\"id\":\"sin-curve\",\"label\":\"正弦曲线\",\"source\":\"y=sin(x)\",\"color\":\"#2f7658\",\"rangeMode\":\"viewport\"}],\"motionPoints\":[],\"objectVisibility\":{},\"designStyles\":{\"nodeDefault\":{}},\"relationStyles\":{\"structureDefault\":{\"routing\":\"straight\"},\"typeOverrides\":{},\"edgeOverrides\":{}}}"
+}
+
+view calculus-lmn-view {
+  for calculus-lmn
+  mode structure
+  preview-policy compact
+  zoom-policy semantic
+}
+
+view calculus-vector-view {
+  for calculus-vector
+  mode structure
+  camera {
+    projection xOy
+    yaw 42
+    pitch 28
+  }
+  preview-policy off
+  object-visibility "{}"
+  zoom-policy semantic
+}
+
+board calculus-board {
+  title "微积分结构画板"
+  description "在同一页面中并列显示 LMN 与向量空间。"
+  owner mathematics
+  width 1800
+  height 1100
+  frame lmn-frame {
+    instance calculus-lmn
+    x 80
+    y 120
+    width 680
+    height 560
+    order 0
+    preview-policy detailed
+  }
+  frame vector-frame {
+    instance calculus-vector
+    x 820
+    y 120
+    width 760
+    height 560
+    order 1
+    preview-policy detailed
+  }
+}
+
+placement calculus-placement {
+  target knowledge calculus
+  parent structure calculus-lmn
+  mode construct
+  order 0
+  path M2
+}
+
+placement vector-placement {
+  target structure calculus-vector
+  parent knowledge calculus
+  mode construct
+  order 0
+}
+
+entry root-entry {
+  title "开始阅读"
+  knowledge mathematics
+}
+
+entry calculus-board-entry {
+  title "打开微积分画板"
+  board calculus-board
+}

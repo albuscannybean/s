@@ -1,0 +1,98 @@
+lkl 2
+
+package pkg:mod12-chart-v4.3 {
+  id "pkg:mod12-chart-v4.3"
+  title "模 12 排盘示例"
+  version "1.0"
+  migrationVersion "4.3.0"
+  language "zh-CN"
+  root knowledge modular-calendar
+  defaultEntry chart-entry
+}
+
+knowledge modular-calendar {
+  title "周期历法"
+  name-zh-CN "周期历法"
+  name-en "Modular Calendar"
+  summary "用模结构表达周期变量与派生位置。"
+}
+
+structure-instance mod12-chart {
+  using builtin:mod-n
+  owner modular-calendar
+  title "模 12 变量排盘"
+  parameter modulus = 12
+  variable hour {
+    label "时辰"
+    display-name "时辰"
+    name-zh-CN "时辰"
+    name-en "Hour"
+    group "输入"
+    order 0
+    kind input
+    type integer
+    value 7
+    show false
+  }
+  variable wenchang {
+    label "文昌"
+    display-name "文昌"
+    name-zh-CN "文昌"
+    name-en "Wenchang"
+    group "派生位置"
+    order 1
+    kind derived
+    type integer
+    expression "-(hour + 2)"
+    display-formula "w_c ≡ -(h+2) (mod 12)"
+    show true
+  }
+  variable wenqu {
+    label "文曲"
+    display-name "文曲"
+    name-zh-CN "文曲"
+    name-en "Wenqu"
+    group "派生位置"
+    order 2
+    kind derived
+    type integer
+    expression "hour + 4"
+    display-formula "w_q ≡ h+4 (mod 12)"
+    show true
+  }
+}
+
+view chart-view {
+  for mod12-chart
+  mode chart
+  preview-policy compact
+  zoom-policy semantic
+}
+
+board chart-board {
+  title "模 12 排盘"
+  owner modular-calendar
+  width 1400
+  height 900
+  frame chart-frame {
+    instance mod12-chart
+    x 120
+    y 100
+    width 920
+    height 680
+    order 0
+    preview-policy detailed
+  }
+}
+
+placement chart-placement {
+  target structure mod12-chart
+  parent knowledge modular-calendar
+  mode construct
+  order 0
+}
+
+entry chart-entry {
+  title "打开模 12 排盘"
+  board chart-board
+}

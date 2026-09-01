@@ -9,6 +9,7 @@ export function bitsetLabel(value,rank){return(Number(value)>>>0).toString(2).pa
 export function generateBooleanAlgebra(rank=4,{displayMode='subset',atomLabels=[]}={}){
   rank=asRank(rank);const count=2**rank;
   const slots=Array.from({length:count},(_,value)=>({id:`b${value}`,label:displayMode==='bitset'?bitsetLabel(value,rank):subsetLabel(value,rank,atomLabels),role:value===0?'bottom':value===count-1?'top':'element',semanticCoordinate:{rank:bitCount(value),value,bitset:bitsetLabel(value,rank)},accepts:['knowledge','value','structure'],cardinality:'many'}));
-  const edges=[];for(let lower=0;lower<count;lower++)for(let bit=0;bit<rank;bit++)if(!(lower&(1<<bit))){const upper=lower|(1<<bit);edges.push({id:`cover-${lower}-${upper}`,sourceSlotId:`b${lower}`,targetSlotId:`b${upper}`,direction:'directed',relationType:'cover',label:'⊂',routing:'straight',semanticAxis:'order'})}
-  return{rank,slots,edges,operations:{meet:booleanMeet,join:booleanJoin,complement:value=>booleanComplement(value,rank)},warning:rank===8?'B₈ contains 256 nodes; compact rendering is enabled.':null};
+  const edges=[];for(let lower=0;lower<count;lower++)for(let bit=0;bit<rank;bit++)if(!(lower&(1<<bit))){const upper=lower|(1<<bit);edges.push({id:`cover-${lower}-${upper}`,sourceSlotId:`b${lower}`,targetSlotId:`b${upper}`,direction:'directed',relationType:'cover',label:'',displayLabel:'',routing:'straight',semanticAxis:'order',visual:{showLabel:false}})}
+  const warning=rank>=8?'B₈ 将生成 256 个元素，画布可读性会明显下降。':rank>=6?`B${rank} 将生成 ${count} 个以上元素，可能降低可读性。`:null;
+  return{rank,slots,edges,operations:{meet:booleanMeet,join:booleanJoin,complement:value=>booleanComplement(value,rank)},warning};
 }

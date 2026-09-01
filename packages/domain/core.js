@@ -1,3 +1,5 @@
+import {ensureObjectContent} from './semantic-container.js';
+
 export const SCHEMA_VERSION = 4;
 
 const uid = () => globalThis.crypto?.randomUUID?.() ?? `lmn-${Date.now()}-${Math.random().toString(16).slice(2)}`;
@@ -6,12 +8,14 @@ const now = () => new Date().toISOString();
 export function createKnowledge(title, content = '') {
   if (!String(title).trim()) throw new Error('Knowledge title is required');
   const timestamp = now();
-  return { id: uid(), title: String(title).trim(), content, createdAt: timestamp, updatedAt: timestamp };
+  const knowledge={ id: uid(), title: String(title).trim(), content, createdAt: timestamp, updatedAt: timestamp };
+  ensureObjectContent(knowledge,{contentType:'note'});return knowledge;
 }
 
 export function createRelation(sourceId, targetId, type = 'related', label = '') {
   if (!sourceId || !targetId) throw new Error('Relation endpoints are required');
-  return { id: uid(), sourceId, targetId, type, label, createdAt: now() };
+  const relation={ id: uid(), sourceId, targetId, type, label, createdAt: now() };
+  ensureObjectContent(relation,{contentType:'custom'});return relation;
 }
 
 export function createRepresentation(knowledgeId, kind, data = {}) {
