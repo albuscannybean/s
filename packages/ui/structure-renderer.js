@@ -21,11 +21,58 @@ export function pointAlongPolyline(points=[],ratio=.5){
 const paddedNodeBounds=(node,padding=8)=>({x:node.x-padding,y:node.y-padding,width:node.width+padding*2,height:node.height+padding*2});
 export const boundsIntersect=(left,right)=>left.x<right.x+right.width&&left.x+left.width>right.x&&left.y<right.y+right.height&&left.y+left.height>right.y;
 export function relationLabelBounds(label,center,{formula=false}={}){const width=formula?Math.max(156,estimateRelationLabelWidth(label)):estimateRelationLabelWidth(label),height=formula?38:22;return{x:center.x-width/2,y:center.y-height/2,width,height}}
-const segmentCandidates=points=>points.slice(1).map((point,index)=>{const start=points[index],length=Math.hypot(point.x-start.x,point.y-start.y);return{length,point:{x:(start.x+point.x)/2,y:(start.y+point.y)/2}}}).sort((left,right)=>right.length-left.length).map(item=>item.point);
+const validEdgePoints=edge=>(edge.points?.length?edge.points:[edge.start,edge.end]).filter(point=>Number.isFinite(point?.x)&&Number.isFinite(point?.y));
+const midpoint=(start,end)=>({x:(start.x+end.x)/2,y:(start.y+end.y)/2});
+const cubicPoint=(points,t)=>{const[start,c1,c2,end]=points,one=1-t;return{x:one**3*start.x+3*one**2*t*c1.x+3*one*t**2*c2.x+t**3*end.x,y:one**3*start.y+3*one**2*t*c1.y+3*one*t**2*c2.y+t**3*end.y}};
+
+export function sampleBezier(edge,segments=32){
+  const points=validEdgePoints(edge);if(points.length!==4)return points;
+  const count=Math.max(2,segments);return Array.from({length:count+1},(_,index)=>cubicPoint(points,index/count));
+}
+
+function sampleRadialArc(edge,segments=32){
+  const points=validEdgePoints(edge),start=points[0],end=points.at(-1),arc=edge.arc;if(!start||!end||!arc)return points;
+  const chordX=end.x-start.x,chordY=end.y-start.y,chord=Math.hypot(chordX,chordY);if(!chord)return[start];
+  const radius=Math.max(Math.abs(Number(arc.radius)||0),chord/2),middle=midpoint(start,end),height=Math.sqrt(Math.max(0,radius*radius-chord*chord/4)),normal={x:-chordY/chord,y:chordX/chord},candidates=[{x:middle.x+normal.x*height,y:middle.y+normal.y*height},{x:middle.x-normal.x*height,y:middle.y-normal.y*height}],sweep=Number(arc.sweep)===1,largeArc=Number(arc.largeArc)===1;
+  const describe=center=>{const startAngle=Math.atan2(start.y-center.y,start.x-center.x),endAngle=Math.atan2(end.y-center.y,end.x-center.x);let delta=endAngle-startAngle;if(sweep&&delta<0)delta+=Math.PI*2;if(!sweep&&delta>0)delta-=Math.PI*2;return{center,startAngle,delta}};
+  const described=candidates.map(describe),selected=described.find(item=>largeArc?Math.abs(item.delta)>=Math.PI-1e-7:Math.abs(item.delta)<=Math.PI+1e-7)??described[0],count=Math.max(2,segments);
+  return Array.from({length:count+1},(_,index)=>{const angle=selected.startAngle+selected.delta*index/count;return{x:selected.center.x+radius*Math.cos(angle),y:selected.center.y+radius*Math.sin(angle)}});
+}
+
+export function relationPathPoints(edge,segments=32){
+  if(edge.routing==='bezier')return sampleBezier(edge,segments);
+  if(edge.routing==='radial-arc')return sampleRadialArc(edge,segments);
+  return validEdgePoints(edge);
+}
+
+export function longestStraightSegment(points=[]){
+  let longest=null;for(let index=1;index<points.length;index++){const start=points[index-1],end=points[index],length=Math.hypot(end.x-start.x,end.y-start.y);if(!longest||length>longest.length)longest={start,end,length}}
+  return longest;
+}
+
+const semanticLabelPosition=edge=>edge.visual?.labelPosition??'center';
+const semanticLabelRatio=position=>position==='start'?.18:position==='end'?.82:.5;
+
+export function semanticRelationLabelPlacement(edge,label){
+  const position=semanticLabelPosition(edge),points=relationPathPoints(edge),start=points[0]??{x:0,y:0},end=points.at(-1)??start;
+  let center;if(position==='center'&&edge.routing==='straight')center=midpoint(edge.start??start,edge.end??end);else if(position==='center'&&edge.routing==='orthogonal'){const segment=longestStraightSegment(points);center=segment?midpoint(segment.start,segment.end):pointAlongPolyline(points,.5)}else center=pointAlongPolyline(points,semanticLabelRatio(position));
+  return{...center,bounds:relationLabelBounds(label,center,{formula:String(label).includes('$')}),strategy:`semantic-${position}`};
+}
+
+const segmentCandidates=points=>points.slice(1).map((point,index)=>{const start=points[index],length=Math.hypot(point.x-start.x,point.y-start.y);return{length,point:midpoint(start,point)}}).sort((left,right)=>right.length-left.length).map(item=>item.point);
+const overlapArea=(left,right)=>Math.max(0,Math.min(left.x+left.width,right.x+right.width)-Math.max(left.x,right.x))*Math.max(0,Math.min(left.y+left.height,right.y+right.height)-Math.max(left.y,right.y));
+
+// Collision fallback is intentionally limited to free/manual layouts by relationLabelPlacement().
 export function chooseRelationLabelPlacement(edge,nodes,label,occupied=[]){
-  const points=(edge.points?.length?edge.points:[edge.start,edge.end]).filter(point=>Number.isFinite(point?.x)&&Number.isFinite(point?.y)),labelPosition=edge.visual?.labelPosition??'center',preferred=labelPosition==='start'?.18:labelPosition==='end'?.82:.5,ratios=[preferred,.5,.4,.6,.35,.65],base=edge.routing==='orthogonal'?[...segmentCandidates(points),...ratios.map(ratio=>pointAlongPolyline(points,ratio))]:ratios.map(ratio=>pointAlongPolyline(points,ratio)),start=points[0]??{x:0,y:0},end=points.at(-1)??start,dx=end.x-start.x,dy=end.y-start.y,length=Math.hypot(dx,dy)||1,normal={x:-dy/length,y:dx/length},offsets=[0,-24,24,-40,40],obstacles=[...nodes.map(node=>paddedNodeBounds(node)),...occupied];let best=null;
-  for(const point of base)for(const offset of offsets){const center={x:point.x+normal.x*offset,y:point.y+normal.y*offset},bounds=relationLabelBounds(label,center,{formula:String(label).includes('$')}),collisions=obstacles.filter(obstacle=>boundsIntersect(bounds,obstacle)),score=collisions.reduce((sum,obstacle)=>sum+Math.max(0,Math.min(bounds.x+bounds.width,obstacle.x+obstacle.width)-Math.max(bounds.x,obstacle.x))*Math.max(0,Math.min(bounds.y+bounds.height,obstacle.y+obstacle.height)-Math.max(bounds.y,obstacle.y)),0)+Math.abs(offset)*.05;if(!collisions.length)return{...center,bounds};if(!best||score<best.score)best={...center,bounds,score}}
-  return best??{x:0,y:0,bounds:relationLabelBounds(label,{x:0,y:0})};
+  const semantic=semanticRelationLabelPlacement(edge,label),position=semanticLabelPosition(edge),obstacles=[...nodes.map(node=>paddedNodeBounds(node)),...occupied];
+  if(position!=='center'||!obstacles.some(obstacle=>boundsIntersect(semantic.bounds,obstacle)))return semantic;
+  const points=relationPathPoints(edge),ratios=[.5,.4,.6,.35,.65],base=edge.routing==='orthogonal'?[...segmentCandidates(points),...ratios.map(ratio=>pointAlongPolyline(points,ratio))]:ratios.map(ratio=>pointAlongPolyline(points,ratio)),start=points[0]??{x:0,y:0},end=points.at(-1)??start,dx=end.x-start.x,dy=end.y-start.y,length=Math.hypot(dx,dy)||1,normal={x:-dy/length,y:dx/length},offsets=[0,-24,24,-40,40];let best=null;
+  for(const point of base)for(const offset of offsets){const center={x:point.x+normal.x*offset,y:point.y+normal.y*offset},bounds=relationLabelBounds(label,center,{formula:String(label).includes('$')}),collisions=obstacles.filter(obstacle=>boundsIntersect(bounds,obstacle)),score=collisions.reduce((sum,obstacle)=>sum+overlapArea(bounds,obstacle),0)+Math.abs(offset)*.05;if(!collisions.length)return{...center,bounds,strategy:'manual-collision-fallback'};if(!best||score<best.score)best={...center,bounds,score,strategy:'manual-collision-fallback'}}
+  return best??semantic;
+}
+
+export function relationLabelPlacement(edge,scene,label,occupied=[]){
+  return scene?.layout==='manual'?chooseRelationLabelPlacement(edge,scene.nodes??[],label,occupied):semanticRelationLabelPlacement(edge,label);
 }
 
 function drawBackground(layer,scene,options={}){layer.replaceChildren();const selected=new Set(options.selectedIds??[]);for(const item of scene.background??[]){const element=svg(item.type);element.classList.add(...String(item.className??'scene-background-item').split(' ').filter(Boolean));for(const[name,value]of Object.entries(item)){if(['type','className','text','plotId','motionId','title'].includes(name)||value==null)continue;element.setAttribute(name,String(value))}if(item.text!=null)element.textContent=item.text;if(item.title){const title=svg('title');title.textContent=item.title;element.append(title)}if(item.motionId)element.dataset.motionId=item.motionId;if(item.plotId){element.dataset.plotId=item.plotId;element.classList.toggle('selected',selected.has(`plot:${item.plotId}`));element.setAttribute('role','button');element.setAttribute('tabindex','0');element.addEventListener('click',event=>{event.stopPropagation();options.onSelect?.({kind:'plot',id:item.plotId,event})});element.addEventListener('contextmenu',event=>{event.preventDefault();event.stopPropagation();options.onContext?.({kind:'plot',id:item.plotId,event})});element.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();options.onSelect?.({kind:'plot',id:item.plotId,event})}})}layer.append(element)}}
@@ -37,7 +84,7 @@ function drawEdges(layer,scene,options){
   for(const edge of scene.edges){const group=svg('g'),readableLabel=edge.displayLabel??edge.label??edge.relationType??'relation';group.classList.add('scene-edge-group');group.dataset.edgeId=edge.id;if(selected.has(`edge:${edge.id}`))group.classList.add('selected');group.tabIndex=0;group.setAttribute('role','button');group.setAttribute('aria-label',`${readableLabel} · ${edge.direction}`);
     const path=svg('path'),arrow=edge.visual?.arrow??'direction',hasSemanticArrow=edge.direction!=='undirected',showEnd=arrow==='forward'||(arrow==='direction'&&hasSemanticArrow)||arrow==='both'||edge.direction==='bidirectional',showStart=arrow==='reverse'||arrow==='both'||edge.direction==='bidirectional';path.classList.add('scene-edge',edge.direction??'directed',edge.routing,edge.visual?.lineStyle??'solid');path.setAttribute('d',edge.path);if(showEnd&&arrow!=='none')path.setAttribute('marker-end','url(#scene-arrow)');if(showStart&&arrow!=='none')path.setAttribute('marker-start','url(#scene-arrow)');if(edge.semanticAxis)path.dataset.semanticAxis=edge.semanticAxis;if(edge.visual?.color)path.style.stroke=edge.visual.color;if(edge.visual?.width)path.style.strokeWidth=String(edge.visual.width);if(edge.visual?.opacity!=null)path.style.opacity=String(edge.visual.opacity);if(edge.visual?.lineStyle==='dashed')path.style.strokeDasharray='7 5';if(edge.visual?.lineStyle==='dotted')path.style.strokeDasharray='2 5';
     const title=svg('title');title.textContent=`${readableLabel} · ${edge.direction}`;group.append(title);const hit=svg('path');hit.classList.add('scene-edge-hit');hit.setAttribute('d',edge.path);hit.addEventListener('click',event=>{event.stopPropagation();options.onSelect?.({kind:'edge',id:edge.id,event})});hit.addEventListener('dblclick',event=>{event.preventDefault();event.stopPropagation()});hit.addEventListener('contextmenu',event=>{event.preventDefault();event.stopPropagation();options.onContext?.({kind:'edge',id:edge.id,event})});group.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();options.onSelect?.({kind:'edge',id:edge.id,event})}if(event.shiftKey&&event.key==='F10'){event.preventDefault();const rect=group.getBoundingClientRect();options.onContext?.({kind:'edge',id:edge.id,event:{clientX:rect.left+rect.width/2,clientY:rect.top+rect.height/2}})}});group.append(path,hit);
-    if(readableLabel){const placement=chooseRelationLabelPlacement(edge,scene.nodes,readableLabel,occupiedLabels),bounds=placement.bounds;occupiedLabels.push(bounds);if(readableLabel.includes('$')){const foreign=svg('foreignObject');foreign.classList.add('edge-formula');foreign.setAttribute('x',bounds.x);foreign.setAttribute('y',bounds.y);foreign.setAttribute('width',bounds.width);foreign.setAttribute('height',bounds.height);const label=document.createElement('div');label.className='edge-formula-label';appendInlineContent(label,readableLabel);foreign.append(label);group.append(foreign)}else{const background=svg('rect');background.classList.add('edge-label-background');background.setAttribute('x',bounds.x);background.setAttribute('y',bounds.y);background.setAttribute('width',bounds.width);background.setAttribute('height',bounds.height);background.setAttribute('rx','8');const label=svg('text');label.classList.add('edge-label');label.setAttribute('x',placement.x);label.setAttribute('y',placement.y+4);label.textContent=readableLabel;group.append(background,label)}}layer.append(group)
+    if(readableLabel){const placement=relationLabelPlacement(edge,scene,readableLabel,occupiedLabels),bounds=placement.bounds;occupiedLabels.push(bounds);group.dataset.labelStrategy=placement.strategy;group.dataset.labelCenterX=String(placement.x);group.dataset.labelCenterY=String(placement.y);if(readableLabel.includes('$')){const foreign=svg('foreignObject');foreign.classList.add('edge-formula');foreign.setAttribute('x',bounds.x);foreign.setAttribute('y',bounds.y);foreign.setAttribute('width',bounds.width);foreign.setAttribute('height',bounds.height);const label=document.createElement('div');label.className='edge-formula-label';appendInlineContent(label,readableLabel);foreign.append(label);group.append(foreign)}else{const background=svg('rect');background.classList.add('edge-label-background');background.setAttribute('x',bounds.x);background.setAttribute('y',bounds.y);background.setAttribute('width',bounds.width);background.setAttribute('height',bounds.height);background.setAttribute('rx','8');const label=svg('text');label.classList.add('edge-label');label.setAttribute('x',placement.x);label.setAttribute('y',placement.y);label.setAttribute('text-anchor','middle');label.setAttribute('dominant-baseline','middle');label.textContent=readableLabel;group.append(background,label)}}layer.append(group)
   }
 }
 

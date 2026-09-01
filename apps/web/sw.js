@@ -1,4 +1,4 @@
-const CACHE='lmn-v4.3.0-stable-20260902-6';
+const CACHE='lmn-v4.3.0-stable-20260902-7';
 const KATEX_FONTS=['AMS-Regular','Caligraphic-Bold','Caligraphic-Regular','Fraktur-Bold','Fraktur-Regular','Main-Bold','Main-BoldItalic','Main-Italic','Main-Regular','Math-BoldItalic','Math-Italic','SansSerif-Bold','SansSerif-Italic','SansSerif-Regular','Script-Regular','Size1-Regular','Size2-Regular','Size3-Regular','Size4-Regular','Typewriter-Regular'].map(name=>`./vendor/katex/fonts/KaTeX_${name}.woff2`);
 const ASSETS=[
   './','./index.html','./styles.css','./app.js','./db.js','./manifest.webmanifest','./vendor/katex/katex.min.css','./vendor/katex/katex.mjs',

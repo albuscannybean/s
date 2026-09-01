@@ -72,9 +72,9 @@ export function routeEdge(source,target,style='straight',options={}){
   }
   if(style==='radial-arc'){
     const center=options.center??{x:(start.x+end.x)/2,y:(start.y+end.y)/2};
-    const radius=Math.max(20,Math.hypot(start.x-center.x,start.y-center.y));
+    const radius=Math.max(20,Math.hypot(start.x-center.x,start.y-center.y),Math.hypot(end.x-start.x,end.y-start.y)/2);
     const sweep=((start.x-center.x)*(end.y-center.y)-(start.y-center.y)*(end.x-center.x))>=0?1:0;
-    return{start,end,points:[start,end],path:`M ${start.x} ${start.y} A ${radius} ${radius} 0 0 ${sweep} ${end.x} ${end.y}`};
+    return{start,end,points:[start,end],arc:{radius,sweep,largeArc:0},path:`M ${start.x} ${start.y} A ${radius} ${radius} 0 0 ${sweep} ${end.x} ${end.y}`};
   }
   const dx=end.x-start.x,dy=end.y-start.y,horizontal=Math.abs(dx)>=Math.abs(dy),bend=clamp((horizontal?Math.abs(dx):Math.abs(dy))*.42,36,180);
   const c1=horizontal?{x:start.x+Math.sign(dx||1)*bend,y:start.y}:{x:start.x,y:start.y+Math.sign(dy||1)*bend};
