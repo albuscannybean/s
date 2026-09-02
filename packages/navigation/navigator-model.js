@@ -30,14 +30,18 @@ export function navigatorKnowledgeRoots(state){
 }
 
 export function navigatorStructureRoots(state,knowledgeId){
-  const owned=(state.structureInstances??[]).filter(item=>item.ownerKnowledgeId===knowledgeId),byId=new Map(owned.map(item=>[item.id,item]));if(!owned.length)return[];
-  const graph=new Map(owned.map(item=>[item.id,new Set()]));
-  for(const instance of owned)for(const binding of instance.bindings??[]){if(binding.targetType!=='structure'||placementMode(binding)!=='construct'||!byId.has(binding.targetId)||binding.targetId===instance.id)continue;graph.get(instance.id).add(binding.targetId)}
-  for(const placement of state.placements??[]){if(placement.mode==='reference'||placement.targetType!=='structure'||placement.parentType!=='structure'||!byId.has(placement.targetId)||!byId.has(placement.parentId)||placement.targetId===placement.parentId)continue;graph.get(placement.parentId).add(placement.targetId)}
-  const incoming=new Map(owned.map(item=>[item.id,0]));for(const targets of graph.values())for(const targetId of targets)incoming.set(targetId,(incoming.get(targetId)??0)+1);
-  const roots=[],rootIds=new Set(),covered=new Set(),addRoot=item=>{if(!rootIds.has(item.id)){rootIds.add(item.id);roots.push(item)}},cover=start=>{const stack=[start];while(stack.length){const id=stack.pop();if(covered.has(id))continue;covered.add(id);for(const target of graph.get(id)??[])stack.push(target)}};
-  for(const item of owned)if(!incoming.get(item.id))addRoot(item);for(const root of roots)cover(root.id);for(const item of owned)if(!covered.has(item.id)){addRoot(item);cover(item.id)}return roots;
+  const instances=state.structureInstances??[],byId=new Map(instances.map(item=>[item.id,item])),direct=orderedConstructStructuresForKnowledge(state,knowledgeId),explicitTargets=new Set((state.placements??[]).filter(item=>item.mode!=='reference'&&item.targetType==='structure').map(item=>item.targetId));
+  if(direct.length)return direct;
+  const owned=instances.filter(item=>item.ownerKnowledgeId===knowledgeId&&!explicitTargets.has(item.id));if(!owned.length)return[];const ownedIds=new Set(owned.map(item=>item.id)),incoming=new Set();
+  for(const instance of instances)for(const binding of instance.bindings??[])if(binding.targetType==='structure'&&placementMode(binding)==='construct'&&ownedIds.has(binding.targetId))incoming.add(binding.targetId);
+  const roots=owned.filter(item=>!incoming.has(item.id));return roots.length?roots:[owned[0]];
 }
+
+export function orderedConstructStructuresForKnowledge(state,knowledgeId){
+  const byId=new Map((state.structureInstances??[]).map(item=>[item.id,item])),seen=new Set();return(state.placements??[]).filter(item=>item.mode!=='reference'&&item.parentType==='knowledge'&&item.parentId===knowledgeId&&item.targetType==='structure'&&byId.has(item.targetId)).sort((a,b)=>Number(a.order??0)-Number(b.order??0)||String(a.stableId??a.id??'').localeCompare(String(b.stableId??b.id??''))).flatMap(item=>{if(seen.has(item.targetId))return[];seen.add(item.targetId);return[byId.get(item.targetId)]});
+}
+
+export function primaryStructureForKnowledge(state,knowledgeId){return orderedConstructStructuresForKnowledge(state,knowledgeId)[0]??(state.structureInstances??[]).find(item=>item.ownerKnowledgeId===knowledgeId&&item.templateId==='builtin:lmn-432')??(state.structureInstances??[]).find(item=>item.ownerKnowledgeId===knowledgeId)??null}
 
 function placementMode(value){return value?.metadata?.placementMode==='reference'?'reference':'construct'}
 function resolvePackageRoot(record,knowledge){const direct=[record?.rootKnowledgeId,record?.rootInternalId].find(id=>knowledge.some(item=>item.id===id));if(direct)return direct;if(record?.root?.type!=='knowledge'||!record.root.id)return null;const stableId=record.root.id,packageId=record.packageId??record.stableId;return knowledge.find(item=>item.id===stableId||item.stableId===stableId&&(!packageId||item.packageId===packageId)||item.externalStableId===`${packageId}/knowledge:${stableId}`)?.id??null}

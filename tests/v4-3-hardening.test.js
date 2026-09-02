@@ -71,5 +71,5 @@ test('target-case example packages parse without warnings',()=>{
 });
 
 test('offline cache includes every V4.3 controller dependency',()=>{
-  const worker=fs.readFileSync(new URL('../apps/web/sw.js',import.meta.url),'utf8');assert.match(worker,/lmn-v4\.3\.0-stable-20260902-7/);for(const asset of['packages/app-metadata.js','packages/ui/localization.js','packages/ui/command-registry.js','packages/navigation/document-id.js','packages/structure-engine/board.js','packages/search-engine/query-engine.js','packages/lkl2/schema.js'])assert.match(worker,new RegExp(asset.replace(/[./]/g,'\\$&')),asset);
+  const worker=fs.readFileSync(new URL('../apps/web/sw.js',import.meta.url),'utf8');assert.match(worker,/lmn-v4\.3\.0-stable-20260902-8/);for(const asset of['packages/app-metadata.js','packages/ui/localization.js','packages/ui/command-registry.js','packages/navigation/document-id.js','packages/structure-engine/board.js','packages/search-engine/query-engine.js','packages/lkl2/schema.js'])assert.match(worker,new RegExp(asset.replace(/[./]/g,'\\$&')),asset);
 });
