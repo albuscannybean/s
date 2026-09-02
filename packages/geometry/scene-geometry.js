@@ -15,6 +15,21 @@ export function estimateRelationLabelWidth(label){
   return clamp(Math.ceil(textWidth)+18,36,260);
 }
 
+export function requiredRelationCorridor(edge,{sidePadding=12,arrowClearance=18,endpointClearance=6}={}){
+  return estimateRelationLabelWidth(edge?.displayLabel??edge?.label??edge?.relationType)+sidePadding*2+arrowClearance+endpointClearance*2;
+}
+
+export function computeRowGaps(row,edges,sizes,{baseGap=30,fallback=DEFAULT_NODE_SIZE}={}){
+  const gaps=Array(Math.max(0,row.length-1)).fill(Math.max(0,Number(baseGap)||0)),positions=new Map(row.map((slot,index)=>[slot.id,index]));
+  const sameRow=(edges??[]).map(edge=>({edge,left:positions.get(edge.sourceSlotId),right:positions.get(edge.targetSlotId)})).filter(item=>item.left!=null&&item.right!=null&&item.left!==item.right).map(item=>({...item,left:Math.min(item.left,item.right),right:Math.max(item.left,item.right)})).sort((a,b)=>(a.right-a.left)-(b.right-b.left));
+  for(const{edge,left,right}of sameRow){
+    const current=gaps.slice(left,right).reduce((sum,value)=>sum+value,0),required=requiredRelationCorridor(edge),deficit=Math.max(0,required-current);
+    if(!deficit)continue;
+    const share=deficit/(right-left);for(let index=left;index<right;index++)gaps[index]+=share;
+  }
+  return gaps;
+}
+
 const hash=value=>{let result=2166136261;for(const char of String(value)){result^=char.charCodeAt(0);result=Math.imul(result,16777619)}return result>>>0};
 const nodeGrammar=(definition,slot,shape='roundedRect')=>{
   const layout=definition.layout?.type??'grid',id=definition.id??'';
@@ -120,7 +135,7 @@ function layeredLayout(definition,{horizontal=false,compact=false,sizes=null,lay
   const groups=new Map();
   for(const slot of definition.slots){const layer=Number(slot.semanticCoordinate?.rank??slot.semanticCoordinate?.layer??0);if(!groups.has(layer))groups.set(layer,[]);groups.get(layer).push(slot)}
   const layers=[...groups.keys()].sort((a,b)=>b-a),maxCount=Math.max(1,...[...groups.values()].map(items=>items.length)),isBoolean=String(definition.id).includes('boolean-algebra'),fallback={width:isBoolean?(maxCount>16?54:68):compact?(maxCount>10?108:132):(maxCount>10?176:188),height:isBoolean?42:compact?(maxCount>10?58:66):(maxCount>10?86:92)},automatic=layoutDesign.autoSpacing!==false,gapX=automatic?(isBoolean?(maxCount>16?10:18):(maxCount>10?18:30)):Number(layoutDesign.nodeGap??30),baseGapY=automatic?(isBoolean?62:compact?74:94):Number(layoutDesign.layerGap??94),maxLabelWidth=Math.max(0,...(definition.edges??[]).map(edge=>estimateRelationLabelWidth(edge.displayLabel??edge.label??edge.relationType))),rows=layers.map(layer=>groups.get(layer).sort((a,b)=>(a.semanticCoordinate?.order??0)-(b.semanticCoordinate?.order??0))),rowHeights=rows.map(items=>Math.max(...items.map(slot=>measured(sizes,slot,fallback).height))),maxNodeWidth=Math.max(...definition.slots.map(slot=>measured(sizes,slot,fallback).width)),minRowHeight=Math.min(...rowHeights),gapY=automatic?horizontal?Math.max(baseGapY,maxNodeWidth-minRowHeight+maxLabelWidth+36):Math.max(baseGapY,maxLabelWidth+30):baseGapY,yAt=row=>112+rowHeights.slice(0,row).reduce((sum,value)=>sum+value+gapY,0);
-  return rows.flatMap((items,row)=>{const widths=items.map(slot=>measured(sizes,slot,fallback).width),total=widths.reduce((sum,value)=>sum+value,0)+(items.length-1)*gapX,start=Math.max(70,(1040-total)/2);let cursor=start;return items.map((slot,index)=>{const size=measured(sizes,slot,fallback),node={...slot,x:cursor,y:yAt(row)+(rowHeights[row]-size.height)/2,...size,...nodeGrammar(definition,slot)};cursor+=size.width+gapX;return node})});
+  return rows.flatMap((items,row)=>{const widths=items.map(slot=>measured(sizes,slot,fallback).width),rowGaps=automatic?computeRowGaps(items,definition.edges,sizes,{baseGap:gapX,fallback}):Array(Math.max(0,items.length-1)).fill(gapX),total=widths.reduce((sum,value)=>sum+value,0)+rowGaps.reduce((sum,value)=>sum+value,0),start=Math.max(70,(1040-total)/2);let cursor=start;return items.map((slot,index)=>{const size=measured(sizes,slot,fallback),node={...slot,x:cursor,y:yAt(row)+(rowHeights[row]-size.height)/2,...size,...nodeGrammar(definition,slot)};cursor+=size.width+(rowGaps[index]??0);return node})});
 }
 
 function forceLayout(definition,sizes){

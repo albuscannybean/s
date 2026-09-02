@@ -14,7 +14,6 @@
 <div id="appShell">
   <header class="topbar">
     <div class="brand"><button id="toggleNavigator" class="icon-button" aria-label="切换知识库">☰</button><b>LMN</b><span>Knowledge System</span><em>V4.3.0</em></div>
-    <div class="history-controls"><button id="backBtn" title="返回 (Alt+←)">‹</button><button id="forwardBtn" title="前进 (Alt+→)">›</button></div>
     <nav id="breadcrumbs" aria-label="递归知识路径"></nav>
     <button id="globalSearch" class="command-trigger"><span>命令行</span><kbd>Ctrl K</kbd></button>
     <button id="insertStructure" class="primary hidden" aria-hidden="true" tabindex="-1">＋ 新建</button>
@@ -35,6 +34,7 @@
 
   <main id="workspace" class="workspace">
     <div class="document-bar">
+      <div class="document-navigation" aria-label="文档导航"><button id="homeBtn" title="主页">⌂</button><button id="backBtn" title="返回 (Alt+←)">‹</button><button id="forwardBtn" title="前进 (Alt+→)">›</button><button id="upBtn" title="返回上层">↑</button></div>
       <div class="document-tab-shell"><div id="documentTabs" class="document-tabs"></div><button id="openDocumentsButton" class="open-documents" title="打开的文档">▾</button></div>
       <div class="canvas-actions"><button id="structureSettingsButton" class="structure-settings hidden">⚙ 结构设置</button><button id="undoBtn" title="撤销 (Ctrl+Z)">↶</button><button id="redoBtn" title="重做 (Ctrl+Shift+Z)">↷</button><button id="fitBtn">适合窗口</button><button id="focusBtn">专注</button></div>
     </div>
@@ -71,6 +71,7 @@
       <div class="settings-page-grid">
         <section><h2>主题与语言</h2><p>控制界面配色、语言和排版。</p><label>主题<select data-global-pref="theme"><option value="warm">松柏绿</option><option value="paper">湖水蓝</option><option value="violet">藤萝紫</option><option value="slate">石墨灰</option><option value="dark">夜幕黑</option></select></label><label>界面语言<select data-global-pref="language"><option value="zh-CN">中文</option><option value="en">English</option></select></label><label>字体<select data-global-pref="font"><option value="system">系统字体</option><option value="humanist">人文无衬线</option><option value="serif">阅读衬线</option></select></label><label>字号<input data-global-pref="fontSize" type="number" min="11" max="22"></label></section>
         <section><h2>画布与交互</h2><p>设置网格、动画、默认预览和鼠标操作。</p><label>画布背景<select data-global-pref="canvas"><option value="warm">暖白</option><option value="paper">纸白</option><option value="white">纯白</option></select></label><label><input data-global-pref="grid" type="checkbox"> 显示画布网格</label><label><input data-global-pref="reduceMotion" type="checkbox"> 减少动画</label><label>默认预览<select data-global-pref="defaultPreview"><option value="off">关闭</option><option value="compact">紧凑</option><option value="detailed">详细</option></select></label><label>默认连线路由<select data-global-pref="defaultRelationRouting"><option value="straight">直线</option><option value="bezier">曲线</option><option value="orthogonal">折线</option></select></label><label>左键拖动画布<select data-global-pref="pointerMode"><option value="pan">平移</option><option value="orbit">环绕</option></select></label><label><input data-global-pref="highClarity" type="checkbox"> 高清晰度显示</label></section>
+        <section><h2>主页</h2><p>主页是永久入口，可以显示欢迎页，也可以恢复到一个指定的知识位置。</p><div class="settings-inline-actions"><button id="setCurrentHome">将当前文档设为主页</button><button id="resetHome">恢复默认欢迎页</button></div><small id="homeLocationStatus">当前使用默认欢迎页</small></section>
       </div>
       <footer class="settings-action-bar"><span id="globalSettingsStatus">更改会立即保存在本机</span><button id="closeGlobalSettings" class="primary">完成</button></footer>
     </section>

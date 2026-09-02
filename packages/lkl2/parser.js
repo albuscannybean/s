@@ -1,6 +1,6 @@
 import {lexLkl2,Lkl2SyntaxError} from './lexer.js';
 
-const declarationKinds=new Set(['package','knowledge','content','structure-template','structure-instance','instance','container','relation','variable','variable-scheme','view','board','placement','entry','source','slot','edge','orientation']);
+const declarationKinds=new Set(['package','knowledge','content','structure-template','structure-instance','instance','container','relation','variable','variable-scheme','view','board','placement','entry','source','slot','edge','orientation','geometry']);
 
 export function parseLkl2(source){
   const tokens=lexLkl2(source);let cursor=0;
