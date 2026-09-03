@@ -75,9 +75,49 @@ export function relationLabelPlacement(edge,scene,label,occupied=[]){
   return scene?.layout==='manual'?chooseRelationLabelPlacement(edge,scene.nodes??[],label,occupied):semanticRelationLabelPlacement(edge,label);
 }
 
-function drawBackground(layer,scene,options={}){layer.replaceChildren();const selected=new Set(options.selectedIds??[]);for(const item of scene.background??[]){const element=svg(item.type);element.classList.add(...String(item.className??'scene-background-item').split(' ').filter(Boolean));for(const[name,value]of Object.entries(item)){if(['type','className','text','plotId','motionId','title'].includes(name)||value==null)continue;element.setAttribute(name,String(value))}if(item.text!=null)element.textContent=item.text;if(item.title){const title=svg('title');title.textContent=item.title;element.append(title)}if(item.motionId){const ref={type:'motion',id:item.motionId};element.dataset.motionId=item.motionId;element.dataset.geometryRefType=ref.type;element.dataset.geometryRefId=ref.id;element.classList.toggle('selected',selected.has(`motion:${item.motionId}`));element.setAttribute('role','button');element.setAttribute('tabindex','0');element.addEventListener('pointerdown',event=>options.onGeometryPointerDown?.(event,ref));element.addEventListener('click',event=>{event.stopPropagation();if(!options.shouldSuppressGeometryClick?.())options.onSelect?.({kind:'motion',id:item.motionId,event})})}if(item.plotId){element.dataset.plotId=item.plotId;element.classList.toggle('selected',selected.has(`plot:${item.plotId}`));element.setAttribute('role','button');element.setAttribute('tabindex','0');element.addEventListener('click',event=>{event.stopPropagation();options.onSelect?.({kind:'plot',id:item.plotId,event})});element.addEventListener('contextmenu',event=>{event.preventDefault();event.stopPropagation();options.onContext?.({kind:'plot',id:item.plotId,event})});element.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();options.onSelect?.({kind:'plot',id:item.plotId,event})}})}layer.append(element)}}
+function bindGeometryTarget(element,target,options,{dragRef=null}={}){element.setAttribute('role','button');element.setAttribute('tabindex','0');element.addEventListener('pointerdown',event=>{if(event.shiftKey){event.stopPropagation();return}if(dragRef)options.onGeometryPointerDown?.(event,dragRef)});element.addEventListener('click',event=>{event.stopPropagation();if(!options.shouldSuppressGeometryClick?.())options.onSelect?.({...target,event})});element.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();options.onSelect?.({...target,event})}})}
 
-function drawGeometry(layer,scene,options={}){if(!layer)return;layer.replaceChildren();const selected=new Set(options.selectedIds??[]);for(const item of scene.geometry??[]){const element=svg(item.type);element.classList.add(...String(item.className??'geometry-primitive').split(' ').filter(Boolean));for(const[name,value]of Object.entries(item)){if(['type','className','primitiveId','kind','value'].includes(name)||value==null)continue;element.setAttribute(name,String(value))}element.dataset.primitiveId=item.primitiveId;element.classList.toggle('selected',selected.has(`geometry:${item.primitiveId}`));element.setAttribute('role','button');element.setAttribute('tabindex','0');element.setAttribute('aria-label',`${item.kind} · ${item.value??''}`);element.addEventListener('click',event=>{event.stopPropagation();options.onSelect?.({kind:'geometry',id:item.primitiveId,event})});layer.append(element)}}
+function drawBackground(layer,scene,options={}){layer.replaceChildren();const selected=new Set(options.selectedIds??[]);for(const item of scene.background??[]){const element=svg(item.type);element.classList.add(...String(item.className??'scene-background-item').split(' ').filter(Boolean));for(const[name,value]of Object.entries(item)){if(['type','className','text','plotId','motionId','title'].includes(name)||value==null)continue;element.setAttribute(name,String(value))}if(item.text!=null)element.textContent=item.text;if(item.title){const title=svg('title');title.textContent=item.title;element.append(title)}if(item.motionId){const ref={type:'motion',id:item.motionId};element.dataset.motionId=item.motionId;element.dataset.geometryRefType=ref.type;element.dataset.geometryRefId=ref.id;element.classList.toggle('selected',selected.has(`motion:${item.motionId}`));bindGeometryTarget(element,{kind:'motion',id:item.motionId},options,{dragRef:ref})}if(item.plotId){element.dataset.plotId=item.plotId;element.classList.toggle('selected',selected.has(`plot:${item.plotId}`));bindGeometryTarget(element,{kind:'plot',id:item.plotId},options);element.addEventListener('contextmenu',event=>{event.preventDefault();event.stopPropagation();options.onContext?.({kind:'plot',id:item.plotId,event})})}layer.append(element)}}
+
+function drawCoordinateInteractions(layer,scene,options={}){
+  for(const item of scene.background??[]){
+    if(!item.plotId||item.type!=='path')continue;
+    const hit=svg('path');
+    hit.classList.add('coordinate-plot-hit');
+    hit.setAttribute('d',item.d);
+    hit.setAttribute('vector-effect','non-scaling-stroke');
+    hit.dataset.plotId=item.plotId;
+    bindGeometryTarget(hit,{kind:'plot',id:item.plotId},options);
+    hit.addEventListener('contextmenu',event=>{event.preventDefault();event.stopPropagation();options.onContext?.({kind:'plot',id:item.plotId,event})});
+    layer.append(hit);
+  }
+  for(const item of scene.geometry??[]){
+    if(item.kind!=='line')continue;
+    const hit=svg('line');
+    for(const name of['x1','y1','x2','y2'])hit.setAttribute(name,item[name]);
+    hit.classList.add('geometry-line-hit');
+    hit.setAttribute('vector-effect','non-scaling-stroke');
+    hit.dataset.primitiveId=item.primitiveId;
+    bindGeometryTarget(hit,{kind:'geometry',id:item.primitiveId},options);
+    layer.append(hit);
+  }
+  const scale=Math.max(.1,Number(options.interactionScale??1));
+  for(const item of scene.background??[]){
+    if(!item.motionId)continue;
+    const halo=svg('circle'),ref={type:'motion',id:item.motionId};
+    halo.classList.add('coordinate-motion-hit');
+    halo.setAttribute('cx',item.cx);
+    halo.setAttribute('cy',item.cy);
+    halo.setAttribute('r',String(13/scale));
+    halo.dataset.motionId=item.motionId;
+    halo.dataset.geometryRefType='motion';
+    halo.dataset.geometryRefId=item.motionId;
+    bindGeometryTarget(halo,{kind:'motion',id:item.motionId},options,{dragRef:ref});
+    layer.append(halo);
+  }
+}
+
+function drawGeometry(layer,scene,options={}){if(!layer)return;layer.replaceChildren();const selected=new Set(options.selectedIds??[]);for(const item of scene.geometry??[]){const element=svg(item.type);element.classList.add(...String(item.className??'geometry-primitive').split(' ').filter(Boolean));for(const[name,value]of Object.entries(item)){if(['type','className','primitiveId','kind','value'].includes(name)||value==null)continue;element.setAttribute(name,String(value))}element.dataset.primitiveId=item.primitiveId;element.classList.toggle('selected',selected.has(`geometry:${item.primitiveId}`));element.setAttribute('aria-label',`${item.kind} · ${item.value??''}`);bindGeometryTarget(element,{kind:'geometry',id:item.primitiveId},options);layer.append(element)}}
 
 function drawColumnAxes(layer,scene){if(!['columns','lmn-semantic'].includes(scene.layout))return;const groups=new Map();for(const node of scene.nodes){if(!groups.has(node.column))groups.set(node.column,[]);groups.get(node.column).push(node)}for(const nodes of groups.values()){if(nodes.length<2)continue;nodes.sort((a,b)=>a.y-b.y);const path=svg('path'),first=nodes[0],last=nodes.at(-1),x=first.x+first.width/2;path.setAttribute('d',`M ${x} ${first.y+first.height} L ${x} ${last.y}`);path.classList.add('column-axis');layer.append(path)}}
 
@@ -107,7 +147,7 @@ function createNode(node,context){
 function drawNodes(layer,scene,context){layer.replaceChildren();for(const node of scene.nodes)layer.append(createNode(node,{...context,scene,nodeLayer:layer}))}
 function drawTokens(layer,scene,options){layer.replaceChildren();for(const token of scene.tokens){const text=token.overflowCount?`${token.label}  +${token.overflowCount}`:token.label,element=html('button','scene-token');element.append(html('span','scene-token-name',text));element.dataset.variableId=token.id;element.dataset.residue=String(token.index);element.dataset.stackSize=String(token.stackSize??1);if(token.overflowCount)element.dataset.overflow=`+${token.overflowCount}`;element.style.transform=`translate(${Math.round(token.x)}px, ${Math.round(token.y)}px)`;element.style.width=`${token.width}px`;element.style.height=`${token.height}px`;element.style.setProperty('--token-color',token.color);element.title=`${token.label} · 位置 ${token.index}`;element.setAttribute('aria-label',`${token.label} · 位置 ${token.index} · 单击打开变量详情`);element.onpointerdown=event=>event.stopPropagation();element.onpointerup=event=>event.stopPropagation();element.onclick=event=>{event.preventDefault();event.stopPropagation();options.onOpenVariable?.(token.id)};element.ondblclick=event=>{event.preventDefault();event.stopPropagation()};element.oncontextmenu=event=>{event.preventDefault();event.stopPropagation();options.onVariableContext?.(token.id,event)};element.onmouseenter=()=>options.onVariableHover?.(token.id,token.index,true);element.onmouseleave=()=>options.onVariableHover?.(token.id,token.index,false);element.onfocus=()=>options.onVariableHover?.(token.id,token.index,true);element.onblur=()=>options.onVariableHover?.(token.id,token.index,false);layer.append(element)}}
 
-export function renderSceneGeometry(scene,{sceneRoot,backgroundLayer,geometryLayer,edgeLayer,nodeLayer,tokenLayer,...options}){const width=Math.ceil(scene.bounds.x+scene.bounds.width),height=Math.ceil(scene.bounds.y+scene.bounds.height);sceneRoot.style.width=`${width}px`;sceneRoot.style.height=`${height}px`;for(const layer of[backgroundLayer,geometryLayer,edgeLayer].filter(Boolean)){layer.setAttribute('width',String(width));layer.setAttribute('height',String(height));layer.setAttribute('viewBox',`0 0 ${width} ${height}`)}if(backgroundLayer)drawBackground(backgroundLayer,scene,options);drawGeometry(geometryLayer,scene,options);drawEdges(edgeLayer,scene,options);drawNodes(nodeLayer,scene,{...options,sceneRoot,edgeLayer});drawTokens(tokenLayer,scene,options);return scene}
+export function renderSceneGeometry(scene,{sceneRoot,backgroundLayer,geometryLayer,edgeLayer,nodeLayer,tokenLayer,...options}){const width=Math.ceil(scene.bounds.x+scene.bounds.width),height=Math.ceil(scene.bounds.y+scene.bounds.height);sceneRoot.style.width=`${width}px`;sceneRoot.style.height=`${height}px`;for(const layer of[backgroundLayer,geometryLayer,edgeLayer].filter(Boolean)){layer.setAttribute('width',String(width));layer.setAttribute('height',String(height));layer.setAttribute('viewBox',`0 0 ${width} ${height}`)}if(backgroundLayer)drawBackground(backgroundLayer,scene,options);drawGeometry(geometryLayer,scene,options);drawEdges(edgeLayer,scene,options);drawCoordinateInteractions(edgeLayer,scene,options);drawNodes(nodeLayer,scene,{...options,sceneRoot,edgeLayer});drawTokens(tokenLayer,scene,options);return scene}
 
 export function renderStructure(options){const {instance,template}=options;if(!instance||!template)return null;const definition=materializeInstanceDefinition(template,instance),scene=buildSceneGeometry(definition,instance,{viewport:options.viewport});renderSceneGeometry(scene,{...options,definition});return{definition,scene}}
 

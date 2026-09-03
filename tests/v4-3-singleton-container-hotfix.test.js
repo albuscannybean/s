@@ -67,6 +67,6 @@ test('special mathematical presentation remains semantic and deployment cache ad
   const matrix=getBuiltinTemplate('builtin:matrix-grid'),instance=createStructureInstance(matrix,'root'),definition=materializeInstanceDefinition(matrix,instance),slot=definition.slots[0],entry=buildPositionIndex(instance,definition).bySlotId[slot.id];
   assert.equal(nodeContainerPresentation(matrix,{slot,entry,state:{},instance,definition}),null);
   const [serviceWorker,metadata]=await Promise.all([readFile(new URL('../apps/web/sw.js',import.meta.url),'utf8'),readFile(new URL('../packages/app-metadata.js',import.meta.url),'utf8')]);
-  assert.match(serviceWorker,/lmn-v4\.3\.0-stable-20260903-9/);
+  assert.match(serviceWorker,/lmn-v4\.3\.0-stable-20260903-10/);
   assert.match(metadata,/V4\.3\.0/);
 });

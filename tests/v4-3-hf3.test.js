@@ -64,6 +64,6 @@ test('coordinate renderer exposes direct geometry hit targets without semantic c
   const renderer=await fs.readFile(new URL('../packages/ui/structure-renderer.js',import.meta.url),'utf8'),controller=await fs.readFile(new URL('../packages/ui/workspace-controller.js',import.meta.url),'utf8');assert.match(renderer,/dataset\.geometryRefType/);assert.match(renderer,/onGeometryPointerDown/);assert.match(controller,/beginGeometryConnectionGesture/);assert.match(controller,/geometry:line-drag/);assert.match(controller,/createGeometryPrimitive\('line'/);
 });
 
-test('HF3 keeps the public version and advances only hotfix/cache metadata',async()=>{
-  const metadata=await fs.readFile(new URL('../packages/app-metadata.js',import.meta.url),'utf8'),sw=await fs.readFile(new URL('../apps/web/sw.js',import.meta.url),'utf8');assert.match(metadata,/APP_VERSION='4\.3\.0'/);assert.match(metadata,/APP_HOTFIX='V4\.3\.0-HF3'/);assert.match(sw,/lmn-v4\.3\.0-stable-20260903-9/);assert.match(sw,/navigation\/tab-session\.js/);
+test('HF4 keeps the public version and advances only hotfix/cache metadata',async()=>{
+  const metadata=await fs.readFile(new URL('../packages/app-metadata.js',import.meta.url),'utf8'),sw=await fs.readFile(new URL('../apps/web/sw.js',import.meta.url),'utf8');assert.match(metadata,/APP_VERSION='4\.3\.0'/);assert.match(metadata,/APP_HOTFIX='V4\.3\.0-HF4'/);assert.match(sw,/lmn-v4\.3\.0-stable-20260903-10/);assert.match(sw,/navigation\/tab-session\.js/);
 });

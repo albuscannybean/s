@@ -20,6 +20,12 @@ export function tetrahedronVolume(points=[]){
   return Math.abs(dot(ab,cross(ac,ad)))/6;
 }
 
+export function meshSurfaceArea(triangles=[]){return triangles.reduce((sum,triangle)=>sum+triangleArea3d(triangle),0)}
+
+export function meshVolume(triangles=[]){
+  let signed=0;for(const triangle of triangles){const[a,b,c]=triangle.map(point);signed+=dot(a,cross(b,c))/6}return Math.abs(signed);
+}
+
 export function measureGeometry(kind,points=[],dimension='2d'){
   if(kind==='line'&&points.length>=2){const a=point(points[0]),b=point(points[1]);return Math.hypot(b.x-a.x,b.y-a.y,dimension==='3d'?b.z-a.z:0)}
   if(kind==='area')return dimension==='3d'?triangleArea3d(points):polygonArea2d(points);
