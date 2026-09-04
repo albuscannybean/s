@@ -1,8 +1,17 @@
-# LMN Knowledge System V4.3.1
+# LMN Knowledge System V4.3.2
 
-LMN V4.3.1 是一个 local-first 的结构化知识包运行环境。Knowledge 保持稳定语义身份；Cognitive Runtime 只表达当前任务与激活状态；Derived Projection 只表达当前观察，除非用户明确保存，否则不会写入知识库。所有 Structure Position 都是可承载知识、结构、正文、变量与公式的 Universal Semantic Container；LKL 2.1 继续负责长期可交换知识。
+LMN V4.3.2 是一个 local-first 的结构化知识包运行环境。Knowledge 保持稳定语义身份；Cognitive Compilation Runtime 根据当前 Task 与 Domain 编译临时知识组织，并保留每次推导的理由与缺口；Derived Projection 只表达当前观察，除非用户明确保存，否则不会写入知识库。所有 Structure Position 都是可承载知识、结构、正文、变量与公式的 Universal Semantic Container；LKL 2.1 继续负责长期可交换知识。
 
-V4.3.1 在既有 Knowledge Package、事务化导入、语义 View 与删除撤回基础上，建立第一阶段认知运行闭环：
+V4.3.2 在 V4.3.1 认知运行闭环上加入确定性的 Cognitive Compilation Runtime：
+
+- Task / Domain 约束共同驱动候选知识编译，不改变 Knowledge 本体。
+- Role Inference 为候选知识推断当前任务角色；Topology Induction 根据已有语义关系形成可解释拓扑。
+- Projection Ranking 对候选投影进行确定性排序，并随结果返回可检查的 Justification。
+- Gap / Completeness 分析明确指出当前投影的覆盖程度与缺失条件。
+- 自动组织把角色、拓扑、排名和完整性结果收敛为可继续操作的临时投影；只有用户明确保存时才持久化。
+- V4.3 工作区数据与 LKL 2.1 保持兼容，不引入 schema 升级。
+
+V4.3.1 已建立并继续保留的第一阶段认知运行闭环：
 
 - Current Task 记录目标、任务类型、领域约束和关注点，不修改 Knowledge 本体。
 - Unified Semantic Retrieval 统一检索知识、正文、关系、标签、别名、来源、语义容器与结构角色。
@@ -115,7 +124,7 @@ powershell -ExecutionPolicy Bypass -File apps/desktop/build.ps1
 
 产物位于：
 
-- `outputs/windows/LMN_V4_3_1_x64_Setup.exe`
+- `outputs/windows/LMN_V4_3_2_x64_Setup.exe`
 - `outputs/windows/portable/LMN.exe`
 
 ## 快捷键

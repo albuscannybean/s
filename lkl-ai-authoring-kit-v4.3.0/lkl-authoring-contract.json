@@ -1,11 +1,11 @@
 {
   "contract": "LMN LKL AI Authoring Contract",
   "schemaVersion": "2.1",
-  "kitVersion": "4.3.1",
+  "kitVersion": "4.3.2",
   "target": {
     "application": "LMN Knowledge System",
-    "release": "V4.3.1",
-    "version": "4.3.1",
+    "release": "V4.3.2",
+    "version": "4.3.2",
     "lkl1": "1",
     "lkl2": "2.1"
   },

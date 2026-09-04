@@ -74,7 +74,7 @@ test('instance LKL preserves global design, plots and motion points',()=>{
 
 test('V4.2.4 UI exposes settings, design, zoomable preview, timeline wiring and knowledge deletion',()=>{
   const controller=fs.readFileSync(new URL('../packages/ui/workspace-controller.js',import.meta.url),'utf8'),html=fs.readFileSync(new URL('../apps/web/index.html',import.meta.url),'utf8');
-  assert.match(html,/V4\.3\.[01](?: RC)?/);assert.match(html,/id="sourcePreviewZoom"/);assert.match(html,/知识库/);
+  assert.match(html,/V4\.3\.[012](?: RC)?/);assert.match(html,/id="sourcePreviewZoom"/);assert.match(html,/知识库/);
   assert.match(controller,/\['settings','设置'\]/);assert.match(controller,/\['design','设计'\]/);
   assert.match(controller,/addTimelineNode/);assert.match(controller,/label:'演化'/);assert.match(controller,/visual:\{labelPosition:'center'\}/);
   assert.match(controller,/删除知识…/);assert.match(controller,/undoDeleteAction/);

@@ -1,5 +1,16 @@
 # Changelog
 
+## V4.3.2 — 2026-09-05
+
+### Cognitive Compilation Runtime
+
+- 以当前 Task 与 Domain 约束驱动确定性的知识编译流程，不修改 Knowledge 本体。
+- 新增 Role Inference 与 Topology Induction，把候选知识的任务角色和已有语义关系编译为可解释的投影拓扑。
+- 新增 Projection Ranking 与 Justification，使候选投影具有稳定排序，并能说明选择、关系与组织依据。
+- 新增 Gap / Completeness 分析，明确展示当前组织的覆盖程度、缺失角色和未满足条件。
+- 将角色推断、拓扑归纳、投影排序与完整性结果收敛为自动组织流程；临时结果仍须由用户明确保存才会持久化。
+- 保持 V4.3 工作区数据、LKL 2.1、既有 Cognitive Runtime、Structure Engine 与导入导出往返兼容。
+
 ## V4.3.1 — 2026-09-04
 
 ### Cognitive Runtime Foundation

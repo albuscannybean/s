@@ -65,5 +65,5 @@ test('coordinate renderer exposes direct geometry hit targets without semantic c
 });
 
 test('HF4 keeps the public version and advances only hotfix/cache metadata',async()=>{
-  const metadata=await fs.readFile(new URL('../packages/app-metadata.js',import.meta.url),'utf8'),sw=await fs.readFile(new URL('../apps/web/sw.js',import.meta.url),'utf8');assert.match(metadata,/APP_VERSION='4\.3\.1'/);assert.match(metadata,/APP_HOTFIX='V4\.3\.1'/);assert.match(sw,/lmn-v4\.3\.1-stable-20260904-1/);assert.match(sw,/navigation\/tab-session\.js/);
+  const metadata=await fs.readFile(new URL('../packages/app-metadata.js',import.meta.url),'utf8'),sw=await fs.readFile(new URL('../apps/web/sw.js',import.meta.url),'utf8');assert.match(metadata,/APP_VERSION='4\.3\.2'/);assert.match(metadata,/APP_HOTFIX='V4\.3\.2'/);assert.match(sw,/lmn-v4\.3\.2-stable-20260905-1/);assert.match(sw,/navigation\/tab-session\.js/);
 });

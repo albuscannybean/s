@@ -72,7 +72,7 @@ const builtinCatalog={
 const contract={
   contract:'LMN LKL AI Authoring Contract',
   schemaVersion:LKL_SCHEMA.version,
-  kitVersion:'4.3.1',
+  kitVersion:'4.3.2',
   target:{application:'LMN Knowledge System',release:APP_RELEASE,version:APP_VERSION,lkl1:'1',lkl2:LKL_SCHEMA_VERSION},
   generatedFrom:{schema:'packages/lkl2/schema.js',parser:'packages/lkl2/parser.js',ast:'packages/lkl2/ast.js',validator:'packages/lkl2/validator.js',importer:'packages/lkl2/importer.js',serializer:'packages/lkl2/serializer.js',exporter:'packages/lkl2/exporter.js',structureSource:'packages/lkl2/structure-source.js',runtimeCatalog:'packages/structure-engine/templates.js'},
   authorityOrder:['lkl-authoring-contract.json','LKL-AI-AUTHORING.md','user request and supplied facts'],

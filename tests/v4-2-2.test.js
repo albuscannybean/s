@@ -66,7 +66,7 @@ test('binding metadata distinguishes a structural construction from a jump refer
 
 test('V4.2.2+ UI converges document editing, creation entry and inline source search',()=>{
   const html=fs.readFileSync(new URL('../apps/web/index.html',import.meta.url),'utf8'),controller=fs.readFileSync(new URL('../packages/ui/workspace-controller.js',import.meta.url),'utf8');
-  assert.match(html,/V4\.3\.[01](?: RC)?/);
+  assert.match(html,/V4\.3\.[012](?: RC)?/);
   assert.match(html,/id="notesEditorHost"/);
   assert.doesNotMatch(html,/id="notesEditor"/);
   assert.match(html,/id="newTabPage"/);

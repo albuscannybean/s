@@ -1,7 +1,7 @@
-export const APP_VERSION='4.3.1';
-export const APP_RELEASE='V4.3.1';
-export const APP_HOTFIX='V4.3.1';
-export const BUNDLE_FORMAT_VERSION='4.3.1';
+export const APP_VERSION='4.3.2';
+export const APP_RELEASE='V4.3.2';
+export const APP_HOTFIX='V4.3.2';
+export const BUNDLE_FORMAT_VERSION='4.3.2';
 export const LKL_SCHEMA_VERSION='2.1';
 export const DEFAULT_RELATION_ROUTING='straight';
 

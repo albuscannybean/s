@@ -14,6 +14,7 @@ export function createCommandRegistry(app){
     command('structure.insert','结构','插入结构','Insert structure',['library','add'],()=>app.openLibrary(),hasKnowledge,'请先打开知识'),
     command('structure.search','结构','结构查询','Structure query',['query','pattern'],()=>app.openSearchWorkbench()),
     command('cognition.task','认知运行时','当前任务','Current task',['context','goal','任务上下文'],()=>app.openSearchWorkbench()),
+    command('cognition.auto','认知运行时','自动组织','Auto organize',['compile','role','topology','projection','认知编译'],()=>{app.openSearchWorkbench();requestAnimationFrame(()=>app.runCognitiveAuto())}),
     command('cognition.activate','认知运行时','激活相关知识','Activate knowledge',['semantic','retrieval','语义检索'],()=>{app.openSearchWorkbench();requestAnimationFrame(()=>app.runCognitiveActivation())}),
     command('cognition.projection','认知运行时','生成派生投影','Create derived projection',['derived','runtime','structure'],()=>{app.openSearchWorkbench();requestAnimationFrame(()=>app.openDerivedProjection())}),
     command('cognition.save','认知运行时','保存当前派生投影','Save projection',['persist'],()=>app.saveDerivedProjection(),()=>!!app.currentDerivedProjection,'当前没有临时派生投影'),

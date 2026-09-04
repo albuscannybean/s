@@ -63,10 +63,10 @@ test('Workspace openSlot is the shared Canvas and Navigator resolver with an exp
   assert.match(renderer,/event\.key==='Enter'\|\|event\.key===' '[^\n]+onOpenContainer/);
 });
 
-test('special mathematical presentation remains semantic and deployment cache advances with V4.3.1',async()=>{
+test('special mathematical presentation remains semantic and deployment cache advances with V4.3.2',async()=>{
   const matrix=getBuiltinTemplate('builtin:matrix-grid'),instance=createStructureInstance(matrix,'root'),definition=materializeInstanceDefinition(matrix,instance),slot=definition.slots[0],entry=buildPositionIndex(instance,definition).bySlotId[slot.id];
   assert.equal(nodeContainerPresentation(matrix,{slot,entry,state:{},instance,definition}),null);
   const [serviceWorker,metadata]=await Promise.all([readFile(new URL('../apps/web/sw.js',import.meta.url),'utf8'),readFile(new URL('../packages/app-metadata.js',import.meta.url),'utf8')]);
-  assert.match(serviceWorker,/lmn-v4\.3\.1-stable-20260904-1/);
-  assert.match(metadata,/V4\.3\.1/);
+  assert.match(serviceWorker,/lmn-v4\.3\.2-stable-20260905-1/);
+  assert.match(metadata,/V4\.3\.2/);
 });

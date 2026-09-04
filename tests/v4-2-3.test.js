@@ -54,7 +54,7 @@ test('built-in template visual defaults survive migration while current topology
 
 test('V4.2.3+ source contains synchronized find scrolling, one settings tab, and three navigation modes',()=>{
   const controller=fs.readFileSync(new URL('../packages/ui/workspace-controller.js',import.meta.url),'utf8'),html=fs.readFileSync(new URL('../apps/web/index.html',import.meta.url),'utf8');
-  assert.match(html,/V4\.3\.[01](?: RC)?/);
+  assert.match(html,/V4\.3\.[012](?: RC)?/);
   assert.equal((html.match(/data-navigator=/g)??[]).length,3);
   assert.doesNotMatch(html,/data-navigator="knowledge"/);
   assert.match(controller,/scrollSourceSelectionIntoView/);
