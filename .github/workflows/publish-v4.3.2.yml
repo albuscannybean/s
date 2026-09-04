@@ -1,0 +1,42 @@
+name: Publish V4.3.2 Release
+
+on:
+  push:
+    branches:
+      - release/v4.3.2
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download verified Windows artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh run download 33897251743 --repo "$GITHUB_REPOSITORY" --name LMN-V4-Windows-x64 --dir release-artifacts
+
+      - name: Package Windows artifact
+        run: |
+          cd release-artifacts
+          zip -r ../LMN-Knowledge-System-V4.3.2-Windows-x64.zip .
+
+      - name: Publish tag and release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view v4.3.2 --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "V4.3.2 release already exists."
+            exit 0
+          fi
+          SETUP="$(find release-artifacts -name 'LMN_V4_3_2_x64_Setup.exe' -print -quit)"
+          test -n "$SETUP"
+          gh release create v4.3.2 \
+            "$SETUP#LMN V4.3.2 Windows x64 Setup" \
+            "LMN-Knowledge-System-V4.3.2-Windows-x64.zip#LMN V4.3.2 Windows x64 package" \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "0794f3fed61b250b29e70b66ca0d1123efedd9de" \
+            --title "LMN Knowledge System V4.3.2 — Cognitive Compilation Runtime" \
+            --notes "Task Schema and Domain Profile now drive semantic retrieval, role inference, topology induction, projection ranking, gap detection, and the visible Auto Organize workflow. Derived projections require real semantic relations; insufficient evidence returns no-structure. LKL 2.1 and V4.3 data remain compatible."
