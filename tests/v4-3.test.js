@@ -78,7 +78,7 @@ test('LKL persists camera, visibility, plots and global relation direction styli
 
 test('V4.3 UI exposes tracked libraries, three search modes, command-only top bar and unified operations',()=>{
   const controller=fs.readFileSync(new URL('../packages/ui/workspace-controller.js',import.meta.url),'utf8'),html=fs.readFileSync(new URL('../apps/web/index.html',import.meta.url),'utf8'),css=fs.readFileSync(new URL('../apps/web/styles.css',import.meta.url),'utf8');
-  assert.match(html,/V4\.3\.0(?: RC)?/);assert.match(html,/id="searchWorkbench"/);assert.match(html,/>命令行</);assert.match(html,/id="insertStructure" class="primary hidden"/);
+  assert.match(html,/V4\.3\.[01](?: RC)?/);assert.match(html,/id="searchWorkbench"/);assert.match(html,/>命令行</);assert.match(html,/id="insertStructure" class="primary hidden"/);
   for(const label of['结构检索','全文检索','LKL 检索','＋ 新建结构','操作','代数','几何'])assert.match(controller,new RegExp(label));
   assert.match(controller,/nav-other-knowledge/);assert.match(controller,/renderNavigatorSlot/);assert.match(controller,/objectVisibility/);assert.match(controller,/camera\.projection/);
   assert.match(css,/\.document-tab\.add[^}]*border-radius:50%/);assert.match(css,/\.navigator-modes[^}]*repeat\(3,1fr\)/);assert.match(css,/\.coordinate-variable-manager/);assert.match(css,/\.search-workbench/);

@@ -14,7 +14,7 @@ internal sealed class LmnWindow : Form
 
     public LmnWindow()
     {
-            Text = "LMN Knowledge System V4.3.0";
+            Text = "LMN Knowledge System V4.3.1";
         StartPosition = FormStartPosition.CenterScreen;
         Width = 1440;
         Height = 900;
@@ -25,7 +25,7 @@ internal sealed class LmnWindow : Form
             Dock = DockStyle.Fill,
             TextAlign = ContentAlignment.MiddleCenter,
             Font = new Font("Segoe UI", 12F),
-                Text = "LMN V4.3.0 is opening its local-first workspace…"
+                Text = "LMN V4.3.1 is opening its local-first workspace…"
         };
         webView = new WebView2 { Dock = DockStyle.Fill, Visible = false };
         Controls.Add(webView);
@@ -60,14 +60,14 @@ internal sealed class LmnWindow : Form
         }
         catch (WebView2RuntimeNotFoundException)
         {
-                loading.Text = "Microsoft Edge WebView2 Runtime is required.\nInstall it, then reopen LMN V4.3.0.";
+                loading.Text = "Microsoft Edge WebView2 Runtime is required.\nInstall it, then reopen LMN V4.3.1.";
             MessageBox.Show(this,
-                    "LMN V4.3.0 requires Microsoft Edge WebView2 Runtime. It is normally included with current Windows installations.",
+                    "LMN V4.3.1 requires Microsoft Edge WebView2 Runtime. It is normally included with current Windows installations.",
                 "WebView2 Runtime required", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
         catch (Exception error)
         {
-                loading.Text = "LMN V4.3.0 could not start.\n" + error.Message;
+                loading.Text = "LMN V4.3.1 could not start.\n" + error.Message;
             MessageBox.Show(this, error.ToString(), "LMN startup error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }

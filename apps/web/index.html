@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#f8f7f2">
-  <title>LMN Knowledge System V4.3.0</title>
+  <title>LMN Knowledge System V4.3.1</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232f7658'/%3E%3Ctext x='32' y='42' text-anchor='middle' font-size='30' fill='white' font-family='Georgia'%3EL%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="vendor/katex/katex.min.css">
   <link rel="stylesheet" href="styles.css">
@@ -13,7 +13,7 @@
 <body>
 <div id="appShell">
   <header class="topbar">
-    <div class="brand"><button id="toggleNavigator" class="icon-button" aria-label="切换知识库">☰</button><b>LMN</b><span>Knowledge System</span><em>V4.3.0</em></div>
+    <div class="brand"><button id="toggleNavigator" class="icon-button" aria-label="切换知识库">☰</button><b>LMN</b><span>Knowledge System</span><em>V4.3.1</em></div>
     <nav id="breadcrumbs" aria-label="递归知识路径"></nav>
     <button id="globalSearch" class="command-trigger"><span>命令行</span><kbd>Ctrl K</kbd></button>
     <button id="insertStructure" class="primary hidden" aria-hidden="true" tabindex="-1">＋ 新建</button>
@@ -60,7 +60,13 @@
       </div>
     </section>
     <section id="searchWorkbench" class="search-workbench hidden" aria-label="结构检索工作台">
-      <header><div><span class="eyebrow">STRUCTURE SEARCH WORKBENCH</span><h1>搭建要查找的结构</h1><p>从左侧结构库拖入或添加结构，再补充文字与知识标签；结果会匹配结构类型和语义内容。</p></div><button id="clearStructureQuery">清空检索台</button></header>
+      <header><div><span class="eyebrow">SEARCH & COGNITIVE RUNTIME</span><h1>搜索与认知工作台</h1><p>任务上下文驱动统一语义检索与有限知识激活；结构查询继续使用原有可视化搭建方式。</p></div><button id="clearStructureQuery">清空检索台</button></header>
+      <section class="cognitive-workbench" aria-label="认知运行时">
+        <header><div><span class="eyebrow">CURRENT TASK</span><h2>当前任务</h2></div><small>上下文独立保存在本机，不修改 Knowledge 本体</small></header>
+        <div class="cognitive-fields"><label>目标<input id="cognitiveGoal" placeholder="例如：理解并解释拉格朗日定理"></label><label>任务类型<select id="cognitiveTaskType"><option value="concept-understanding">概念理解</option><option value="problem-solving">问题求解</option><option value="proof-learning">证明学习</option><option value="calculation">计算</option><option value="comparison">比较</option><option value="explanation">解释</option><option value="interpretation">阐释</option></select></label><label>领域约束<input id="cognitiveDomain" placeholder="数学，群论"></label><label>关注点<input id="cognitiveFocus" placeholder="定义，证明"></label><label class="cognitive-cue">语义线索<input id="cognitiveCue" placeholder="可搜索标题、正文、关系、标签、来源和结构角色"></label></div>
+        <div class="cognitive-actions"><button id="runCognitiveActivation" class="primary">激活相关知识</button><select id="cognitiveProjectionType" aria-label="派生投影类型"><option value="network">关系网络</option><option value="dependency">依赖图</option><option value="proof">证明树</option><option value="hierarchy">层级图</option><option value="comparison">比较图</option><option value="decision">决策树</option><option value="lmn">LMN</option></select><button id="createDerivedProjection">生成临时投影</button></div>
+        <div id="cognitiveActivationResults" class="cognitive-results"></div>
+      </section>
       <div class="search-workbench-toolbar"><select id="structureMatchMode" aria-label="匹配模式"><option value="contains">包含结构</option><option value="exact">完全匹配</option><option value="subgraph">子图匹配</option></select><input id="searchWorkbenchQuery" placeholder="节点、关系、变量或正文中的文字"><select id="searchKnowledgeLabel" aria-label="知识标签"></select><button id="addSearchKnowledgeLabel">＋ 添加知识标签</button><button id="runStructureSearch" class="primary">运行结构搜索</button></div>
       <div id="searchStructureCanvas" class="search-structure-canvas" tabindex="0"><p>将结构库中的结构拖到这里，或从左侧点击“添加到检索台”</p></div>
       <div id="searchWorkbenchLabels" class="search-workbench-labels"></div>
@@ -77,6 +83,7 @@
     </section>
     <section id="lklManualPage" class="document-page lkl-manual-page hidden" aria-label="LKL 使用手册"><header><div><span class="eyebrow">SCHEMA GENERATED</span><h1>LKL 使用手册</h1><p>内容由当前解析器 schema 生成，字段与实现保持同步。</p></div><div><input id="lklManualSearch" placeholder="搜索对象、字段或示例"><button id="copyLklManual">复制手册</button></div></header><pre id="lklManualContent"></pre></section>
     <section id="canvasViewport" class="canvas-viewport hidden" aria-label="结构画布">
+      <div id="derivedProjectionBar" class="derived-projection-bar hidden"><span><b>派生投影</b><small>仅存在于当前运行会话，尚未写入知识库</small></span><button id="discardDerivedProjection">放弃</button><button id="saveDerivedProjection" class="primary">保存为结构</button></div>
       <div id="sceneRoot" class="scene-root"><svg id="backgroundLayer" aria-hidden="true"></svg><svg id="geometryLayer" aria-label="几何构造层"></svg><svg id="edgeLayer"></svg><div id="nodeLayer" class="node-layer"></div><div id="tokenLayer" class="token-layer"></div><div id="nestedLayer"></div></div>
       <div id="minimap" class="minimap" hidden></div>
       <aside id="modularVariableList" class="modular-variable-list hidden" aria-label="全部变量"></aside>

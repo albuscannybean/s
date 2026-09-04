@@ -42,11 +42,11 @@ Copy-Item -Recurse -Force (Join-Path $projectRoot 'packages') $portableRoot
 
 $payloadArchive = Join-Path $buildRoot 'payload.zip'
 Compress-Archive -Path (Join-Path $portableRoot '*') -DestinationPath $payloadArchive -CompressionLevel Optimal
-$setupOutput = Join-Path $outputRoot 'LMN_V4_3_0_x64_Setup.exe'
+$setupOutput = Join-Path $outputRoot 'LMN_V4_3_1_x64_Setup.exe'
 & $compiler /nologo /target:winexe /optimize+ /platform:x64 "/out:$setupOutput" "/resource:$payloadArchive,LMN.Payload.zip" /reference:System.dll /reference:System.Core.dll /reference:System.Windows.Forms.dll /reference:System.IO.Compression.dll /reference:System.IO.Compression.FileSystem.dll /reference:Microsoft.CSharp.dll (Join-Path $PSScriptRoot 'installer\Setup.cs')
 if ($LASTEXITCODE -ne 0) { throw 'LMN installer compilation failed.' }
 
 if (-not (Test-Path -LiteralPath (Join-Path $portableRoot 'LMN.exe'))) { throw 'Portable LMN.exe was not produced.' }
-if (-not (Test-Path -LiteralPath $setupOutput)) { throw 'LMN_V4_3_0_x64_Setup.exe was not produced.' }
+if (-not (Test-Path -LiteralPath $setupOutput)) { throw 'LMN_V4_3_1_x64_Setup.exe was not produced.' }
 Write-Host "Built portable application: $portableRoot\LMN.exe"
 Write-Host "Built installer: $setupOutput"

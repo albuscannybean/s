@@ -1,5 +1,16 @@
 # Changelog
 
+## V4.3.1 — 2026-09-04
+
+### Cognitive Runtime Foundation
+
+- 新增独立于 Knowledge 本体的 Cognitive Task Context，用于记录当前目标、任务类型、领域约束、关注点、活跃知识和可选学习者状态；上下文仅保存在本机会话中。
+- 新增统一语义索引，覆盖知识、正文对象、关系、语义容器、标签、别名、来源与结构角色；现有全文搜索 API 继续兼容，并迁移到同一检索底座。
+- 新增确定性、local-first 的 Knowledge Activation，以有限候选集、激活分数、激活原因和关系路径表达当前任务真正需要的知识。
+- 新增 Derived / Ephemeral Projection：复用现有 Structure Engine 与内置模板动态组织活跃知识，默认不写入知识库，只有明确选择“保存为结构”后才持久化。
+- 补充语义邻域、有向遍历、依赖闭包和最短有意义路径等轻量关系能力，以及可组合的任务模式与领域配置接口。
+- 保持 V4.3.0 工作区数据、LKL 2.1、Semantic Container、construct/reference、Geometry、变量、结构导入导出和往返语义兼容。
+
 ## V4.3.0 — 2026-09-01
 
 V4.3.0 将此前多轮 RC 验证收敛为正式稳定版，重点完成：

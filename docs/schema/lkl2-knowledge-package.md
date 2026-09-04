@@ -1,6 +1,6 @@
 # LKL 2 Knowledge Package schema
 
-LKL 2.1 is the package language used by LMN Knowledge System 4.3.0. The source header remains `lkl 2`; LKL 1 remains the Structure Template interchange format.
+LKL 2.1 is the package language used by LMN Knowledge System 4.3.1. The source header remains `lkl 2`; LKL 1 remains the Structure Template interchange format.
 
 The import pipeline is deliberately pure until commit:
 

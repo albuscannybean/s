@@ -1,8 +1,17 @@
-# LMN Knowledge System V4.3.0
+# LMN Knowledge System V4.3.1
 
-LMN V4.3.0 是一个 local-first 的结构化知识包运行环境。Knowledge 保持稳定语义身份；所有 Structure Position 都是可承载知识、结构、正文、变量与公式的 Universal Semantic Container；LKL 2 可以完整导入、导出和往返 Knowledge Package；公式由本地 KaTeX 离线渲染；Structure View 只改变观察方式。
+LMN V4.3.1 是一个 local-first 的结构化知识包运行环境。Knowledge 保持稳定语义身份；Cognitive Runtime 只表达当前任务与激活状态；Derived Projection 只表达当前观察，除非用户明确保存，否则不会写入知识库。所有 Structure Position 都是可承载知识、结构、正文、变量与公式的 Universal Semantic Container；LKL 2.1 继续负责长期可交换知识。
 
-V4.3.0 在既有 Knowledge Package、事务化导入、语义 View 与删除撤回基础上，完成关系、向量空间与三项全局入口的整合：
+V4.3.1 在既有 Knowledge Package、事务化导入、语义 View 与删除撤回基础上，建立第一阶段认知运行闭环：
+
+- Current Task 记录目标、任务类型、领域约束和关注点，不修改 Knowledge 本体。
+- Unified Semantic Retrieval 统一检索知识、正文、关系、标签、别名、来源、语义容器与结构角色。
+- Knowledge Activation 返回有界的活跃知识与关系，并给出确定性的分数和原因。
+- Derived Projection 复用现有 Structure Engine 动态生成关系网络、依赖图、证明树、层级图、比较图、决策树或 LMN 投影。
+- 临时投影默认不持久化；“保存为结构”会生成可正常重载、编辑与导出的 Structure Instance。
+- LKL schema 仍为 2.1，V4.3.0 数据与既有导入、导出和 round-trip 保持兼容。
+
+V4.3.0 已完成的关系、向量空间与三项全局入口继续保留：
 
 - LMN 的去符号化与去结构化关系修正为 `N1 → M2` 和 `N2 → M3`；双向关系使用同一个双端箭头语义，自建关系可删除并撤销。
 - “设计”对模板关系和自建关系统一控制颜色、粗细、线型、箭头与路由，并以 `relation-styles` 写回 LKL 2。
@@ -106,7 +115,7 @@ powershell -ExecutionPolicy Bypass -File apps/desktop/build.ps1
 
 产物位于：
 
-- `outputs/windows/LMN_V4_3_0_x64_Setup.exe`
+- `outputs/windows/LMN_V4_3_1_x64_Setup.exe`
 - `outputs/windows/portable/LMN.exe`
 
 ## 快捷键

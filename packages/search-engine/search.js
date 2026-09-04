@@ -1,13 +1,11 @@
 import {materializeTemplate} from '../structure-engine/templates.js';
 import {materializeInstanceDefinition} from '../structure-engine/model.js';
+import {buildSemanticIndex} from '../cognitive-runtime/semantic-index.js';
 
 const same=(a,b)=>String(a??'').toLowerCase()===String(b??'').toLowerCase();
 
 export function textSearch(query,state){
-  const q=String(query).trim().toLowerCase();if(!q)return[];const hits=[];
-  for(const knowledge of state.knowledge??[]){const text=[knowledge.title,knowledge.content,knowledge.summary,...(knowledge.aliases??[])].join(' ').toLowerCase();if(text.includes(q))hits.push({type:'knowledge',id:knowledge.id,title:knowledge.title,score:text.startsWith(q)?2:1})}
-  for(const relation of state.relations??[])if(`${relation.label} ${relation.type}`.toLowerCase().includes(q))hits.push({type:'relation',id:relation.id,title:relation.label||relation.type,score:1});
-  return hits.sort((a,b)=>b.score-a.score);
+  return buildSemanticIndex(state).search(query).map(hit=>({type:hit.kind,id:hit.id,title:hit.title,score:hit.score,knowledgeId:hit.knowledgeId,instanceId:hit.instanceId,reasons:hit.reasons}));
 }
 
 export function structureSearch(criteria,state){
