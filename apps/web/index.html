@@ -4,16 +4,17 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#f8f7f2">
-  <title>LMN Knowledge System V4.3.2</title>
+  <title>LMN Knowledge System V5.0.0</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232f7658'/%3E%3Ctext x='32' y='42' text-anchor='middle' font-size='30' fill='white' font-family='Georgia'%3EL%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="vendor/katex/katex.min.css">
   <link rel="stylesheet" href="styles.css">
   <link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="../../packages/ui/web-next.css">
 </head>
 <body>
 <div id="appShell">
   <header class="topbar">
-    <div class="brand"><button id="toggleNavigator" class="icon-button" aria-label="切换知识库">☰</button><b>LMN</b><span>Knowledge System</span><em>V4.3.2</em></div>
+    <div class="brand"><button id="toggleNavigator" class="icon-button" aria-label="切换知识库">☰</button><b>LMN</b><span>Knowledge System</span><em>V5.0.0</em></div>
     <nav id="breadcrumbs" aria-label="递归知识路径"></nav>
     <button id="globalSearch" class="command-trigger"><span>命令行</span><kbd>Ctrl K</kbd></button>
     <button id="insertStructure" class="primary hidden" aria-hidden="true" tabindex="-1">＋ 新建</button>
@@ -81,7 +82,7 @@
       </div>
       <footer class="settings-action-bar"><span id="globalSettingsStatus">更改会立即保存在本机</span><button id="closeGlobalSettings" class="primary">完成</button></footer>
     </section>
-    <section id="lklManualPage" class="document-page lkl-manual-page hidden" aria-label="LKL 使用手册"><header><div><span class="eyebrow">SCHEMA GENERATED</span><h1>LKL 使用手册</h1><p>内容由当前解析器 schema 生成，字段与实现保持同步。</p></div><div><input id="lklManualSearch" placeholder="搜索对象、字段或示例"><button id="copyLklManual">复制手册</button></div></header><pre id="lklManualContent"></pre></section>
+    <section id="lklManualPage" class="document-page lkl-manual-page hidden" aria-label="LKL 使用手册"><header><div><span class="eyebrow">SCHEMA GENERATED</span><h1>LKL 使用手册</h1><p>从第一个知识包开始：正文、结构、图片、绘图与完整信息档案。</p></div><div><input id="lklManualSearch" placeholder="搜索对象、字段或示例"><button id="copyLklManual">复制手册</button></div></header><article id="lklManualContent" class="lkl-manual-content"></article></section>
     <section id="canvasViewport" class="canvas-viewport hidden" aria-label="结构画布">
       <div id="derivedProjectionBar" class="derived-projection-bar hidden"><span><b>派生投影</b><small>仅存在于当前运行会话，尚未写入知识库</small></span><button id="discardDerivedProjection">放弃</button><button id="saveDerivedProjection" class="primary">保存为结构</button></div>
       <div id="sceneRoot" class="scene-root"><svg id="backgroundLayer" aria-hidden="true"></svg><svg id="geometryLayer" aria-label="几何构造层"></svg><svg id="edgeLayer"></svg><div id="nodeLayer" class="node-layer"></div><div id="tokenLayer" class="token-layer"></div><div id="nestedLayer"></div></div>
@@ -137,9 +138,9 @@
 
 <dialog id="advancedBuilderDialog" class="sheet advanced-builder"><header><div><span class="eyebrow">ADVANCED BUILDER · LKL 1</span><h2>LKL 1 高级结构语言工作台</h2></div><button class="dialog-close">×</button></header><div class="advanced-layout"><aside><h3>结构起点</h3><button data-starter="graph">＋ 图 Graph</button><button data-starter="tree">＋ 树 Tree</button><button data-starter="algebra">＋ 代数 Algebra</button><button data-starter="matrix">＋ 矩阵 Matrix</button><p>可直接粘贴由 AI 按 LKL 1 规则生成的任意结构代码；系统会实时验证并生成可视预览，保存后成为可复用模板。</p></aside><section><textarea id="advancedLkl" spellcheck="false" aria-label="LKL 1 结构代码"></textarea><div id="advancedValidation" class="validation-state"></div></section><aside id="advancedPreview"><h3>语义预览</h3><div id="advancedSummary"></div></aside></div><footer><button id="validateAdvanced">验证 LKL 1</button><button id="saveAdvanced" class="primary">保存并插入</button></footer></dialog>
 
-<dialog id="importDialog" class="sheet import-sheet"><header><div><span class="eyebrow">IMPORT PREVIEW · TRANSACTIONAL</span><h2>导入、校验、解决身份</h2></div><button class="dialog-close">×</button></header><div class="import-tabs"><button data-import-type="auto" class="active">自动识别</button><button data-import-type="lkl2">LKL 2 Package</button><button data-import-type="lkl1">LKL 1 Template</button><button data-import-type="json">JSON Bundle</button></div><textarea id="importSource" placeholder="粘贴 LKL 1、LKL 2 或 JSON 内容"></textarea><div class="import-strategy"><label>冲突策略 <select id="importStrategy"><option value="merge">合并 Merge</option><option value="replace">覆盖 Replace</option><option value="copy">创建副本 Copy</option></select></label><span>整个包将作为一次事务提交</span></div><div id="importPreview"></div><footer><button id="chooseImportFile">选择文件</button><button id="validateImport">验证预览</button><button id="confirmImport" class="primary" disabled>确认导入</button></footer></dialog>
+<dialog id="importDialog" class="sheet import-sheet"><header><div><span class="eyebrow">IMPORT PREVIEW · TRANSACTIONAL</span><h2>导入、校验、解决身份</h2></div><button class="dialog-close">×</button></header><div class="import-tabs"><button data-import-type="auto" class="active">自动识别</button><button data-import-type="lkl3">LKL 3 完整档案</button><button data-import-type="lkl2">LKL 2 Package</button><button data-import-type="lkl1">LKL 1 Template</button><button data-import-type="json">JSON Bundle</button></div><textarea id="importSource" placeholder="粘贴 LKL 3、旧 LKL 1/2 或 JSON 内容"></textarea><div class="import-strategy"><label>冲突策略 <select id="importStrategy"><option value="merge">合并 Merge</option><option value="replace">覆盖 Replace</option><option value="copy">创建副本 Copy</option></select></label><span>整个包将作为一次事务提交</span></div><div id="importPreview"></div><footer><button id="chooseImportFile">选择文件</button><button id="validateImport">验证预览</button><button id="confirmImport" class="primary" disabled>确认导入</button></footer></dialog>
 
-<dialog id="exportDialog" class="export-dialog"><header><h2>导出 / 备份</h2><button class="dialog-close">×</button></header><div id="exportPreview" class="export-preview"></div><button data-export="lkl"><b>结构模板 · LKL 1</b><small>仅当前结构模板</small></button><button data-export="knowledge-package"><b>知识包 · LKL 2</b><small>递归导出知识、正文、结构、位置、变量与视图</small></button><button data-export="knowledge"><b>当前知识 · LKL 2</b><small>以当前知识为包根入口</small></button><button data-export="json"><b>完整工作区 · JSON</b><small>V4.3 本地备份格式</small></button><button data-export="markdown"><b>当前知识 · Markdown</b><small>标题与笔记</small></button></dialog>
+<dialog id="exportDialog" class="export-dialog"><header><h2>导出 / 备份</h2><button class="dialog-close">×</button></header><div id="exportPreview" class="export-preview"></div><button data-export="lkl3"><b>完整知识档案 · LKL 3</b><small>工作区全部知识、结构与嵌套对象信息；保留图片、几何、视图与扩展字段</small></button><button data-export="lkl"><b>结构模板 · LKL 1</b><small>仅当前结构模板</small></button><button data-export="knowledge-package"><b>知识包 · LKL 2</b><small>递归导出知识、正文、结构、位置、变量与视图</small></button><button data-export="knowledge"><b>当前知识 · LKL 2</b><small>以当前知识为包根入口</small></button><button data-export="json"><b>完整工作区 · JSON</b><small>完整工作区备份</small></button><button data-export="markdown"><b>当前知识 · Markdown</b><small>标题与笔记</small></button></dialog>
 <input id="fileInput" type="file" accept=".lkl,.json,.md" hidden>
 <script type="module" src="app.js"></script>
 </body>

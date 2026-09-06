@@ -1,4 +1,4 @@
-name: CI
+name: Web CI
 on: [push, pull_request]
 permissions: { contents: read }
 jobs:
@@ -9,17 +9,19 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 20 }
       - run: npm test
-  windows:
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-      - run: powershell -ExecutionPolicy Bypass -File apps/desktop/build.ps1
-      - uses: actions/upload-artifact@v4
-        with: { name: LMN-V4-Windows-x64, path: outputs/windows }
-  pages:
+      - run: mkdir -p site/apps && cp -r apps/web site/apps/ && cp -r packages site/
+      - uses: actions/upload-pages-artifact@v3
+        with: { path: site }
+  browser:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: mkdir site && cp -r apps packages site/
-      - uses: actions/upload-pages-artifact@v3
-        with: { path: site }
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: npm install --no-save playwright@1.62.1
+      - run: npx playwright install --with-deps chromium
+      - run: node tests/local-server.mjs 4174 > /tmp/lmn-server.log 2>&1 &
+      - run: node tests/qa-vnext-web.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: web-browser-validation, path: qa-output }

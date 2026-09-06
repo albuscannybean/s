@@ -10,7 +10,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: mkdir site && cp -r apps packages site/
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: npm test
+      - run: mkdir -p site/apps && cp -r apps/web site/apps/ && cp -r packages site/
       - uses: actions/upload-pages-artifact@v3
         with: { path: site }
       - id: deployment

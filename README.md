@@ -1,3 +1,26 @@
+# LMN Knowledge System V5.0.0 · M System Web
+
+网页：[打开 M System](https://albuscannybean.github.io/s/apps/web/)
+
+M System 负责稳定知识、正文、真实关系和结构的保存、呈现与操作。L System 解析需求并通过 LKL 交付认知产品；N 是用户的理解、学习与实践。任务激活、推断角色和临时投影继续与知识事实分离。
+
+本版本把正文编辑、数学计算、数学模型、结构预览和完整档案交换放在共享模块中。网页发布仅包含 apps/web 与 packages，CI 不再构建 Windows。
+
+- 关系文字在独立标签层渲染，背景按实际字体测量；交叉连线不会穿过文字，固定点显示自环。
+- 全局正文编辑器支持图片文件、剪贴板图片、拖入图片，以及调用向量空间引擎的 plot 绘图块。
+- n 元中心、有限函数、交换图、等价类、集合划分、笛卡尔积、置换、二面体群、离散动力系统与流网络使用真实数学模型，库预览由同一模型生成。
+- 矩阵工作台提供转置、加减乘、行列式、逆、秩、行最简形和唯一解求解；运算结果可写回矩阵。
+- 向量空间提供二维/三维对象创建、参数曲线/曲面、区间、向量运算、数值分析和已有的依赖式几何构造。
+- LKL 3 完整档案保留对象数据、嵌套对象目录、图片、几何、参数、视图和扩展元数据；旧 LKL 1/2 入口继续可用。升级时保留受影响旧实例的模板定义。
+
+阅读 [LKL 3 新手手册](docs/LKL-3-入门.md)、[格式合同](docs/LKL-3-contract.json) 和 [M System 架构与兼容说明](docs/M-SYSTEM-WEB-V5.md)。
+
+运行命令：node tests/local-server.mjs 4174，然后访问 http://127.0.0.1:4174/apps/web/。单元测试：node --test tests/*.test.js。浏览器测试：安装 Playwright 1.62.1 与 Chromium，启动本地服务器，再运行 node tests/qa-vnext-web.mjs；可用 LMN_QA_URL 指定待验证网页。
+
+数学运算采用有限实数的双精度数值算法，绘图采用有限采样。当前不提供通用符号计算、任意函数的解析域证明或无限维运算。数学模板在说明中明确实现范围。
+
+## 历史版本
+
 # LMN Knowledge System V4.3.2
 
 LMN V4.3.2 是一个 local-first 的结构化知识包运行环境。Knowledge 保持稳定语义身份；Cognitive Compilation Runtime 根据当前 Task 与 Domain 编译临时知识组织，并保留每次推导的理由与缺口；Derived Projection 只表达当前观察，除非用户明确保存，否则不会写入知识库。所有 Structure Position 都是可承载知识、结构、正文、变量与公式的 Universal Semantic Container；LKL 2.1 继续负责长期可交换知识。

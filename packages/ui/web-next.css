@@ -1,0 +1,44 @@
+/* Shared content, mathematical workspaces and label presentation. */
+.edge-label{fill:var(--ink);font-size:12px;font-weight:500;paint-order:stroke fill;stroke:var(--canvas);stroke-width:4px;stroke-linejoin:round}
+.relation-label-layer{isolation:isolate}.relation-label-layer .edge-label-background{fill:var(--canvas);fill-opacity:1;stroke:var(--canvas);stroke-width:4}
+.relation-label-layer .edge-formula-label{background:var(--canvas);color:var(--ink);width:max-content;min-width:100%;height:auto;min-height:100%;padding:5px 9px}
+.relation-label-layer>g{cursor:pointer;pointer-events:auto}
+.document-format-toolbar{position:sticky;top:0;z-index:4;flex-wrap:wrap;background:var(--paper);gap:8px}
+.document-body-editor{font:15px/1.8 ui-monospace,Consolas,monospace;tab-size:2;min-height:55vh}
+.markdown-preview img{max-width:100%;height:auto;border-radius:8px;display:block;margin:18px auto}
+.document-media-message{font-size:12px;color:var(--muted)}.document-media-message.error{color:#ac3333}
+.document-plot{margin:20px 0;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--canvas)}
+.document-plot-viewport{position:relative;height:340px;overflow:hidden}.document-plot-controls{display:flex;align-items:center;gap:6px;padding:9px;border-top:1px solid var(--line)}
+.document-plot-controls code{flex:1;overflow:auto;font-size:12px}.document-plot-error{padding:16px;color:#a33}
+.lkl-manual-content{max-width:950px;margin:auto;padding:24px 36px;background:var(--paper);border:1px solid var(--line);border-radius:14px}
+.lkl-manual-content pre{white-space:pre-wrap;overflow:auto}.lkl-manual-content table{border-collapse:collapse;width:100%}
+.math-workbench{display:grid;gap:16px}.math-workbench h3{margin:0;font-size:18px}.math-workbench p{line-height:1.6;color:var(--muted)}
+.math-tabs{display:flex;flex-wrap:wrap;gap:6px}.math-tabs button.active{background:var(--green);color:white}
+.math-form{display:grid;gap:12px}.math-form label{display:grid;gap:5px;font-size:13px}.math-form textarea{font:14px/1.65 ui-monospace,Consolas,monospace;min-height:90px;width:100%}
+.math-field-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.math-result{display:block;white-space:pre-wrap;overflow:auto;padding:16px;border:1px solid var(--line);border-radius:8px;background:var(--paper);font:14px/1.65 ui-monospace,Consolas,monospace}
+.math-result.error{color:#a33;border-color:#d8aaaa}.math-actions{display:flex;gap:8px;flex-wrap:wrap}.math-hint{font-size:12px;color:var(--muted)}
+.template-semantic-preview{width:76px;height:54px;flex:0 0 76px;overflow:hidden}.nav-library-card{align-items:center;gap:10px}.nav-library-card .template-semantic-preview{display:block}
+@media(max-width:650px){.math-field-grid{grid-template-columns:1fr}.lkl-manual-content{padding:16px}.document-plot-controls{flex-wrap:wrap}}
+
+[data-semantic-role='host-anchor'] .node-empty-action,[data-semantic-role='host-anchor'] .node-connector{display:none}.template-preview .template-semantic-preview{width:100%;height:100%;min-height:120px}
+
+.math-workbench .coordinate-operation-section.math-form{display:flex;flex-direction:column;gap:14px}
+.math-workbench input,.math-workbench select,.math-workbench textarea{box-sizing:border-box;width:100%;min-height:36px;padding:8px 10px;border:1px solid var(--line-strong);border-radius:7px;background:var(--paper);color:var(--ink);font-size:14px}
+.math-workbench .math-form label{width:100%;min-width:0;display:flex;flex-direction:column;gap:6px}
+.math-workbench .math-field-grid{display:grid;grid-template-columns:1fr 1fr}.math-workbench output{width:100%;box-sizing:border-box}
+.math-workbench .math-tabs{display:flex}.math-workbench .math-actions{display:flex}.math-workbench .coordinate-operation-section h3{width:100%}
+
+.semantic-model-node{justify-content:center;align-items:center;text-align:center;border:1px solid var(--line-strong);padding:14px}
+.semantic-model-node .node-top{position:absolute;right:7px;top:3px}
+.semantic-model-node .node-identity,.semantic-model-node .node-role,.semantic-model-node .node-connector{display:none}
+.semantic-model-node .node-label{font-size:18px;line-height:1.5;max-width:100%;overflow-wrap:anywhere}
+.semantic-model-node.empty .node-semantic-title{display:none}
+.semantic-model-node .node-empty-action{font-size:10px;opacity:.7;margin-top:4px}
+.semantic-model-node[data-semantic-role='host-anchor']{border:2px solid var(--green);background:#e7f2ec;border-radius:22px}
+.semantic-model-node[data-semantic-role='host-anchor'] .node-empty-action{display:none}
+@media(max-width:650px){.math-workbench .math-field-grid{grid-template-columns:1fr}}
+
+.lkl-manual-content.markdown-preview{display:block}
+.nav-library-card{display:grid;grid-template-columns:76px minmax(0,1fr);gap:10px;min-height:70px;align-items:center}
+.nav-library-card>span{min-width:0}.nav-library-card .template-semantic-preview{width:76px;height:54px}
+.relation-label-layer .edge-label,.relation-label-layer .edge-label-background{pointer-events:visiblePainted}
