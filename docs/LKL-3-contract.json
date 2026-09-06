@@ -1,0 +1,68 @@
+{
+  "schema": "lmn.cognitive-package/3.0",
+  "header": "lkl 3",
+  "encoding": "UTF-8",
+  "payload": "strict JSON",
+  "required": [
+    "schema",
+    "package",
+    "records"
+  ],
+  "packageFields": [
+    "id",
+    "title",
+    "roots"
+  ],
+  "recordFields": [
+    "kind",
+    "id",
+    "profile",
+    "members",
+    "data"
+  ],
+  "recordKinds": [
+    "knowledge",
+    "relation",
+    "representation",
+    "structure-template",
+    "structure-instance",
+    "variable-scheme",
+    "package",
+    "content",
+    "view",
+    "board",
+    "placement",
+    "settings"
+  ],
+  "profileFields": [
+    "schema",
+    "kind",
+    "id",
+    "title",
+    "summary",
+    "version",
+    "authors",
+    "sources",
+    "createdAt",
+    "updatedAt",
+    "evidenceStatus",
+    "scope",
+    "extensions"
+  ],
+  "limits": {
+    "maxBytes": 73400320,
+    "maxRecords": 50000,
+    "maxDepth": 70,
+    "imageBytes": 5242880
+  },
+  "identity": "kind/id must agree with profile and data; references use stable IDs",
+  "dataPolicy": "complete runtime records; supported nested fields preserved; unknown provenance remains unknown",
+  "profilePolicy": "derived directory; authoritative definitions and custom profile metadata belong in data",
+  "importStrategies": [
+    "merge",
+    "replace",
+    "copy"
+  ],
+  "executableFactories": "only IDs implemented by the current runtime",
+  "transientState": "task context and activation are not knowledge facts"
+}

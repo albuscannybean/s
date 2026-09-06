@@ -9,3 +9,5 @@ dist/
 artifacts/
 outputs/
 node_modules/
+
+qa-output/

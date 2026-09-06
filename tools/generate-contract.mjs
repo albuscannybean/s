@@ -3,7 +3,9 @@ import {fileURLToPath} from 'node:url';
 import path from 'node:path';
 import {APP_RELEASE,APP_VERSION,LKL_SCHEMA_VERSION} from '../packages/app-metadata.js';
 import {LKL_ENUMS,LKL_LIMITS,LKL_SCHEMA,LKL_STRUCTURE_SOURCE_SCHEMA} from '../packages/lkl2/schema.js';
-import {BUILTIN_TEMPLATES,materializeTemplate} from '../packages/structure-engine/templates.js';
+import {LKL3_CONTRACT} from '../packages/lkl3/schema.js';
+import {lkl3ManualMarkdown} from '../packages/lkl3/manual.js';
+import {BUILTIN_TEMPLATES,materializeTemplate,getStructureCapabilities} from '../packages/structure-engine/templates.js';
 import {GLOBAL_RELATION_STYLE,RELATION_STYLE_FIELDS} from '../packages/structure-engine/relation-style-resolver.js';
 
 const kitRoot=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..','lkl-ai-authoring-kit-v4.3.0');
@@ -72,11 +74,12 @@ const builtinCatalog={
 const contract={
   contract:'LMN LKL AI Authoring Contract',
   schemaVersion:LKL_SCHEMA.version,
-  kitVersion:'4.3.2',
-  target:{application:'LMN Knowledge System',release:APP_RELEASE,version:APP_VERSION,lkl1:'1',lkl2:LKL_SCHEMA_VERSION},
+  kitVersion:APP_VERSION,
+  target:{application:'LMN Knowledge System',release:APP_RELEASE,version:APP_VERSION,lkl1:'1',lkl2:LKL_SCHEMA_VERSION,lkl3:'3.0'},
   generatedFrom:{schema:'packages/lkl2/schema.js',parser:'packages/lkl2/parser.js',ast:'packages/lkl2/ast.js',validator:'packages/lkl2/validator.js',importer:'packages/lkl2/importer.js',serializer:'packages/lkl2/serializer.js',exporter:'packages/lkl2/exporter.js',structureSource:'packages/lkl2/structure-source.js',runtimeCatalog:'packages/structure-engine/templates.js'},
   authorityOrder:['lkl-authoring-contract.json','LKL-AI-AUTHORING.md','user request and supplied facts'],
-  outputPolicy:{default:'one complete LKL 2 Knowledge Package',whenBuiltinStructuresAreInsufficient:['one LKL 1 Structure Template','one LKL 2 Knowledge Package that references the imported custom template'],forbidPseudocode:true,forbidNewBoardsAndFrames:true},
+  lkl3:LKL3_CONTRACT,structureCapabilities:getStructureCapabilities(),
+  outputPolicy:{default:'one complete importable LKL 3 archive or LKL 2 Knowledge Package, selected for the requested exchange scope',whenBuiltinStructuresAreInsufficient:['package-local declarative template and instance in the same package','LKL 1 only for deliberately shared independent templates'],forbidPseudocode:true,forbidNewBoardsAndFrames:true},
   sourceKinds:{
     lkl1:{header:'lkl 1',purpose:'reusable structure template',requiresEnd:true,directives:lkl1Directives,aliases:{graph:'structure',node:'slot',relation:'edge'}},
     lkl2Package:{header:LKL_SCHEMA.header,purpose:'complete importable knowledge package',requiresExactlyOnePackage:true,topLevelDeclarations:LKL_SCHEMA.topLevelDeclarations,declarationAliases:LKL_SCHEMA.declarationAliases,declarations},
@@ -114,3 +117,5 @@ const contract={
 await mkdir(machineRoot,{recursive:true});
 await writeFile(path.join(machineRoot,'lkl-authoring-contract.json'),`${JSON.stringify(contract,null,2)}\n`,'utf8');
 console.log(`Generated ${contract.builtins.length} built-in templates for ${APP_RELEASE}.`);
+
+const docsRoot=path.resolve(kitRoot,'..','docs');await mkdir(docsRoot,{recursive:true});await writeFile(path.join(docsRoot,'LKL-3-入门.md'),lkl3ManualMarkdown()+'\n','utf8');await writeFile(path.join(docsRoot,'LKL-3-contract.json'),JSON.stringify(LKL3_CONTRACT,null,2)+'\n','utf8');

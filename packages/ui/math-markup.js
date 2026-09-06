@@ -1,3 +1,4 @@
+import {safeMediaUrl} from './portable-media.js';
 import katex from '../../apps/web/vendor/katex/katex.mjs';
 
 export const MATH_RENDERER_ID='katex-local-0.16.25';
@@ -25,6 +26,7 @@ export function tokenizeInline(source){
   while(index<source.length){
     if(source.startsWith('**',index)){const end=source.indexOf('**',index+2);if(end>=0){flush();result.push({type:'strong',value:source.slice(index+2,end)});index=end+2;continue}}
     if(source[index]==='`'){const end=source.indexOf('`',index+1);if(end>=0){flush();result.push({type:'code',value:source.slice(index+1,end)});index=end+1;continue}}
+    if(source.startsWith('![',index)){const middle=source.indexOf('](',index+2),end=middle>=0?source.indexOf(')',middle+2):-1;if(middle>=0&&end>=0){flush();result.push({type:'image',value:source.slice(index+2,middle),href:source.slice(middle+2,end)});index=end+1;continue}}
     if(source[index]==='['){const middle=source.indexOf('](',index+1),end=middle>=0?source.indexOf(')',middle+2):-1;if(middle>=0&&end>=0){flush();result.push({type:'link',value:source.slice(index+1,middle),href:source.slice(middle+2,end)});index=end+1;continue}}
     if(source[index]==='$'&&source[index+1]!=='$'){const end=source.indexOf('$',index+1);if(end>=0){flush();result.push({type:'math',value:source.slice(index+1,end)});index=end+1;continue}}
     text+=source[index++];
@@ -36,7 +38,8 @@ export function appendInlineContent(root,source,documentRef=root.ownerDocument){
   for(const token of tokenizeInline(String(source??''))){
     if(token.type==='text')root.append(documentRef.createTextNode(token.value));
     else if(token.type==='math')root.append(createMathElement(documentRef,token.value));
-    else if(token.type==='link'){const element=documentRef.createElement('a');element.textContent=token.value;element.href=token.href;element.rel='noopener noreferrer';root.append(element)}
+    else if(token.type==='image'){const url=safeMediaUrl(token.href,{image:true});if(url){const element=documentRef.createElement('img');element.src=url;element.alt=token.value;element.loading='lazy';root.append(element)}else root.append(documentRef.createTextNode('[图片地址无效]'))}
+    else if(token.type==='link'){const url=safeMediaUrl(token.href),element=documentRef.createElement(url?'a':'span');element.textContent=token.value;if(url){element.href=url;element.rel='noopener noreferrer'}root.append(element)}
     else{const element=documentRef.createElement(token.type==='strong'?'strong':'code');element.textContent=token.value;root.append(element)}
   }return root;
 }
@@ -50,7 +53,7 @@ export function parseStudyMarkdown(source){
     if(line.trim().startsWith('$$')){flush();const body=[],single=line.trim().slice(2);if(single.endsWith('$$')&&single.length>2){blocks.push({type:'math',text:single.slice(0,-2).trim()});index++;continue}if(single)body.push(single);index++;while(index<lines.length&&!lines[index].trim().endsWith('$$'))body.push(lines[index++]);if(index<lines.length){body.push(lines[index].trim().slice(0,-2));index++}blocks.push({type:'math',text:body.join('\n').trim()});continue}
     const heading=line.match(/^(#{1,6})\s+(.+)$/);if(heading){flush();blocks.push({type:'heading',level:heading[1].length,text:heading[2]});index++;continue}
     if(/^>\s?/.test(line)){flush();blocks.push({type:'quote',text:line.replace(/^>\s?/, '')});index++;continue}
-    const list=line.match(/^\s*(?:[-*]|\d+\.)\s+(.+)$/);if(list){flush();const ordered=/^\s*\d+\./.test(line),items=[];while(index<lines.length){const match=lines[index].match(ordered?/^\s*\d+\.\s+(.+)$/:/^\s*[-*]\s+(.+)$/);if(!match)break;items.push(match[1]);index++}blocks.push({type:'list',ordered,items});continue}
+    const list=line.match(/^\s*(?:[-*]|\d+\.)\s+(.+)$/);if(list){flush();const ordered=/^\s*\d+\./.test(line),items=[];while(index<lines.length){const match=lines[index].match(ordered?/^\s*\d+\.\s+(.+)$/:/^\s*[-*]\s+(.+)$/);if(!match)break;items.push(match[1]);index++}blocks.push({type:'list',ordered,items,...(ordered?{start:Number(line.trim().match(/^\d+/)[0])}: {})});continue}
     if(!line.trim()){flush();index++;continue}paragraph.push(line.trim());index++;
   }
   flush();return blocks;
@@ -63,8 +66,9 @@ export function renderMarkdownDocument(root,source,documentRef=root.ownerDocumen
     else if(block.type==='paragraph'){element=documentRef.createElement('p');appendInlineContent(element,block.text,documentRef)}
     else if(block.type==='quote'){element=documentRef.createElement('blockquote');appendInlineContent(element,block.text,documentRef)}
     else if(block.type==='math'){element=documentRef.createElement('div');element.className='math-display';element.append(createMathElement(documentRef,block.text,{display:true}))}
+    else if(block.type==='code'&&['plot','lmn-plot'].includes(block.language)){element=documentRef.createElement('figure');element.className='document-plot';const figure=element;import('./inline-plot.js').then(({mountInlinePlot})=>mountInlinePlot(figure,block.text)).catch(error=>{figure.classList.add('document-plot-error');figure.textContent='绘图：'+error.message})}
     else if(block.type==='code'){element=documentRef.createElement('pre');element.className='study-code';const code=documentRef.createElement('code');code.textContent=block.text;element.append(code)}
-    else if(block.type==='list'){element=documentRef.createElement(block.ordered?'ol':'ul');for(const item of block.items){const li=documentRef.createElement('li');appendInlineContent(li,item,documentRef);element.append(li)}}
+    else if(block.type==='list'){element=documentRef.createElement(block.ordered?'ol':'ul');if(block.ordered)element.start=block.start??1;for(const item of block.items){const li=documentRef.createElement('li');appendInlineContent(li,item,documentRef);element.append(li)}}
     else if(block.type==='study'){element=documentRef.createElement('section');element.className=`study-block study-${block.kind}`;const title=documentRef.createElement('strong');title.textContent=labels[block.kind]??block.kind;const body=documentRef.createElement('div');for(const line of block.text.split('\n')){const paragraph=documentRef.createElement('p');appendInlineContent(paragraph,line,documentRef);body.append(paragraph)}element.append(title,body)}
     if(element)root.append(element);
   }return root;

@@ -1,6 +1,7 @@
-const CACHE='lmn-v4.3.2-stable-20260905-1';
+const CACHE='lmn-v5.0.0-web-20260906-1';
 const KATEX_FONTS=['AMS-Regular','Caligraphic-Bold','Caligraphic-Regular','Fraktur-Bold','Fraktur-Regular','Main-Bold','Main-BoldItalic','Main-Italic','Main-Regular','Math-BoldItalic','Math-Italic','SansSerif-Bold','SansSerif-Italic','SansSerif-Regular','Script-Regular','Size1-Regular','Size2-Regular','Size3-Regular','Size4-Regular','Typewriter-Regular'].map(name=>`./vendor/katex/fonts/KaTeX_${name}.woff2`);
 const ASSETS=[
+  '../../packages/domain/object-profile.js','../../packages/lkl3/schema.js','../../packages/lkl3/package.js','../../packages/lkl3/manual.js','../../packages/math/linear-algebra.js','../../packages/structure-engine/semantic-templates.js','../../packages/ui/inline-plot.js','../../packages/ui/math-workbench.js','../../packages/ui/portable-media.js','../../packages/ui/template-preview.js','../../packages/ui/web-next.css',
   './','./index.html','./styles.css','./app.js','./db.js','./manifest.webmanifest','./vendor/katex/katex.min.css','./vendor/katex/katex.mjs',
   '../../packages/domain/core.js','../../packages/domain/object-management.js','../../packages/domain/semantic-container.js','../../packages/domain/identity.js','../../packages/domain/naming-policy.js','../../packages/domain/variable-registry.js',
   '../../packages/app-metadata.js','../../packages/ui/workspace-controller.js','../../packages/ui/structure-renderer.js','../../packages/ui/math-markup.js','../../packages/ui/library-model.js','../../packages/ui/object-interaction-contract.js','../../packages/ui/content-preview.js','../../packages/ui/transient-overlay-manager.js','../../packages/ui/document-editor.js','../../packages/ui/localization.js','../../packages/ui/command-registry.js',

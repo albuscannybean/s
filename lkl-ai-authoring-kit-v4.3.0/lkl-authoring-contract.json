@@ -1,13 +1,14 @@
 {
   "contract": "LMN LKL AI Authoring Contract",
   "schemaVersion": "2.1",
-  "kitVersion": "4.3.2",
+  "kitVersion": "5.0.0",
   "target": {
     "application": "LMN Knowledge System",
-    "release": "V4.3.2",
-    "version": "4.3.2",
+    "release": "V5.0.0",
+    "version": "5.0.0",
     "lkl1": "1",
-    "lkl2": "2.1"
+    "lkl2": "2.1",
+    "lkl3": "3.0"
   },
   "generatedFrom": {
     "schema": "packages/lkl2/schema.js",
@@ -25,11 +26,965 @@
     "LKL-AI-AUTHORING.md",
     "user request and supplied facts"
   ],
+  "lkl3": {
+    "schema": "lmn.cognitive-package/3.0",
+    "header": "lkl 3",
+    "encoding": "UTF-8",
+    "payload": "strict JSON",
+    "required": [
+      "schema",
+      "package",
+      "records"
+    ],
+    "packageFields": [
+      "id",
+      "title",
+      "roots"
+    ],
+    "recordFields": [
+      "kind",
+      "id",
+      "profile",
+      "members",
+      "data"
+    ],
+    "recordKinds": [
+      "knowledge",
+      "relation",
+      "representation",
+      "structure-template",
+      "structure-instance",
+      "variable-scheme",
+      "package",
+      "content",
+      "view",
+      "board",
+      "placement",
+      "settings"
+    ],
+    "profileFields": [
+      "schema",
+      "kind",
+      "id",
+      "title",
+      "summary",
+      "version",
+      "authors",
+      "sources",
+      "createdAt",
+      "updatedAt",
+      "evidenceStatus",
+      "scope",
+      "extensions"
+    ],
+    "limits": {
+      "maxBytes": 73400320,
+      "maxRecords": 50000,
+      "maxDepth": 70,
+      "imageBytes": 5242880
+    },
+    "identity": "kind/id must agree with profile and data; references use stable IDs",
+    "dataPolicy": "complete runtime records; supported nested fields preserved; unknown provenance remains unknown",
+    "profilePolicy": "derived directory; authoritative definitions and custom profile metadata belong in data",
+    "importStrategies": [
+      "merge",
+      "replace",
+      "copy"
+    ],
+    "executableFactories": "only IDs implemented by the current runtime",
+    "transientState": "task context and activation are not knowledge facts"
+  },
+  "structureCapabilities": [
+    {
+      "id": "builtin:lmn-432",
+      "version": 2,
+      "name": "LMN 4–3–2",
+      "affordances": [
+        "lmn-semantic"
+      ],
+      "ordering": "model-defined",
+      "parameters": [],
+      "layout": {
+        "type": "lmn-semantic",
+        "columns": [
+          "L",
+          "M",
+          "N"
+        ],
+        "startY": 170,
+        "gapY": 132
+      },
+      "implementation": "declarative",
+      "scope": "runtime",
+      "supportsPackageLocal": true
+    },
+    {
+      "id": "builtin:directed-graph",
+      "version": 2,
+      "name": "有向图 · Directed Graph",
+      "affordances": [
+        "force"
+      ],
+      "ordering": "model-defined",
+      "parameters": [],
+      "layout": {
+        "type": "force"
+      },
+      "implementation": "declarative",
+      "scope": "runtime",
+      "supportsPackageLocal": true
+    },
+    {
+      "id": "builtin:undirected-graph",
+      "version": 2,
+      "name": "无向图 · Undirected Graph",
+      "affordances": [
+        "force"
+      ],
+      "ordering": "model-defined",
+      "parameters": [],
+      "layout": {
+        "type": "force"
+      },
+      "implementation": "declarative",
+      "scope": "runtime",
+      "supportsPackageLocal": true
+    },
+    {
+      "id": "builtin:poset-hasse",
+      "version": 3,
+      "name": "偏序 Poset / Hasse",
+      "affordances": [
+        "hasse"
+      ],
+      "ordering": "model-defined",
+      "parameters": [
+        {
+          "id": "starter",
+          "label": "初始模型",
+          "type": "enum",
+          "defaultValue": "blank",
+          "options": [
+            {
+              "value": "blank",
+              "label": "空白偏序"
+            },
+            {
+              "value": "diamond",
+              "label": "四元素菱形示例"
+            },
+            {
+              "value": "subset",
+              "label": "集合包含"
+            },
+            {
+              "value": "divisibility",
+              "label": "整除关系"
+            },
+            {
+              "value": "numeric",
+              "label": "数值 ≤"
+            },
+            {
+              "value": "relation-text",
+              "label": "从关系文本导入"
+            }
+          ]
+        },
+        {
+          "id": "relationText",
+          "label": "关系文本",
+          "type": "textarea",
+          "defaultValue": "a < b < c"
+        }
+      ],
+      "layout": {
+        "type": "hasse"
+      },
+      "implementation": "poset",
+      "scope": "runtime",
+      "supportsPackageLocal": true
+    },
+    {
+      "id": "builtin:tree",
+      "version": 1,
+      "name": "树 · Tree",
+      "affordances": [
+        "tree"
+      ],
+      "ordering": "model-defined",
+      "parameters": [],
+      "layout": {
+        "type": "tree"
+      },
+      "implementation": "declarative",
+      "scope": "runtime",
+      "supportsPackageLocal": true
+    },
+    {
+      "id": "builtin:mod-n",
+      "version": 3,
+      "name": "模结构 Modular Ring · ℤ/nℤ",
+      "affordances": [
+        "radial"
+      ],
+      "ordering": "model-defined",
+      "parameters": [
+        {
+          "id": "modulus",
+          "label": "模数 n",
+          "type": "number",
+          "defaultValue": 12,
+          "min": 2,
+          "max": 64
+        }
+      ],
+      "layout": {
+        "type": "radial"
+      },
+      "implementation": "mod-n",
+      "scope": "runtime",
+      "supportsPackageLocal": true
+    },
+    {
+      "id": "builtin:boolean-algebra",
+      "version": 2,
+      "name": "布尔代数 Boolean Algebra Bₙ",
+      "affordances": [
+        "hasse"
+      ],
+      "ordering": "model-defined",
+      "parameters": [
+        {
+          "id": "rank",
+          "label": "维数 n",
+          "type": "number",
+          "defaultValue": 4,
+          "min": 1,
+          "max": 8
+        },
+        {
+          "id": "displayMode",
+          "label": "标签形式",
+          "type": "enum",
+          "defaultValue": "subset",
+          "options": [
+            {
+              "value": "subset",
+              "label": "子集"
+            },
+            {
+              "value": "bitset",
+              "label": "位串"
+            }
+          ]
+        },
+        {
+          "id": "atomLabels",
+          "label": "原子标签",
+          "type": "string",
+          "defaultValue": "a,b,c,d"
+        }
+      ],
+      "layout": {
+        "type": "hasse"
+      },
+      "implementation": "boolean-algebra",
+      "scope": "runtime",
+      "supportsPackageLocal": true
+    },
+    {
+      "id": "builtin:venn-2",
+      "version": 1,
+      "name": "韦恩图 · Venn Diagram · 2 Sets",
+      "affordances": [
+        "venn"
+      ],
+      "ordering": "model-defined",
+      "parameters": [
+        {
+          "id": "setA",
+          "label": "集合 A / Set A",
+          "type": "string",
+          "defaultValue": "A"
+        },
+        {
+          "id": "setB",
+          "label": "集合 B / Set B",
+          "type": "string",
+          "defaultValue": "B"
+        }
+      ],
+      "layout": {
+        "type": "venn",
+        "sets": 2
+      },
+      "implementation": "declarative",
+      "scope": "runtime",
+      "supportsPackageLocal": true
+    },
+    {
+      "id": "builtin:venn-3",
+      "version": 1,
+      "name": "韦恩图 · Venn Diagram · 3 Sets",
+      "affordances": [
+        "venn"
+      ],
+      "ordering": "model-defined",
+      "parameters": [],
+      "layout": {
+        "type": "venn",
+        "sets": 3
+      },
+      "implementation": "declarative",
+      "scope": "runtime",
+      "supportsPackageLocal": true
+    },
+    {
+      "id": "builtin:regular-polygon",
+      "version": 1,
+      "name": "正 n 边形 Regular n-gon",
+      "affordances": [
+        "radial"
+      ],
+      "ordering": "model-defined",
+      "parameters": [
+        {
+          "id": "n",
+          "label": "边数 n",
+          "type": "number",
+          "defaultValue": 6,
+          "min": 3,
+          "max": 24
+        },
+        {
+          "id": "radius",
+          "label": "半径",
+          "type": "number",
+          "defaultValue": 180,
+          "min": 80,
+          "max": 360
+        }
+      ],
+      "layout": {
+        "type": "radial"
+      },
+      "implementation": "regular-polygon",
+      "scope": "runtime",
+      "supportsPackageLocal": true
+    },
+    {
+      "id": "builtin:coordinate-plane",
+      "version": 5,
+      "name": "向量空间 Vector Space",
+      "affordances": [
+        "coordinate"
+      ],
+      "ordering": "model-defined",
+      "parameters": [
+        {
+          "id": "dimension",
+          "label": "维数",
+          "type": "enum",
+          "defaultValue": "2d",
+          "options": [
+            {
+              "value": "2d",
+              "label": "二维平面"
+            },
+            {
+              "value": "3d",
+              "label": "三维空间"
+            }
+          ]
+        },
+        {
+          "id": "scale",
+          "label": "单位缩放",
+          "type": "number",
+          "defaultValue": 40,
+          "min": 16,
+          "max": 120
+        }
+      ],
+      "layout": {
+        "type": "coordinate"
+      },
+      "implementation": "declarative",
+      "scope": "runtime",
+      "supportsPackageLocal": true
+    },
+    {
+      "id": "builtin:cyclic-group",
+      "version": 3,
+      "name": "循环群 Cyclic Group · Cₙ",
+      "affordances": [
+        "radial"
+      ],
+      "ordering": "model-defined",
+      "parameters": [
+        {
+          "id": "n",
+          "label": "阶 n",
+          "type": "number",
+          "defaultValue": 8,
+          "min": 2,
+          "max": 64
+        },
+        {
+          "id": "generator",
+          "label": "选定元素 / 作用步长",
+          "type": "number",
+          "defaultValue": 1,
+          "min": 0,
+          "max": 63
+        },
+        {
+          "id": "notation",
+          "label": "显示记号",
+          "type": "enum",
+          "defaultValue": "cyclic",
+          "options": [
+            {
+              "value": "cyclic",
+              "label": "Cₙ"
+            },
+            {
+              "value": "quotient",
+              "label": "ℤ/nℤ"
+            }
+          ]
+        }
+      ],
+      "layout": {
+        "type": "radial"
+      },
+      "implementation": "cyclic-group",
+      "scope": "runtime",
+      "supportsPackageLocal": true
+    },
+    {
+      "id": "builtin:operation-table",
+      "version": 2,
+      "name": "有限运算表 Finite Operation Table",
+      "affordances": [
+        "table"
+      ],
+      "ordering": "model-defined",
+      "parameters": [
+        {
+          "id": "n",
+          "label": "元素数量 n",
+          "type": "number",
+          "defaultValue": 4,
+          "min": 2,
+          "max": 12
+        },
+        {
+          "id": "operation",
+          "label": "运算",
+          "type": "enum",
+          "defaultValue": "add-mod-n",
+          "options": [
+            {
+              "value": "add-mod-n",
+              "label": "模 n 加法"
+            },
+            {
+              "value": "multiply-mod-n",
+              "label": "模 n 乘法"
+            }
+          ]
+        }
+      ],
+      "layout": {
+        "type": "table"
+      },
+      "implementation": "operation-table",
+      "scope": "runtime",
+      "supportsPackageLocal": true
+    },
+    {
+      "id": "builtin:free-coordinate",
+      "version": 1,
+      "name": "自由坐标结构 · Free Coordinate Structure",
+      "affordances": [
+        "manual"
+      ],
+      "ordering": "model-defined",
+      "parameters": [],
+      "layout": {
+        "type": "manual"
+      },
+      "implementation": "declarative",
+      "scope": "runtime",
+      "supportsPackageLocal": true
+    },
+    {
+      "id": "builtin:empty-custom",
+      "version": 1,
+      "name": "空白自定义结构 · Empty Custom Structure",
+      "affordances": [
+        "manual"
+      ],
+      "ordering": "model-defined",
+      "parameters": [],
+      "layout": {
+        "type": "manual"
+      },
+      "implementation": "declarative",
+      "scope": "runtime",
+      "supportsPackageLocal": true
+    },
+    {
+      "id": "builtin:n-center",
+      "version": 4,
+      "name": "n 元中心 · Center & Facets",
+      "affordances": [
+        "center-periphery",
+        "unordered-facets",
+        "overview"
+      ],
+      "ordering": "unordered",
+      "parameters": [
+        {
+          "id": "members",
+          "label": "面向名称（逗号分隔）",
+          "defaultValue": "面向一,面向二,面向三,面向四",
+          "type": "string"
+        }
+      ],
+      "layout": {
+        "type": "manual"
+      },
+      "implementation": "semantic:n-center",
+      "scope": "runtime",
+      "supportsPackageLocal": true
+    },
+    {
+      "id": "builtin:matrix-grid",
+      "version": 3,
+      "name": "矩阵 / 网格 · Matrix / Grid",
+      "affordances": [
+        "matrix"
+      ],
+      "ordering": "model-defined",
+      "parameters": [
+        {
+          "id": "rows",
+          "label": "行数",
+          "type": "number",
+          "defaultValue": 3,
+          "min": 1,
+          "max": 20
+        },
+        {
+          "id": "columns",
+          "label": "列数",
+          "type": "number",
+          "defaultValue": 3,
+          "min": 1,
+          "max": 20
+        },
+        {
+          "id": "cellPrefix",
+          "label": "单元格前缀",
+          "type": "string",
+          "defaultValue": "a"
+        },
+        {
+          "id": "values",
+          "label": "矩阵元素（JSON；可留空）",
+          "type": "textarea",
+          "defaultValue": ""
+        }
+      ],
+      "layout": {
+        "type": "matrix"
+      },
+      "implementation": "matrix-grid",
+      "scope": "runtime",
+      "supportsPackageLocal": true
+    },
+    {
+      "id": "builtin:function-mapping",
+      "version": 4,
+      "name": "函数映射 · Function Mapping",
+      "affordances": [
+        "mapping",
+        "finite-function"
+      ],
+      "ordering": "model-defined",
+      "parameters": [
+        {
+          "id": "domain",
+          "label": "定义域",
+          "defaultValue": "a,b,c",
+          "type": "string"
+        },
+        {
+          "id": "codomain",
+          "label": "陪域",
+          "defaultValue": "1,2",
+          "type": "string"
+        },
+        {
+          "id": "images",
+          "label": "按定义域顺序列出的像",
+          "defaultValue": "1,2,1",
+          "type": "string"
+        }
+      ],
+      "layout": {
+        "type": "manual"
+      },
+      "implementation": "semantic:function-mapping",
+      "scope": "runtime",
+      "supportsPackageLocal": true
+    },
+    {
+      "id": "builtin:commutative-diagram",
+      "version": 4,
+      "name": "交换图 · Commutative Diagram",
+      "affordances": [
+        "mapping",
+        "composition",
+        "commutativity"
+      ],
+      "ordering": "model-defined",
+      "parameters": [
+        {
+          "id": "f",
+          "label": "f: A → B",
+          "defaultValue": "0,1,2",
+          "type": "string"
+        },
+        {
+          "id": "g",
+          "label": "g: A → C",
+          "defaultValue": "0,1,2",
+          "type": "string"
+        },
+        {
+          "id": "h",
+          "label": "h: B → D",
+          "defaultValue": "0,1,2",
+          "type": "string"
+        },
+        {
+          "id": "k",
+          "label": "k: C → D",
+          "defaultValue": "0,1,2",
+          "type": "string"
+        }
+      ],
+      "layout": {
+        "type": "manual"
+      },
+      "implementation": "semantic:commutative-diagram",
+      "scope": "runtime",
+      "supportsPackageLocal": true
+    },
+    {
+      "id": "builtin:dependency-dag",
+      "version": 4,
+      "name": "依赖有向无环图 · Dependency DAG",
+      "affordances": [
+        "layered"
+      ],
+      "ordering": "model-defined",
+      "parameters": [],
+      "layout": {
+        "type": "layered"
+      },
+      "implementation": "declarative",
+      "scope": "runtime",
+      "supportsPackageLocal": true
+    },
+    {
+      "id": "builtin:state-machine",
+      "version": 4,
+      "name": "状态机 · State Machine",
+      "affordances": [
+        "grid"
+      ],
+      "ordering": "model-defined",
+      "parameters": [],
+      "layout": {
+        "type": "grid"
+      },
+      "implementation": "declarative",
+      "scope": "runtime",
+      "supportsPackageLocal": true
+    },
+    {
+      "id": "builtin:timeline",
+      "version": 2,
+      "name": "时间线 · Timeline",
+      "affordances": [
+        "timeline"
+      ],
+      "ordering": "model-defined",
+      "parameters": [],
+      "layout": {
+        "type": "timeline"
+      },
+      "implementation": "declarative",
+      "scope": "runtime",
+      "supportsPackageLocal": true
+    },
+    {
+      "id": "builtin:equivalence-classes",
+      "version": 4,
+      "name": "等价类 · Equivalence Classes",
+      "affordances": [
+        "equivalence",
+        "quotient-set"
+      ],
+      "ordering": "model-defined",
+      "parameters": [
+        {
+          "id": "groups",
+          "label": "等价类（类内逗号，类间 |）",
+          "defaultValue": "a,b|c,d|e",
+          "type": "string"
+        }
+      ],
+      "layout": {
+        "type": "manual"
+      },
+      "implementation": "semantic:equivalence-classes",
+      "scope": "runtime",
+      "supportsPackageLocal": true
+    },
+    {
+      "id": "builtin:set-partition",
+      "version": 4,
+      "name": "集合划分 · Set Partition",
+      "affordances": [
+        "partition",
+        "disjoint-subsets"
+      ],
+      "ordering": "model-defined",
+      "parameters": [
+        {
+          "id": "groups",
+          "label": "分块（块内逗号，块间 |）",
+          "defaultValue": "a,b|c,d|e",
+          "type": "string"
+        }
+      ],
+      "layout": {
+        "type": "manual"
+      },
+      "implementation": "semantic:set-partition",
+      "scope": "runtime",
+      "supportsPackageLocal": true
+    },
+    {
+      "id": "builtin:lattice",
+      "version": 4,
+      "name": "格 · Lattice",
+      "affordances": [
+        "hasse"
+      ],
+      "ordering": "model-defined",
+      "parameters": [],
+      "layout": {
+        "type": "hasse"
+      },
+      "implementation": "declarative",
+      "scope": "runtime",
+      "supportsPackageLocal": true
+    },
+    {
+      "id": "builtin:proof-tree",
+      "version": 4,
+      "name": "证明树 · Proof Tree",
+      "affordances": [
+        "tree"
+      ],
+      "ordering": "model-defined",
+      "parameters": [],
+      "layout": {
+        "type": "tree"
+      },
+      "implementation": "declarative",
+      "scope": "runtime",
+      "supportsPackageLocal": true
+    },
+    {
+      "id": "builtin:decision-tree",
+      "version": 4,
+      "name": "决策树 · Decision Tree",
+      "affordances": [
+        "tree"
+      ],
+      "ordering": "model-defined",
+      "parameters": [],
+      "layout": {
+        "type": "tree"
+      },
+      "implementation": "declarative",
+      "scope": "runtime",
+      "supportsPackageLocal": true
+    },
+    {
+      "id": "builtin:cartesian-product",
+      "version": 4,
+      "name": "笛卡尔积 · Cartesian Product",
+      "affordances": [
+        "ordered-pairs",
+        "cartesian-product",
+        "matrix"
+      ],
+      "ordering": "model-defined",
+      "parameters": [
+        {
+          "id": "setA",
+          "label": "集合 A",
+          "defaultValue": "a,b",
+          "type": "string"
+        },
+        {
+          "id": "setB",
+          "label": "集合 B",
+          "defaultValue": "1,2,3",
+          "type": "string"
+        }
+      ],
+      "layout": {
+        "type": "manual"
+      },
+      "implementation": "semantic:cartesian-product",
+      "scope": "runtime",
+      "supportsPackageLocal": true
+    },
+    {
+      "id": "builtin:permutation",
+      "version": 4,
+      "name": "置换 · Permutation",
+      "affordances": [
+        "bijection",
+        "permutation",
+        "cycles"
+      ],
+      "ordering": "model-defined",
+      "parameters": [
+        {
+          "id": "images",
+          "label": "σ(1),…,σ(n)",
+          "defaultValue": "2,3,1,4",
+          "type": "string"
+        }
+      ],
+      "layout": {
+        "type": "manual"
+      },
+      "implementation": "semantic:permutation",
+      "scope": "runtime",
+      "supportsPackageLocal": true
+    },
+    {
+      "id": "builtin:transformation-group",
+      "version": 4,
+      "name": "变换群 · Dihedral Action",
+      "affordances": [
+        "group-action",
+        "symmetry",
+        "cayley-graph"
+      ],
+      "ordering": "model-defined",
+      "parameters": [
+        {
+          "id": "n",
+          "label": "多边形边数 n",
+          "defaultValue": 3,
+          "type": "number",
+          "min": 3,
+          "max": 8
+        }
+      ],
+      "layout": {
+        "type": "manual"
+      },
+      "implementation": "semantic:transformation-group",
+      "scope": "runtime",
+      "supportsPackageLocal": true
+    },
+    {
+      "id": "builtin:dynamical-system",
+      "version": 4,
+      "name": "动力系统 · Discrete Dynamics",
+      "affordances": [
+        "state-evolution",
+        "iteration"
+      ],
+      "ordering": "model-defined",
+      "parameters": [
+        {
+          "id": "r",
+          "label": "参数 r",
+          "defaultValue": 3.2,
+          "type": "number",
+          "min": 0,
+          "max": 4
+        },
+        {
+          "id": "x0",
+          "label": "初态 x₀",
+          "defaultValue": 0.2,
+          "type": "number",
+          "min": 0,
+          "max": 1
+        },
+        {
+          "id": "steps",
+          "label": "迭代步数",
+          "defaultValue": 8,
+          "type": "number",
+          "min": 1,
+          "max": 30
+        }
+      ],
+      "layout": {
+        "type": "manual"
+      },
+      "implementation": "semantic:dynamical-system",
+      "scope": "runtime",
+      "supportsPackageLocal": true
+    },
+    {
+      "id": "builtin:flow-network",
+      "version": 4,
+      "name": "流网络 · Flow Network",
+      "affordances": [
+        "flow",
+        "capacity",
+        "conservation"
+      ],
+      "ordering": "model-defined",
+      "parameters": [
+        {
+          "id": "arcs",
+          "label": "容量边",
+          "defaultValue": "s,a,5;a,t,3;s,t,1",
+          "type": "string"
+        }
+      ],
+      "layout": {
+        "type": "manual"
+      },
+      "implementation": "semantic:flow-network",
+      "scope": "runtime",
+      "supportsPackageLocal": true
+    }
+  ],
   "outputPolicy": {
-    "default": "one complete LKL 2 Knowledge Package",
+    "default": "one complete importable LKL 3 archive or LKL 2 Knowledge Package, selected for the requested exchange scope",
     "whenBuiltinStructuresAreInsufficient": [
-      "one LKL 1 Structure Template",
-      "one LKL 2 Knowledge Package that references the imported custom template"
+      "package-local declarative template and instance in the same package",
+      "LKL 1 only for deliberately shared independent templates"
     ],
     "forbidPseudocode": true,
     "forbidNewBoardsAndFrames": true
@@ -2666,6 +3621,7 @@
       "builtin:vector-space",
       "builtin:free-coordinate",
       "builtin:empty-custom",
+      "builtin:n-center",
       "builtin:matrix-grid",
       "builtin:function-mapping",
       "builtin:commutative-diagram",
@@ -2822,6 +3778,13 @@
         "slot-1"
       ],
       "builtin:empty-custom": [],
+      "builtin:n-center": [
+        "n-center-1",
+        "n-center-2",
+        "n-center-3",
+        "n-center-4",
+        "n-center-5"
+      ],
       "builtin:matrix-grid": [
         "cell-1-1",
         "cell-1-2",
@@ -2836,7 +3799,9 @@
       "builtin:function-mapping": [
         "function-mapping-1",
         "function-mapping-2",
-        "function-mapping-3"
+        "function-mapping-3",
+        "function-mapping-4",
+        "function-mapping-5"
       ],
       "builtin:commutative-diagram": [
         "commutative-diagram-1",
@@ -2847,7 +3812,8 @@
       "builtin:dependency-dag": [
         "dependency-dag-1",
         "dependency-dag-2",
-        "dependency-dag-3"
+        "dependency-dag-3",
+        "dependency-dag-4"
       ],
       "builtin:state-machine": [
         "state-machine-1",
@@ -2872,12 +3838,14 @@
       "builtin:lattice": [
         "lattice-1",
         "lattice-2",
-        "lattice-3"
+        "lattice-3",
+        "lattice-4"
       ],
       "builtin:proof-tree": [
         "proof-tree-1",
         "proof-tree-2",
-        "proof-tree-3"
+        "proof-tree-3",
+        "proof-tree-4"
       ],
       "builtin:decision-tree": [
         "decision-tree-1",
@@ -2887,7 +3855,13 @@
       "builtin:cartesian-product": [
         "cartesian-product-1",
         "cartesian-product-2",
-        "cartesian-product-3"
+        "cartesian-product-3",
+        "cartesian-product-4",
+        "cartesian-product-5",
+        "cartesian-product-6",
+        "cartesian-product-7",
+        "cartesian-product-8",
+        "cartesian-product-9"
       ],
       "builtin:permutation": [
         "permutation-1",
@@ -2898,12 +3872,21 @@
       "builtin:transformation-group": [
         "transformation-group-1",
         "transformation-group-2",
-        "transformation-group-3"
+        "transformation-group-3",
+        "transformation-group-4",
+        "transformation-group-5",
+        "transformation-group-6"
       ],
       "builtin:dynamical-system": [
         "dynamical-system-1",
         "dynamical-system-2",
-        "dynamical-system-3"
+        "dynamical-system-3",
+        "dynamical-system-4",
+        "dynamical-system-5",
+        "dynamical-system-6",
+        "dynamical-system-7",
+        "dynamical-system-8",
+        "dynamical-system-9"
       ],
       "builtin:flow-network": [
         "flow-network-1",
@@ -3198,6 +4181,17 @@
       ],
       "builtin:free-coordinate": [],
       "builtin:empty-custom": [],
+      "builtin:n-center": [
+        {
+          "id": "members",
+          "label": "面向名称（逗号分隔）",
+          "type": "string",
+          "defaultValue": "面向一,面向二,面向三,面向四",
+          "min": null,
+          "max": null,
+          "options": null
+        }
+      ],
       "builtin:matrix-grid": [
         {
           "id": "rows",
@@ -3225,23 +4219,194 @@
           "min": null,
           "max": null,
           "options": null
+        },
+        {
+          "id": "values",
+          "label": "矩阵元素（JSON；可留空）",
+          "type": "textarea",
+          "defaultValue": "",
+          "min": null,
+          "max": null,
+          "options": null
         }
       ],
-      "builtin:function-mapping": [],
-      "builtin:commutative-diagram": [],
+      "builtin:function-mapping": [
+        {
+          "id": "domain",
+          "label": "定义域",
+          "type": "string",
+          "defaultValue": "a,b,c",
+          "min": null,
+          "max": null,
+          "options": null
+        },
+        {
+          "id": "codomain",
+          "label": "陪域",
+          "type": "string",
+          "defaultValue": "1,2",
+          "min": null,
+          "max": null,
+          "options": null
+        },
+        {
+          "id": "images",
+          "label": "按定义域顺序列出的像",
+          "type": "string",
+          "defaultValue": "1,2,1",
+          "min": null,
+          "max": null,
+          "options": null
+        }
+      ],
+      "builtin:commutative-diagram": [
+        {
+          "id": "f",
+          "label": "f: A → B",
+          "type": "string",
+          "defaultValue": "0,1,2",
+          "min": null,
+          "max": null,
+          "options": null
+        },
+        {
+          "id": "g",
+          "label": "g: A → C",
+          "type": "string",
+          "defaultValue": "0,1,2",
+          "min": null,
+          "max": null,
+          "options": null
+        },
+        {
+          "id": "h",
+          "label": "h: B → D",
+          "type": "string",
+          "defaultValue": "0,1,2",
+          "min": null,
+          "max": null,
+          "options": null
+        },
+        {
+          "id": "k",
+          "label": "k: C → D",
+          "type": "string",
+          "defaultValue": "0,1,2",
+          "min": null,
+          "max": null,
+          "options": null
+        }
+      ],
       "builtin:dependency-dag": [],
       "builtin:state-machine": [],
       "builtin:timeline": [],
-      "builtin:equivalence-classes": [],
-      "builtin:set-partition": [],
+      "builtin:equivalence-classes": [
+        {
+          "id": "groups",
+          "label": "等价类（类内逗号，类间 |）",
+          "type": "string",
+          "defaultValue": "a,b|c,d|e",
+          "min": null,
+          "max": null,
+          "options": null
+        }
+      ],
+      "builtin:set-partition": [
+        {
+          "id": "groups",
+          "label": "分块（块内逗号，块间 |）",
+          "type": "string",
+          "defaultValue": "a,b|c,d|e",
+          "min": null,
+          "max": null,
+          "options": null
+        }
+      ],
       "builtin:lattice": [],
       "builtin:proof-tree": [],
       "builtin:decision-tree": [],
-      "builtin:cartesian-product": [],
-      "builtin:permutation": [],
-      "builtin:transformation-group": [],
-      "builtin:dynamical-system": [],
-      "builtin:flow-network": []
+      "builtin:cartesian-product": [
+        {
+          "id": "setA",
+          "label": "集合 A",
+          "type": "string",
+          "defaultValue": "a,b",
+          "min": null,
+          "max": null,
+          "options": null
+        },
+        {
+          "id": "setB",
+          "label": "集合 B",
+          "type": "string",
+          "defaultValue": "1,2,3",
+          "min": null,
+          "max": null,
+          "options": null
+        }
+      ],
+      "builtin:permutation": [
+        {
+          "id": "images",
+          "label": "σ(1),…,σ(n)",
+          "type": "string",
+          "defaultValue": "2,3,1,4",
+          "min": null,
+          "max": null,
+          "options": null
+        }
+      ],
+      "builtin:transformation-group": [
+        {
+          "id": "n",
+          "label": "多边形边数 n",
+          "type": "number",
+          "defaultValue": 3,
+          "min": 3,
+          "max": 8,
+          "options": null
+        }
+      ],
+      "builtin:dynamical-system": [
+        {
+          "id": "r",
+          "label": "参数 r",
+          "type": "number",
+          "defaultValue": 3.2,
+          "min": 0,
+          "max": 4,
+          "options": null
+        },
+        {
+          "id": "x0",
+          "label": "初态 x₀",
+          "type": "number",
+          "defaultValue": 0.2,
+          "min": 0,
+          "max": 1,
+          "options": null
+        },
+        {
+          "id": "steps",
+          "label": "迭代步数",
+          "type": "number",
+          "defaultValue": 8,
+          "min": 1,
+          "max": 30,
+          "options": null
+        }
+      ],
+      "builtin:flow-network": [
+        {
+          "id": "arcs",
+          "label": "容量边",
+          "type": "string",
+          "defaultValue": "s,a,5;a,t,3;s,t,1",
+          "min": null,
+          "max": null,
+          "options": null
+        }
+      ]
     }
   },
   "builtins": [
@@ -6437,6 +7602,178 @@
       "viewCapability": null
     },
     {
+      "id": "builtin:n-center",
+      "name": "n 元中心 · Center & Facets",
+      "names": {
+        "zh-CN": "n 元中心",
+        "en": "Center & Facets"
+      },
+      "description": "一个中心与无序的并列面向。圆周位置不表示先后、依赖或等级。",
+      "version": 4,
+      "category": "graph",
+      "maturity": "ready",
+      "deprecated": false,
+      "replacementTemplateId": null,
+      "nestable": true,
+      "computable": true,
+      "factory": "semantic:n-center",
+      "parameters": [
+        {
+          "id": "members",
+          "label": "面向名称（逗号分隔）",
+          "type": "string",
+          "defaultValue": "面向一,面向二,面向三,面向四",
+          "min": null,
+          "max": null,
+          "options": null
+        }
+      ],
+      "defaultSlots": [
+        {
+          "id": "n-center-1",
+          "label": "中心",
+          "role": "host-anchor",
+          "cardinality": "many",
+          "accepts": [
+            "knowledge",
+            "structure",
+            "value",
+            "variable"
+          ],
+          "semanticCoordinate": {}
+        },
+        {
+          "id": "n-center-2",
+          "label": "面向一",
+          "role": "facet",
+          "cardinality": "many",
+          "accepts": [
+            "knowledge",
+            "structure",
+            "value",
+            "variable"
+          ],
+          "semanticCoordinate": {}
+        },
+        {
+          "id": "n-center-3",
+          "label": "面向二",
+          "role": "facet",
+          "cardinality": "many",
+          "accepts": [
+            "knowledge",
+            "structure",
+            "value",
+            "variable"
+          ],
+          "semanticCoordinate": {}
+        },
+        {
+          "id": "n-center-4",
+          "label": "面向三",
+          "role": "facet",
+          "cardinality": "many",
+          "accepts": [
+            "knowledge",
+            "structure",
+            "value",
+            "variable"
+          ],
+          "semanticCoordinate": {}
+        },
+        {
+          "id": "n-center-5",
+          "label": "面向四",
+          "role": "facet",
+          "cardinality": "many",
+          "accepts": [
+            "knowledge",
+            "structure",
+            "value",
+            "variable"
+          ],
+          "semanticCoordinate": {}
+        }
+      ],
+      "defaultEdges": [
+        {
+          "id": "facet-0",
+          "from": "n-center-1",
+          "to": "n-center-2",
+          "direction": "undirected",
+          "type": "facet-membership",
+          "label": "",
+          "routing": "straight"
+        },
+        {
+          "id": "facet-1",
+          "from": "n-center-1",
+          "to": "n-center-3",
+          "direction": "undirected",
+          "type": "facet-membership",
+          "label": "",
+          "routing": "straight"
+        },
+        {
+          "id": "facet-2",
+          "from": "n-center-1",
+          "to": "n-center-4",
+          "direction": "undirected",
+          "type": "facet-membership",
+          "label": "",
+          "routing": "straight"
+        },
+        {
+          "id": "facet-3",
+          "from": "n-center-1",
+          "to": "n-center-5",
+          "direction": "undirected",
+          "type": "facet-membership",
+          "label": "",
+          "routing": "straight"
+        }
+      ],
+      "layout": {
+        "type": "manual",
+        "positions": {
+          "n-center-1": {
+            "x": 440,
+            "y": 410,
+            "width": 190,
+            "height": 100
+          },
+          "n-center-2": {
+            "x": 440,
+            "y": 120,
+            "width": 190,
+            "height": 100
+          },
+          "n-center-3": {
+            "x": 730,
+            "y": 410,
+            "width": 190,
+            "height": 100
+          },
+          "n-center-4": {
+            "x": 440,
+            "y": 700,
+            "width": 190,
+            "height": 100
+          },
+          "n-center-5": {
+            "x": 150,
+            "y": 410.00000000000006,
+            "width": 190,
+            "height": 100
+          }
+        }
+      },
+      "viewCapability": {
+        "mode": "fixed",
+        "label": "语义布局"
+      }
+    },
+    {
       "id": "builtin:matrix-grid",
       "name": "矩阵 / 网格 · Matrix / Grid",
       "names": {
@@ -6476,6 +7813,15 @@
           "label": "单元格前缀",
           "type": "string",
           "defaultValue": "a",
+          "min": null,
+          "max": null,
+          "options": null
+        },
+        {
+          "id": "values",
+          "label": "矩阵元素（JSON；可留空）",
+          "type": "textarea",
+          "defaultValue": "",
           "min": null,
           "max": null,
           "options": null
@@ -6649,21 +7995,49 @@
         "zh-CN": "函数映射",
         "en": "Function Mapping"
       },
-      "description": "可直接创建、编辑节点与关系的 函数映射 · Function Mapping 工作台。",
-      "version": 2,
+      "description": "有限集合间的函数：定义域每个元素恰有一个像；自动检验单射、满射。",
+      "version": 4,
       "category": "algebra",
       "maturity": "ready",
       "deprecated": false,
       "replacementTemplateId": null,
       "nestable": true,
-      "computable": false,
-      "factory": null,
-      "parameters": [],
+      "computable": true,
+      "factory": "semantic:function-mapping",
+      "parameters": [
+        {
+          "id": "domain",
+          "label": "定义域",
+          "type": "string",
+          "defaultValue": "a,b,c",
+          "min": null,
+          "max": null,
+          "options": null
+        },
+        {
+          "id": "codomain",
+          "label": "陪域",
+          "type": "string",
+          "defaultValue": "1,2",
+          "min": null,
+          "max": null,
+          "options": null
+        },
+        {
+          "id": "images",
+          "label": "按定义域顺序列出的像",
+          "type": "string",
+          "defaultValue": "1,2,1",
+          "min": null,
+          "max": null,
+          "options": null
+        }
+      ],
       "defaultSlots": [
         {
           "id": "function-mapping-1",
-          "label": "domain",
-          "role": "domain",
+          "label": "a",
+          "role": "domain-element",
           "cardinality": "many",
           "accepts": [
             "knowledge",
@@ -6671,15 +8045,12 @@
             "value",
             "variable"
           ],
-          "semanticCoordinate": {
-            "layer": 0,
-            "order": 0
-          }
+          "semanticCoordinate": {}
         },
         {
           "id": "function-mapping-2",
-          "label": "mapping",
-          "role": "mapping",
+          "label": "b",
+          "role": "domain-element",
           "cardinality": "many",
           "accepts": [
             "knowledge",
@@ -6687,15 +8058,12 @@
             "value",
             "variable"
           ],
-          "semanticCoordinate": {
-            "layer": 1,
-            "order": 1
-          }
+          "semanticCoordinate": {}
         },
         {
           "id": "function-mapping-3",
-          "label": "codomain",
-          "role": "codomain",
+          "label": "c",
+          "role": "domain-element",
           "cardinality": "many",
           "accepts": [
             "knowledge",
@@ -6703,45 +8071,102 @@
             "value",
             "variable"
           ],
-          "semanticCoordinate": {
-            "layer": 2,
-            "order": 2
-          }
+          "semanticCoordinate": {}
+        },
+        {
+          "id": "function-mapping-4",
+          "label": "1",
+          "role": "codomain-element",
+          "cardinality": "many",
+          "accepts": [
+            "knowledge",
+            "structure",
+            "value",
+            "variable"
+          ],
+          "semanticCoordinate": {}
+        },
+        {
+          "id": "function-mapping-5",
+          "label": "2",
+          "role": "codomain-element",
+          "cardinality": "many",
+          "accepts": [
+            "knowledge",
+            "structure",
+            "value",
+            "variable"
+          ],
+          "semanticCoordinate": {}
         }
       ],
       "defaultEdges": [
         {
-          "id": "function-mapping-edge-1",
+          "id": "map-0",
           "from": "function-mapping-1",
-          "to": "function-mapping-2",
+          "to": "function-mapping-4",
           "direction": "directed",
-          "type": "function-mapping",
-          "label": "映射",
+          "type": "maps-to",
+          "label": "f",
           "routing": "straight"
         },
         {
-          "id": "function-mapping-edge-2",
+          "id": "map-1",
           "from": "function-mapping-2",
-          "to": "function-mapping-3",
+          "to": "function-mapping-5",
           "direction": "directed",
-          "type": "function-mapping",
-          "label": "映射",
+          "type": "maps-to",
+          "label": "f",
+          "routing": "straight"
+        },
+        {
+          "id": "map-2",
+          "from": "function-mapping-3",
+          "to": "function-mapping-4",
+          "direction": "directed",
+          "type": "maps-to",
+          "label": "f",
           "routing": "straight"
         }
       ],
       "layout": {
-        "type": "columns"
+        "type": "manual",
+        "positions": {
+          "function-mapping-1": {
+            "x": 100,
+            "y": 100,
+            "width": 190,
+            "height": 100
+          },
+          "function-mapping-2": {
+            "x": 100,
+            "y": 235,
+            "width": 190,
+            "height": 100
+          },
+          "function-mapping-3": {
+            "x": 100,
+            "y": 370,
+            "width": 190,
+            "height": 100
+          },
+          "function-mapping-4": {
+            "x": 550,
+            "y": 100,
+            "width": 190,
+            "height": 100
+          },
+          "function-mapping-5": {
+            "x": 550,
+            "y": 235,
+            "width": 190,
+            "height": 100
+          }
+        }
       },
       "viewCapability": {
-        "mode": "arrange",
-        "label": "可排列",
-        "defaultArrangement": "horizontal-forward",
-        "options": [
-          "horizontal-forward",
-          "horizontal-reverse",
-          "vertical-forward",
-          "vertical-reverse"
-        ]
+        "mode": "fixed",
+        "label": "语义布局"
       }
     },
     {
@@ -6751,21 +8176,58 @@
         "zh-CN": "交换图",
         "en": "Commutative Diagram"
       },
-      "description": "可直接创建、编辑节点与关系的 交换图 · Commutative Diagram 工作台。",
-      "version": 2,
+      "description": "四个有限集上的映射方形；逐元素验证 h∘f = k∘g。映射用 0…n−1 的像列表定义。",
+      "version": 4,
       "category": "algebra",
       "maturity": "ready",
       "deprecated": false,
       "replacementTemplateId": null,
       "nestable": true,
-      "computable": false,
-      "factory": null,
-      "parameters": [],
+      "computable": true,
+      "factory": "semantic:commutative-diagram",
+      "parameters": [
+        {
+          "id": "f",
+          "label": "f: A → B",
+          "type": "string",
+          "defaultValue": "0,1,2",
+          "min": null,
+          "max": null,
+          "options": null
+        },
+        {
+          "id": "g",
+          "label": "g: A → C",
+          "type": "string",
+          "defaultValue": "0,1,2",
+          "min": null,
+          "max": null,
+          "options": null
+        },
+        {
+          "id": "h",
+          "label": "h: B → D",
+          "type": "string",
+          "defaultValue": "0,1,2",
+          "min": null,
+          "max": null,
+          "options": null
+        },
+        {
+          "id": "k",
+          "label": "k: C → D",
+          "type": "string",
+          "defaultValue": "0,1,2",
+          "min": null,
+          "max": null,
+          "options": null
+        }
+      ],
       "defaultSlots": [
         {
           "id": "commutative-diagram-1",
-          "label": "object a",
-          "role": "object-a",
+          "label": "A = {0,…,2}",
+          "role": "object",
           "cardinality": "many",
           "accepts": [
             "knowledge",
@@ -6773,15 +8235,12 @@
             "value",
             "variable"
           ],
-          "semanticCoordinate": {
-            "layer": 0,
-            "order": 0
-          }
+          "semanticCoordinate": {}
         },
         {
           "id": "commutative-diagram-2",
-          "label": "object b",
-          "role": "object-b",
+          "label": "B = {0,…,2}",
+          "role": "object",
           "cardinality": "many",
           "accepts": [
             "knowledge",
@@ -6789,15 +8248,12 @@
             "value",
             "variable"
           ],
-          "semanticCoordinate": {
-            "layer": 1,
-            "order": 1
-          }
+          "semanticCoordinate": {}
         },
         {
           "id": "commutative-diagram-3",
-          "label": "object c",
-          "role": "object-c",
+          "label": "C = {0,…,2}",
+          "role": "object",
           "cardinality": "many",
           "accepts": [
             "knowledge",
@@ -6805,15 +8261,12 @@
             "value",
             "variable"
           ],
-          "semanticCoordinate": {
-            "layer": 2,
-            "order": 2
-          }
+          "semanticCoordinate": {}
         },
         {
           "id": "commutative-diagram-4",
-          "label": "object d",
-          "role": "object-d",
+          "label": "D = {0,…,2}",
+          "role": "object",
           "cardinality": "many",
           "accepts": [
             "knowledge",
@@ -6821,47 +8274,79 @@
             "value",
             "variable"
           ],
-          "semanticCoordinate": {
-            "layer": 3,
-            "order": 3
-          }
+          "semanticCoordinate": {}
         }
       ],
       "defaultEdges": [
         {
-          "id": "commutative-diagram-edge-1",
+          "id": "f",
           "from": "commutative-diagram-1",
           "to": "commutative-diagram-2",
           "direction": "directed",
-          "type": "commutative-diagram",
-          "label": "态射",
+          "type": "maps-to",
+          "label": "f",
           "routing": "straight"
         },
         {
-          "id": "commutative-diagram-edge-2",
-          "from": "commutative-diagram-2",
+          "id": "g",
+          "from": "commutative-diagram-1",
           "to": "commutative-diagram-3",
           "direction": "directed",
-          "type": "commutative-diagram",
-          "label": "态射",
+          "type": "maps-to",
+          "label": "g",
           "routing": "straight"
         },
         {
-          "id": "commutative-diagram-edge-3",
+          "id": "h",
+          "from": "commutative-diagram-2",
+          "to": "commutative-diagram-4",
+          "direction": "directed",
+          "type": "maps-to",
+          "label": "h",
+          "routing": "straight"
+        },
+        {
+          "id": "k",
           "from": "commutative-diagram-3",
           "to": "commutative-diagram-4",
           "direction": "directed",
-          "type": "commutative-diagram",
-          "label": "态射",
+          "type": "maps-to",
+          "label": "k",
           "routing": "straight"
         }
       ],
       "layout": {
-        "type": "grid"
+        "type": "manual",
+        "positions": {
+          "commutative-diagram-1": {
+            "x": 100,
+            "y": 100,
+            "width": 190,
+            "height": 100
+          },
+          "commutative-diagram-2": {
+            "x": 550,
+            "y": 100,
+            "width": 190,
+            "height": 100
+          },
+          "commutative-diagram-3": {
+            "x": 100,
+            "y": 390,
+            "width": 190,
+            "height": 100
+          },
+          "commutative-diagram-4": {
+            "x": 550,
+            "y": 390,
+            "width": 190,
+            "height": 100
+          }
+        }
       },
       "viewCapability": {
         "mode": "fixed",
-        "label": "固定视角"
+        "label": "语义布局"
       }
     },
     {
@@ -6871,8 +8356,8 @@
         "zh-CN": "依赖有向无环图",
         "en": "Dependency DAG"
       },
-      "description": "可直接创建、编辑节点与关系的 依赖有向无环图 · Dependency DAG 工作台。",
-      "version": 2,
+      "description": "多项先修汇合到依赖步骤与目标；只承载有依据的无环依赖。",
+      "version": 4,
       "category": "graph",
       "maturity": "ready",
       "deprecated": false,
@@ -6929,25 +8414,50 @@
             "layer": 0,
             "order": 2
           }
+        },
+        {
+          "id": "dependency-dag-4",
+          "label": "先修 B",
+          "role": "input",
+          "cardinality": "many",
+          "accepts": [
+            "knowledge",
+            "structure",
+            "value",
+            "variable"
+          ],
+          "semanticCoordinate": {
+            "layer": 2,
+            "order": 2
+          }
         }
       ],
       "defaultEdges": [
         {
-          "id": "dependency-dag-edge-1",
+          "id": "dependency-dag-a",
           "from": "dependency-dag-1",
           "to": "dependency-dag-2",
           "direction": "directed",
-          "type": "dependency-dag",
+          "type": "depends-on",
           "label": "依赖",
           "routing": "straight"
         },
         {
-          "id": "dependency-dag-edge-2",
+          "id": "dependency-dag-b",
+          "from": "dependency-dag-4",
+          "to": "dependency-dag-2",
+          "direction": "directed",
+          "type": "depends-on",
+          "label": "依赖",
+          "routing": "straight"
+        },
+        {
+          "id": "dependency-dag-c",
           "from": "dependency-dag-2",
           "to": "dependency-dag-3",
           "direction": "directed",
-          "type": "dependency-dag",
-          "label": "依赖",
+          "type": "depends-on",
+          "label": "形成",
           "routing": "straight"
         }
       ],
@@ -6973,8 +8483,8 @@
         "zh-CN": "状态机",
         "en": "State Machine"
       },
-      "description": "可直接创建、编辑节点与关系的 状态机 · State Machine 工作台。",
-      "version": 2,
+      "description": "状态、初态/终态与带触发条件的转移；可编辑转移模型。",
+      "version": 4,
       "category": "graph",
       "maturity": "ready",
       "deprecated": false,
@@ -6986,7 +8496,7 @@
       "defaultSlots": [
         {
           "id": "state-machine-1",
-          "label": "initial",
+          "label": "q₀ · 初态",
           "role": "initial",
           "cardinality": "many",
           "accepts": [
@@ -7002,7 +8512,7 @@
         },
         {
           "id": "state-machine-2",
-          "label": "state",
+          "label": "q₁",
           "role": "state",
           "cardinality": "many",
           "accepts": [
@@ -7018,7 +8528,7 @@
         },
         {
           "id": "state-machine-3",
-          "label": "terminal",
+          "label": "q₂ · 终态",
           "role": "terminal",
           "cardinality": "many",
           "accepts": [
@@ -7035,21 +8545,30 @@
       ],
       "defaultEdges": [
         {
-          "id": "state-machine-edge-1",
+          "id": "a",
           "from": "state-machine-1",
           "to": "state-machine-2",
           "direction": "directed",
-          "type": "state-machine",
-          "label": "转移",
+          "type": "transition",
+          "label": "事件 a",
           "routing": "straight"
         },
         {
-          "id": "state-machine-edge-2",
+          "id": "b",
           "from": "state-machine-2",
           "to": "state-machine-3",
           "direction": "directed",
-          "type": "state-machine",
-          "label": "转移",
+          "type": "transition",
+          "label": "事件 b",
+          "routing": "straight"
+        },
+        {
+          "id": "reset",
+          "from": "state-machine-2",
+          "to": "state-machine-1",
+          "direction": "directed",
+          "type": "transition",
+          "label": "reset",
           "routing": "straight"
         }
       ],
@@ -7170,21 +8689,31 @@
         "zh-CN": "等价类",
         "en": "Equivalence Classes"
       },
-      "description": "可直接创建、编辑节点与关系的 等价类 · Equivalence Classes 工作台。",
-      "version": 2,
+      "description": "同一分组内的元素等价；各等价类互斥，组成商集。每个元素只能属于一个类。",
+      "version": 4,
       "category": "set",
       "maturity": "ready",
       "deprecated": false,
       "replacementTemplateId": null,
       "nestable": true,
-      "computable": false,
-      "factory": null,
-      "parameters": [],
+      "computable": true,
+      "factory": "semantic:equivalence-classes",
+      "parameters": [
+        {
+          "id": "groups",
+          "label": "等价类（类内逗号，类间 |）",
+          "type": "string",
+          "defaultValue": "a,b|c,d|e",
+          "min": null,
+          "max": null,
+          "options": null
+        }
+      ],
       "defaultSlots": [
         {
           "id": "equivalence-classes-1",
-          "label": "class a",
-          "role": "class-a",
+          "label": "[a] = {a, b}",
+          "role": "equivalence-class",
           "cardinality": "many",
           "accepts": [
             "knowledge",
@@ -7192,15 +8721,12 @@
             "value",
             "variable"
           ],
-          "semanticCoordinate": {
-            "layer": 0,
-            "order": 0
-          }
+          "semanticCoordinate": {}
         },
         {
           "id": "equivalence-classes-2",
-          "label": "class b",
-          "role": "class-b",
+          "label": "[c] = {c, d}",
+          "role": "equivalence-class",
           "cardinality": "many",
           "accepts": [
             "knowledge",
@@ -7208,15 +8734,12 @@
             "value",
             "variable"
           ],
-          "semanticCoordinate": {
-            "layer": 1,
-            "order": 1
-          }
+          "semanticCoordinate": {}
         },
         {
           "id": "equivalence-classes-3",
-          "label": "class c",
-          "role": "class-c",
+          "label": "[e] = {e}",
+          "role": "equivalence-class",
           "cardinality": "many",
           "accepts": [
             "knowledge",
@@ -7224,38 +8747,36 @@
             "value",
             "variable"
           ],
-          "semanticCoordinate": {
-            "layer": 2,
-            "order": 2
+          "semanticCoordinate": {}
+        }
+      ],
+      "defaultEdges": [],
+      "layout": {
+        "type": "manual",
+        "positions": {
+          "equivalence-classes-1": {
+            "x": 100,
+            "y": 100,
+            "width": 190,
+            "height": 100
+          },
+          "equivalence-classes-2": {
+            "x": 365,
+            "y": 100,
+            "width": 190,
+            "height": 100
+          },
+          "equivalence-classes-3": {
+            "x": 630,
+            "y": 100,
+            "width": 190,
+            "height": 100
           }
         }
-      ],
-      "defaultEdges": [
-        {
-          "id": "equivalence-classes-edge-1",
-          "from": "equivalence-classes-1",
-          "to": "equivalence-classes-2",
-          "direction": "directed",
-          "type": "equivalence-classes",
-          "label": "关系",
-          "routing": "straight"
-        },
-        {
-          "id": "equivalence-classes-edge-2",
-          "from": "equivalence-classes-2",
-          "to": "equivalence-classes-3",
-          "direction": "directed",
-          "type": "equivalence-classes",
-          "label": "关系",
-          "routing": "straight"
-        }
-      ],
-      "layout": {
-        "type": "grid"
       },
       "viewCapability": {
         "mode": "fixed",
-        "label": "固定视角"
+        "label": "语义布局"
       }
     },
     {
@@ -7265,21 +8786,31 @@
         "zh-CN": "集合划分",
         "en": "Set Partition"
       },
-      "description": "可直接创建、编辑节点与关系的 集合划分 · Set Partition 工作台。",
-      "version": 2,
+      "description": "非空、两两不交的子集，其并集就是当前全集。",
+      "version": 4,
       "category": "set",
       "maturity": "ready",
       "deprecated": false,
       "replacementTemplateId": null,
       "nestable": true,
-      "computable": false,
-      "factory": null,
-      "parameters": [],
+      "computable": true,
+      "factory": "semantic:set-partition",
+      "parameters": [
+        {
+          "id": "groups",
+          "label": "分块（块内逗号，块间 |）",
+          "type": "string",
+          "defaultValue": "a,b|c,d|e",
+          "min": null,
+          "max": null,
+          "options": null
+        }
+      ],
       "defaultSlots": [
         {
           "id": "set-partition-1",
-          "label": "part a",
-          "role": "part-a",
+          "label": "B1 = {a, b}",
+          "role": "partition-block",
           "cardinality": "many",
           "accepts": [
             "knowledge",
@@ -7287,15 +8818,12 @@
             "value",
             "variable"
           ],
-          "semanticCoordinate": {
-            "layer": 0,
-            "order": 0
-          }
+          "semanticCoordinate": {}
         },
         {
           "id": "set-partition-2",
-          "label": "part b",
-          "role": "part-b",
+          "label": "B2 = {c, d}",
+          "role": "partition-block",
           "cardinality": "many",
           "accepts": [
             "knowledge",
@@ -7303,15 +8831,12 @@
             "value",
             "variable"
           ],
-          "semanticCoordinate": {
-            "layer": 1,
-            "order": 1
-          }
+          "semanticCoordinate": {}
         },
         {
           "id": "set-partition-3",
-          "label": "part c",
-          "role": "part-c",
+          "label": "B3 = {e}",
+          "role": "partition-block",
           "cardinality": "many",
           "accepts": [
             "knowledge",
@@ -7319,38 +8844,36 @@
             "value",
             "variable"
           ],
-          "semanticCoordinate": {
-            "layer": 2,
-            "order": 2
+          "semanticCoordinate": {}
+        }
+      ],
+      "defaultEdges": [],
+      "layout": {
+        "type": "manual",
+        "positions": {
+          "set-partition-1": {
+            "x": 100,
+            "y": 100,
+            "width": 190,
+            "height": 100
+          },
+          "set-partition-2": {
+            "x": 365,
+            "y": 100,
+            "width": 190,
+            "height": 100
+          },
+          "set-partition-3": {
+            "x": 630,
+            "y": 100,
+            "width": 190,
+            "height": 100
           }
         }
-      ],
-      "defaultEdges": [
-        {
-          "id": "set-partition-edge-1",
-          "from": "set-partition-1",
-          "to": "set-partition-2",
-          "direction": "directed",
-          "type": "set-partition",
-          "label": "关系",
-          "routing": "straight"
-        },
-        {
-          "id": "set-partition-edge-2",
-          "from": "set-partition-2",
-          "to": "set-partition-3",
-          "direction": "directed",
-          "type": "set-partition",
-          "label": "关系",
-          "routing": "straight"
-        }
-      ],
-      "layout": {
-        "type": "grid"
       },
       "viewCapability": {
         "mode": "fixed",
-        "label": "固定视角"
+        "label": "语义布局"
       }
     },
     {
@@ -7360,8 +8883,8 @@
         "zh-CN": "格",
         "en": "Lattice"
       },
-      "description": "可直接创建、编辑节点与关系的 格 · Lattice 工作台。",
-      "version": 2,
+      "description": "以幂集 P({a,b}) 的包含序为起始格；交为 meet，并为 join。偏序工具可检查上下界。",
+      "version": 4,
       "category": "poset",
       "maturity": "ready",
       "deprecated": false,
@@ -7373,7 +8896,7 @@
       "defaultSlots": [
         {
           "id": "lattice-1",
-          "label": "bottom",
+          "label": "∅",
           "role": "bottom",
           "cardinality": "many",
           "accepts": [
@@ -7383,13 +8906,12 @@
             "variable"
           ],
           "semanticCoordinate": {
-            "layer": 0,
-            "order": 0
+            "rank": 0
           }
         },
         {
           "id": "lattice-2",
-          "label": "element",
+          "label": "{a}",
           "role": "element",
           "cardinality": "many",
           "accepts": [
@@ -7399,13 +8921,12 @@
             "variable"
           ],
           "semanticCoordinate": {
-            "layer": 1,
-            "order": 1
+            "rank": 1
           }
         },
         {
           "id": "lattice-3",
-          "label": "top",
+          "label": "{a,b}",
           "role": "top",
           "cardinality": "many",
           "accepts": [
@@ -7415,28 +8936,60 @@
             "variable"
           ],
           "semanticCoordinate": {
-            "layer": 2,
-            "order": 2
+            "rank": 2
+          }
+        },
+        {
+          "id": "lattice-4",
+          "label": "{b}",
+          "role": "element",
+          "cardinality": "many",
+          "accepts": [
+            "knowledge",
+            "structure",
+            "value",
+            "variable"
+          ],
+          "semanticCoordinate": {
+            "rank": 1
           }
         }
       ],
       "defaultEdges": [
         {
-          "id": "lattice-edge-1",
+          "id": "la",
           "from": "lattice-1",
           "to": "lattice-2",
           "direction": "directed",
-          "type": "lattice",
-          "label": "覆盖",
+          "type": "covers",
+          "label": "≺",
           "routing": "straight"
         },
         {
-          "id": "lattice-edge-2",
+          "id": "lb",
+          "from": "lattice-1",
+          "to": "lattice-4",
+          "direction": "directed",
+          "type": "covers",
+          "label": "≺",
+          "routing": "straight"
+        },
+        {
+          "id": "lc",
           "from": "lattice-2",
           "to": "lattice-3",
           "direction": "directed",
-          "type": "lattice",
-          "label": "覆盖",
+          "type": "covers",
+          "label": "≺",
+          "routing": "straight"
+        },
+        {
+          "id": "ld",
+          "from": "lattice-4",
+          "to": "lattice-3",
+          "direction": "directed",
+          "type": "covers",
+          "label": "≺",
           "routing": "straight"
         }
       ],
@@ -7462,8 +9015,8 @@
         "zh-CN": "证明树",
         "en": "Proof Tree"
       },
-      "description": "可直接创建、编辑节点与关系的 证明树 · Proof Tree 工作台。",
-      "version": 2,
+      "description": "多前提汇合到推理步骤与结论；填入的推理仍须有证据。",
+      "version": 4,
       "category": "logic",
       "maturity": "ready",
       "deprecated": false,
@@ -7520,26 +9073,51 @@
             "layer": 0,
             "order": 2
           }
+        },
+        {
+          "id": "proof-tree-4",
+          "label": "前提 B",
+          "role": "premise",
+          "cardinality": "many",
+          "accepts": [
+            "knowledge",
+            "structure",
+            "value",
+            "variable"
+          ],
+          "semanticCoordinate": {
+            "layer": 2,
+            "order": 2
+          }
         }
       ],
       "defaultEdges": [
         {
-          "id": "proof-tree-edge-1",
+          "id": "proof-tree-a",
           "from": "proof-tree-1",
           "to": "proof-tree-2",
           "direction": "directed",
-          "type": "proof-tree",
-          "label": "推出",
-          "routing": "orthogonal"
+          "type": "proves",
+          "label": "依据",
+          "routing": "straight"
         },
         {
-          "id": "proof-tree-edge-2",
+          "id": "proof-tree-b",
+          "from": "proof-tree-4",
+          "to": "proof-tree-2",
+          "direction": "directed",
+          "type": "proves",
+          "label": "依据",
+          "routing": "straight"
+        },
+        {
+          "id": "proof-tree-c",
           "from": "proof-tree-2",
           "to": "proof-tree-3",
           "direction": "directed",
-          "type": "proof-tree",
+          "type": "implies",
           "label": "推出",
-          "routing": "orthogonal"
+          "routing": "straight"
         }
       ],
       "layout": {
@@ -7564,8 +9142,8 @@
         "zh-CN": "决策树",
         "en": "Decision Tree"
       },
-      "description": "可直接创建、编辑节点与关系的 决策树 · Decision Tree 工作台。",
-      "version": 2,
+      "description": "条件分支与互斥结果；分支标签标明成立条件。",
+      "version": 4,
       "category": "logic",
       "maturity": "ready",
       "deprecated": false,
@@ -7577,8 +9155,8 @@
       "defaultSlots": [
         {
           "id": "decision-tree-1",
-          "label": "question",
-          "role": "question",
+          "label": "条件 P？",
+          "role": "condition",
           "cardinality": "many",
           "accepts": [
             "knowledge",
@@ -7593,8 +9171,8 @@
         },
         {
           "id": "decision-tree-2",
-          "label": "branch",
-          "role": "branch",
+          "label": "P 成立时",
+          "role": "outcome",
           "cardinality": "many",
           "accepts": [
             "knowledge",
@@ -7609,7 +9187,7 @@
         },
         {
           "id": "decision-tree-3",
-          "label": "outcome",
+          "label": "P 不成立时",
           "role": "outcome",
           "cardinality": "many",
           "accepts": [
@@ -7626,22 +9204,22 @@
       ],
       "defaultEdges": [
         {
-          "id": "decision-tree-edge-1",
+          "id": "decision-yes",
           "from": "decision-tree-1",
           "to": "decision-tree-2",
-          "direction": "directed",
-          "type": "decision-tree",
-          "label": "分支",
-          "routing": "orthogonal"
+          "direction": "conditional",
+          "type": "branch",
+          "label": "是",
+          "routing": "straight"
         },
         {
-          "id": "decision-tree-edge-2",
-          "from": "decision-tree-2",
+          "id": "decision-no",
+          "from": "decision-tree-1",
           "to": "decision-tree-3",
-          "direction": "directed",
-          "type": "decision-tree",
-          "label": "分支",
-          "routing": "orthogonal"
+          "direction": "conditional",
+          "type": "branch",
+          "label": "否",
+          "routing": "straight"
         }
       ],
       "layout": {
@@ -7666,20 +9244,39 @@
         "zh-CN": "笛卡尔积",
         "en": "Cartesian Product"
       },
-      "description": "可直接创建、编辑节点与关系的 笛卡尔积 · Cartesian Product 工作台。",
-      "version": 2,
+      "description": "A×B 的每一个有序对；行对应 A，列对应 B，不添加虚假的时间或依赖箭头。",
+      "version": 4,
       "category": "set",
       "maturity": "ready",
       "deprecated": false,
       "replacementTemplateId": null,
       "nestable": true,
-      "computable": false,
-      "factory": null,
-      "parameters": [],
+      "computable": true,
+      "factory": "semantic:cartesian-product",
+      "parameters": [
+        {
+          "id": "setA",
+          "label": "集合 A",
+          "type": "string",
+          "defaultValue": "a,b",
+          "min": null,
+          "max": null,
+          "options": null
+        },
+        {
+          "id": "setB",
+          "label": "集合 B",
+          "type": "string",
+          "defaultValue": "1,2,3",
+          "min": null,
+          "max": null,
+          "options": null
+        }
+      ],
       "defaultSlots": [
         {
           "id": "cartesian-product-1",
-          "label": "factor a",
+          "label": "A = {a, b}",
           "role": "factor-a",
           "cardinality": "many",
           "accepts": [
@@ -7688,15 +9285,12 @@
             "value",
             "variable"
           ],
-          "semanticCoordinate": {
-            "layer": 0,
-            "order": 0
-          }
+          "semanticCoordinate": {}
         },
         {
           "id": "cartesian-product-2",
-          "label": "pair",
-          "role": "pair",
+          "label": "A × B",
+          "role": "product",
           "cardinality": "many",
           "accepts": [
             "knowledge",
@@ -7704,14 +9298,11 @@
             "value",
             "variable"
           ],
-          "semanticCoordinate": {
-            "layer": 1,
-            "order": 1
-          }
+          "semanticCoordinate": {}
         },
         {
           "id": "cartesian-product-3",
-          "label": "factor b",
+          "label": "B = {1, 2, 3}",
           "role": "factor-b",
           "cardinality": "many",
           "accepts": [
@@ -7720,38 +9311,192 @@
             "value",
             "variable"
           ],
+          "semanticCoordinate": {}
+        },
+        {
+          "id": "cartesian-product-4",
+          "label": "(a, 1)",
+          "role": "ordered-pair",
+          "cardinality": "many",
+          "accepts": [
+            "knowledge",
+            "structure",
+            "value",
+            "variable"
+          ],
           "semanticCoordinate": {
-            "layer": 2,
-            "order": 2
+            "row": 1,
+            "col": 1,
+            "pair": [
+              "a",
+              "1"
+            ]
+          }
+        },
+        {
+          "id": "cartesian-product-5",
+          "label": "(a, 2)",
+          "role": "ordered-pair",
+          "cardinality": "many",
+          "accepts": [
+            "knowledge",
+            "structure",
+            "value",
+            "variable"
+          ],
+          "semanticCoordinate": {
+            "row": 1,
+            "col": 2,
+            "pair": [
+              "a",
+              "2"
+            ]
+          }
+        },
+        {
+          "id": "cartesian-product-6",
+          "label": "(a, 3)",
+          "role": "ordered-pair",
+          "cardinality": "many",
+          "accepts": [
+            "knowledge",
+            "structure",
+            "value",
+            "variable"
+          ],
+          "semanticCoordinate": {
+            "row": 1,
+            "col": 3,
+            "pair": [
+              "a",
+              "3"
+            ]
+          }
+        },
+        {
+          "id": "cartesian-product-7",
+          "label": "(b, 1)",
+          "role": "ordered-pair",
+          "cardinality": "many",
+          "accepts": [
+            "knowledge",
+            "structure",
+            "value",
+            "variable"
+          ],
+          "semanticCoordinate": {
+            "row": 2,
+            "col": 1,
+            "pair": [
+              "b",
+              "1"
+            ]
+          }
+        },
+        {
+          "id": "cartesian-product-8",
+          "label": "(b, 2)",
+          "role": "ordered-pair",
+          "cardinality": "many",
+          "accepts": [
+            "knowledge",
+            "structure",
+            "value",
+            "variable"
+          ],
+          "semanticCoordinate": {
+            "row": 2,
+            "col": 2,
+            "pair": [
+              "b",
+              "2"
+            ]
+          }
+        },
+        {
+          "id": "cartesian-product-9",
+          "label": "(b, 3)",
+          "role": "ordered-pair",
+          "cardinality": "many",
+          "accepts": [
+            "knowledge",
+            "structure",
+            "value",
+            "variable"
+          ],
+          "semanticCoordinate": {
+            "row": 2,
+            "col": 3,
+            "pair": [
+              "b",
+              "3"
+            ]
           }
         }
       ],
-      "defaultEdges": [
-        {
-          "id": "cartesian-product-edge-1",
-          "from": "cartesian-product-1",
-          "to": "cartesian-product-2",
-          "direction": "directed",
-          "type": "cartesian-product",
-          "label": "配对",
-          "routing": "straight"
-        },
-        {
-          "id": "cartesian-product-edge-2",
-          "from": "cartesian-product-2",
-          "to": "cartesian-product-3",
-          "direction": "directed",
-          "type": "cartesian-product",
-          "label": "配对",
-          "routing": "straight"
-        }
-      ],
+      "defaultEdges": [],
       "layout": {
-        "type": "grid"
+        "type": "manual",
+        "positions": {
+          "cartesian-product-1": {
+            "x": 100,
+            "y": 60,
+            "width": 190,
+            "height": 100
+          },
+          "cartesian-product-2": {
+            "x": 365,
+            "y": 60,
+            "width": 190,
+            "height": 100
+          },
+          "cartesian-product-3": {
+            "x": 630,
+            "y": 60,
+            "width": 190,
+            "height": 100
+          },
+          "cartesian-product-4": {
+            "x": 100,
+            "y": 240,
+            "width": 190,
+            "height": 100
+          },
+          "cartesian-product-5": {
+            "x": 335,
+            "y": 240,
+            "width": 190,
+            "height": 100
+          },
+          "cartesian-product-6": {
+            "x": 570,
+            "y": 240,
+            "width": 190,
+            "height": 100
+          },
+          "cartesian-product-7": {
+            "x": 100,
+            "y": 380,
+            "width": 190,
+            "height": 100
+          },
+          "cartesian-product-8": {
+            "x": 335,
+            "y": 380,
+            "width": 190,
+            "height": 100
+          },
+          "cartesian-product-9": {
+            "x": 570,
+            "y": 380,
+            "width": 190,
+            "height": 100
+          }
+        }
       },
       "viewCapability": {
         "mode": "fixed",
-        "label": "固定视角"
+        "label": "语义布局"
       }
     },
     {
@@ -7761,21 +9506,31 @@
         "zh-CN": "置换",
         "en": "Permutation"
       },
-      "description": "可直接创建、编辑节点与关系的 置换 · Permutation 工作台。",
-      "version": 2,
+      "description": "有限集上的双射，显示真实置换箭头与不交循环分解。",
+      "version": 4,
       "category": "algebra",
       "maturity": "ready",
       "deprecated": false,
       "replacementTemplateId": null,
       "nestable": true,
-      "computable": false,
-      "factory": null,
-      "parameters": [],
+      "computable": true,
+      "factory": "semantic:permutation",
+      "parameters": [
+        {
+          "id": "images",
+          "label": "σ(1),…,σ(n)",
+          "type": "string",
+          "defaultValue": "2,3,1,4",
+          "min": null,
+          "max": null,
+          "options": null
+        }
+      ],
       "defaultSlots": [
         {
           "id": "permutation-1",
-          "label": "one",
-          "role": "one",
+          "label": "1",
+          "role": "permutation-element",
           "cardinality": "many",
           "accepts": [
             "knowledge",
@@ -7783,15 +9538,12 @@
             "value",
             "variable"
           ],
-          "semanticCoordinate": {
-            "layer": 0,
-            "order": 0
-          }
+          "semanticCoordinate": {}
         },
         {
           "id": "permutation-2",
-          "label": "two",
-          "role": "two",
+          "label": "2",
+          "role": "permutation-element",
           "cardinality": "many",
           "accepts": [
             "knowledge",
@@ -7799,15 +9551,12 @@
             "value",
             "variable"
           ],
-          "semanticCoordinate": {
-            "layer": 1,
-            "order": 1
-          }
+          "semanticCoordinate": {}
         },
         {
           "id": "permutation-3",
-          "label": "three",
-          "role": "three",
+          "label": "3",
+          "role": "permutation-element",
           "cardinality": "many",
           "accepts": [
             "knowledge",
@@ -7815,15 +9564,12 @@
             "value",
             "variable"
           ],
-          "semanticCoordinate": {
-            "layer": 2,
-            "order": 2
-          }
+          "semanticCoordinate": {}
         },
         {
           "id": "permutation-4",
-          "label": "four",
-          "role": "four",
+          "label": "4",
+          "role": "permutation-element",
           "cardinality": "many",
           "accepts": [
             "knowledge",
@@ -7831,71 +9577,113 @@
             "value",
             "variable"
           ],
-          "semanticCoordinate": {
-            "layer": 3,
-            "order": 3
-          }
+          "semanticCoordinate": {}
         }
       ],
       "defaultEdges": [
         {
-          "id": "permutation-edge-1",
+          "id": "sigma-0",
           "from": "permutation-1",
           "to": "permutation-2",
           "direction": "directed",
-          "type": "permutation",
-          "label": "置换",
-          "routing": "radial-arc"
+          "type": "maps-to",
+          "label": "σ",
+          "routing": "straight"
         },
         {
-          "id": "permutation-edge-2",
+          "id": "sigma-1",
           "from": "permutation-2",
           "to": "permutation-3",
           "direction": "directed",
-          "type": "permutation",
-          "label": "置换",
-          "routing": "radial-arc"
+          "type": "maps-to",
+          "label": "σ",
+          "routing": "straight"
         },
         {
-          "id": "permutation-edge-3",
+          "id": "sigma-2",
           "from": "permutation-3",
+          "to": "permutation-1",
+          "direction": "directed",
+          "type": "maps-to",
+          "label": "σ",
+          "routing": "straight"
+        },
+        {
+          "id": "sigma-3",
+          "from": "permutation-4",
           "to": "permutation-4",
           "direction": "directed",
-          "type": "permutation",
-          "label": "置换",
-          "routing": "radial-arc"
+          "type": "maps-to",
+          "label": "σ",
+          "routing": "straight"
         }
       ],
       "layout": {
-        "type": "radial"
+        "type": "manual",
+        "positions": {
+          "permutation-1": {
+            "x": 400,
+            "y": 120,
+            "width": 190,
+            "height": 100
+          },
+          "permutation-2": {
+            "x": 650,
+            "y": 370,
+            "width": 190,
+            "height": 100
+          },
+          "permutation-3": {
+            "x": 400,
+            "y": 620,
+            "width": 190,
+            "height": 100
+          },
+          "permutation-4": {
+            "x": 150,
+            "y": 370.00000000000006,
+            "width": 190,
+            "height": 100
+          }
+        }
       },
       "viewCapability": {
-        "mode": "rotate",
-        "label": "可旋转"
+        "mode": "fixed",
+        "label": "语义布局"
       }
     },
     {
       "id": "builtin:transformation-group",
-      "name": "变换群 · Transformation Group",
+      "name": "变换群 · Dihedral Action",
       "names": {
         "zh-CN": "变换群",
-        "en": "Transformation Group"
+        "en": "Dihedral Action"
       },
-      "description": "可直接创建、编辑节点与关系的 变换群 · Transformation Group 工作台。",
-      "version": 2,
-      "category": "algebra",
+      "description": "正 n 边形的二面体群 Dₙ：n 个旋转和 n 个反射。图表示右乘旋转 r 与反射 s 的 Cayley 作用。",
+      "version": 4,
+      "category": "geometry",
       "maturity": "ready",
       "deprecated": false,
       "replacementTemplateId": null,
       "nestable": true,
-      "computable": false,
-      "factory": null,
-      "parameters": [],
+      "computable": true,
+      "factory": "semantic:transformation-group",
+      "parameters": [
+        {
+          "id": "n",
+          "label": "多边形边数 n",
+          "type": "number",
+          "defaultValue": 3,
+          "min": 3,
+          "max": 8,
+          "options": null
+        }
+      ],
       "defaultSlots": [
         {
           "id": "transformation-group-1",
-          "label": "identity",
-          "role": "identity",
+          "label": "e",
+          "role": "group-element",
           "cardinality": "many",
           "accepts": [
             "knowledge",
@@ -7903,15 +9691,12 @@
             "value",
             "variable"
           ],
-          "semanticCoordinate": {
-            "layer": 0,
-            "order": 0
-          }
+          "semanticCoordinate": {}
         },
         {
           "id": "transformation-group-2",
-          "label": "rotation",
-          "role": "rotation",
+          "label": "r",
+          "role": "group-element",
           "cardinality": "many",
           "accepts": [
             "knowledge",
@@ -7919,15 +9704,12 @@
             "value",
             "variable"
           ],
-          "semanticCoordinate": {
-            "layer": 1,
-            "order": 1
-          }
+          "semanticCoordinate": {}
         },
         {
           "id": "transformation-group-3",
-          "label": "reflection",
-          "role": "reflection",
+          "label": "s",
+          "role": "group-element",
           "cardinality": "many",
           "accepts": [
             "knowledge",
@@ -7935,62 +9717,227 @@
             "value",
             "variable"
           ],
-          "semanticCoordinate": {
-            "layer": 2,
-            "order": 2
-          }
+          "semanticCoordinate": {}
+        },
+        {
+          "id": "transformation-group-4",
+          "label": "r^2",
+          "role": "group-element",
+          "cardinality": "many",
+          "accepts": [
+            "knowledge",
+            "structure",
+            "value",
+            "variable"
+          ],
+          "semanticCoordinate": {}
+        },
+        {
+          "id": "transformation-group-5",
+          "label": "rs",
+          "role": "group-element",
+          "cardinality": "many",
+          "accepts": [
+            "knowledge",
+            "structure",
+            "value",
+            "variable"
+          ],
+          "semanticCoordinate": {}
+        },
+        {
+          "id": "transformation-group-6",
+          "label": "r^2s",
+          "role": "group-element",
+          "cardinality": "many",
+          "accepts": [
+            "knowledge",
+            "structure",
+            "value",
+            "variable"
+          ],
+          "semanticCoordinate": {}
         }
       ],
       "defaultEdges": [
         {
-          "id": "transformation-group-edge-1",
+          "id": "r-0",
           "from": "transformation-group-1",
           "to": "transformation-group-2",
           "direction": "directed",
-          "type": "transformation-group",
-          "label": "作用",
-          "routing": "radial-arc"
+          "type": "right-multiply",
+          "label": "r",
+          "routing": "straight"
         },
         {
-          "id": "transformation-group-edge-2",
+          "id": "s-0",
+          "from": "transformation-group-1",
+          "to": "transformation-group-3",
+          "direction": "undirected",
+          "type": "right-multiply",
+          "label": "s",
+          "routing": "straight"
+        },
+        {
+          "id": "r-1",
           "from": "transformation-group-2",
+          "to": "transformation-group-4",
+          "direction": "directed",
+          "type": "right-multiply",
+          "label": "r",
+          "routing": "straight"
+        },
+        {
+          "id": "s-1",
+          "from": "transformation-group-2",
+          "to": "transformation-group-5",
+          "direction": "undirected",
+          "type": "right-multiply",
+          "label": "s",
+          "routing": "straight"
+        },
+        {
+          "id": "r-2",
+          "from": "transformation-group-3",
+          "to": "transformation-group-6",
+          "direction": "directed",
+          "type": "right-multiply",
+          "label": "r",
+          "routing": "straight"
+        },
+        {
+          "id": "r-3",
+          "from": "transformation-group-4",
+          "to": "transformation-group-1",
+          "direction": "directed",
+          "type": "right-multiply",
+          "label": "r",
+          "routing": "straight"
+        },
+        {
+          "id": "s-3",
+          "from": "transformation-group-4",
+          "to": "transformation-group-6",
+          "direction": "undirected",
+          "type": "right-multiply",
+          "label": "s",
+          "routing": "straight"
+        },
+        {
+          "id": "r-4",
+          "from": "transformation-group-5",
           "to": "transformation-group-3",
           "direction": "directed",
-          "type": "transformation-group",
-          "label": "作用",
-          "routing": "radial-arc"
+          "type": "right-multiply",
+          "label": "r",
+          "routing": "straight"
+        },
+        {
+          "id": "r-5",
+          "from": "transformation-group-6",
+          "to": "transformation-group-5",
+          "direction": "directed",
+          "type": "right-multiply",
+          "label": "r",
+          "routing": "straight"
         }
       ],
       "layout": {
-        "type": "radial"
+        "type": "manual",
+        "positions": {
+          "transformation-group-1": {
+            "x": 100,
+            "y": 120,
+            "width": 190,
+            "height": 100
+          },
+          "transformation-group-2": {
+            "x": 350,
+            "y": 120,
+            "width": 190,
+            "height": 100
+          },
+          "transformation-group-3": {
+            "x": 100,
+            "y": 380,
+            "width": 190,
+            "height": 100
+          },
+          "transformation-group-4": {
+            "x": 600,
+            "y": 120,
+            "width": 190,
+            "height": 100
+          },
+          "transformation-group-5": {
+            "x": 350,
+            "y": 380,
+            "width": 190,
+            "height": 100
+          },
+          "transformation-group-6": {
+            "x": 600,
+            "y": 380,
+            "width": 190,
+            "height": 100
+          }
+        }
       },
       "viewCapability": {
-        "mode": "rotate",
-        "label": "可旋转"
+        "mode": "fixed",
+        "label": "语义布局"
       }
     },
     {
       "id": "builtin:dynamical-system",
-      "name": "动力系统 · Dynamical System",
+      "name": "动力系统 · Discrete Dynamics",
       "names": {
         "zh-CN": "动力系统",
-        "en": "Dynamical System"
+        "en": "Discrete Dynamics"
       },
-      "description": "可直接创建、编辑节点与关系的 动力系统 · Dynamical System 工作台。",
-      "version": 2,
+      "description": "Logistic 映射 xₖ₊₁ = r xₖ(1−xₖ) 的有限轨道，显示由参数计算出的实际状态。",
+      "version": 4,
       "category": "analysis",
       "maturity": "ready",
       "deprecated": false,
       "replacementTemplateId": null,
       "nestable": true,
-      "computable": false,
-      "factory": null,
-      "parameters": [],
+      "computable": true,
+      "factory": "semantic:dynamical-system",
+      "parameters": [
+        {
+          "id": "r",
+          "label": "参数 r",
+          "type": "number",
+          "defaultValue": 3.2,
+          "min": 0,
+          "max": 4,
+          "options": null
+        },
+        {
+          "id": "x0",
+          "label": "初态 x₀",
+          "type": "number",
+          "defaultValue": 0.2,
+          "min": 0,
+          "max": 1,
+          "options": null
+        },
+        {
+          "id": "steps",
+          "label": "迭代步数",
+          "type": "number",
+          "defaultValue": 8,
+          "min": 1,
+          "max": 30,
+          "options": null
+        }
+      ],
       "defaultSlots": [
         {
           "id": "dynamical-system-1",
-          "label": "state t",
-          "role": "state-t",
+          "label": "x0 = 0.2",
+          "role": "state",
           "cardinality": "many",
           "accepts": [
             "knowledge",
@@ -7998,15 +9945,12 @@
             "value",
             "variable"
           ],
-          "semanticCoordinate": {
-            "layer": 0,
-            "order": 0
-          }
+          "semanticCoordinate": {}
         },
         {
           "id": "dynamical-system-2",
-          "label": "evolution",
-          "role": "evolution",
+          "label": "x1 = 0.512",
+          "role": "state",
           "cardinality": "many",
           "accepts": [
             "knowledge",
@@ -8014,15 +9958,12 @@
             "value",
             "variable"
           ],
-          "semanticCoordinate": {
-            "layer": 1,
-            "order": 1
-          }
+          "semanticCoordinate": {}
         },
         {
           "id": "dynamical-system-3",
-          "label": "state next",
-          "role": "state-next",
+          "label": "x2 = 0.799539",
+          "role": "state",
           "cardinality": "many",
           "accepts": [
             "knowledge",
@@ -8030,45 +9971,223 @@
             "value",
             "variable"
           ],
-          "semanticCoordinate": {
-            "layer": 2,
-            "order": 2
-          }
+          "semanticCoordinate": {}
+        },
+        {
+          "id": "dynamical-system-4",
+          "label": "x3 = 0.512884",
+          "role": "state",
+          "cardinality": "many",
+          "accepts": [
+            "knowledge",
+            "structure",
+            "value",
+            "variable"
+          ],
+          "semanticCoordinate": {}
+        },
+        {
+          "id": "dynamical-system-5",
+          "label": "x4 = 0.799469",
+          "role": "state",
+          "cardinality": "many",
+          "accepts": [
+            "knowledge",
+            "structure",
+            "value",
+            "variable"
+          ],
+          "semanticCoordinate": {}
+        },
+        {
+          "id": "dynamical-system-6",
+          "label": "x5 = 0.513019",
+          "role": "state",
+          "cardinality": "many",
+          "accepts": [
+            "knowledge",
+            "structure",
+            "value",
+            "variable"
+          ],
+          "semanticCoordinate": {}
+        },
+        {
+          "id": "dynamical-system-7",
+          "label": "x6 = 0.799458",
+          "role": "state",
+          "cardinality": "many",
+          "accepts": [
+            "knowledge",
+            "structure",
+            "value",
+            "variable"
+          ],
+          "semanticCoordinate": {}
+        },
+        {
+          "id": "dynamical-system-8",
+          "label": "x7 = 0.51304",
+          "role": "state",
+          "cardinality": "many",
+          "accepts": [
+            "knowledge",
+            "structure",
+            "value",
+            "variable"
+          ],
+          "semanticCoordinate": {}
+        },
+        {
+          "id": "dynamical-system-9",
+          "label": "x8 = 0.799456",
+          "role": "state",
+          "cardinality": "many",
+          "accepts": [
+            "knowledge",
+            "structure",
+            "value",
+            "variable"
+          ],
+          "semanticCoordinate": {}
         }
       ],
       "defaultEdges": [
         {
-          "id": "dynamical-system-edge-1",
+          "id": "step-1",
           "from": "dynamical-system-1",
           "to": "dynamical-system-2",
           "direction": "directed",
-          "type": "dynamical-system",
-          "label": "演化",
+          "type": "evolves-to",
+          "label": "r·x(1−x)",
           "routing": "straight"
         },
         {
-          "id": "dynamical-system-edge-2",
+          "id": "step-2",
           "from": "dynamical-system-2",
           "to": "dynamical-system-3",
           "direction": "directed",
-          "type": "dynamical-system",
-          "label": "演化",
+          "type": "evolves-to",
+          "label": "r·x(1−x)",
+          "routing": "straight"
+        },
+        {
+          "id": "step-3",
+          "from": "dynamical-system-3",
+          "to": "dynamical-system-4",
+          "direction": "directed",
+          "type": "evolves-to",
+          "label": "r·x(1−x)",
+          "routing": "straight"
+        },
+        {
+          "id": "step-4",
+          "from": "dynamical-system-4",
+          "to": "dynamical-system-5",
+          "direction": "directed",
+          "type": "evolves-to",
+          "label": "r·x(1−x)",
+          "routing": "straight"
+        },
+        {
+          "id": "step-5",
+          "from": "dynamical-system-5",
+          "to": "dynamical-system-6",
+          "direction": "directed",
+          "type": "evolves-to",
+          "label": "r·x(1−x)",
+          "routing": "straight"
+        },
+        {
+          "id": "step-6",
+          "from": "dynamical-system-6",
+          "to": "dynamical-system-7",
+          "direction": "directed",
+          "type": "evolves-to",
+          "label": "r·x(1−x)",
+          "routing": "straight"
+        },
+        {
+          "id": "step-7",
+          "from": "dynamical-system-7",
+          "to": "dynamical-system-8",
+          "direction": "directed",
+          "type": "evolves-to",
+          "label": "r·x(1−x)",
+          "routing": "straight"
+        },
+        {
+          "id": "step-8",
+          "from": "dynamical-system-8",
+          "to": "dynamical-system-9",
+          "direction": "directed",
+          "type": "evolves-to",
+          "label": "r·x(1−x)",
           "routing": "straight"
         }
       ],
       "layout": {
-        "type": "timeline"
+        "type": "manual",
+        "positions": {
+          "dynamical-system-1": {
+            "x": 90,
+            "y": 130,
+            "width": 190,
+            "height": 100
+          },
+          "dynamical-system-2": {
+            "x": 380,
+            "y": 130,
+            "width": 190,
+            "height": 100
+          },
+          "dynamical-system-3": {
+            "x": 670,
+            "y": 130,
+            "width": 190,
+            "height": 100
+          },
+          "dynamical-system-4": {
+            "x": 960,
+            "y": 130,
+            "width": 190,
+            "height": 100
+          },
+          "dynamical-system-5": {
+            "x": 1250,
+            "y": 130,
+            "width": 190,
+            "height": 100
+          },
+          "dynamical-system-6": {
+            "x": 1540,
+            "y": 130,
+            "width": 190,
+            "height": 100
+          },
+          "dynamical-system-7": {
+            "x": 1830,
+            "y": 130,
+            "width": 190,
+            "height": 100
+          },
+          "dynamical-system-8": {
+            "x": 2120,
+            "y": 130,
+            "width": 190,
+            "height": 100
+          },
+          "dynamical-system-9": {
+            "x": 2410,
+            "y": 130,
+            "width": 190,
+            "height": 100
+          }
+        }
       },
       "viewCapability": {
-        "mode": "arrange",
-        "label": "可排列",
-        "defaultArrangement": "horizontal-forward",
-        "options": [
-          "horizontal-forward",
-          "horizontal-reverse",
-          "vertical-forward",
-          "vertical-reverse"
-        ]
+        "mode": "fixed",
+        "label": "语义布局"
       }
     },
     {
@@ -8078,20 +10197,30 @@
         "zh-CN": "流网络",
         "en": "Flow Network"
       },
-      "description": "可直接创建、编辑节点与关系的 流网络 · Flow Network 工作台。",
-      "version": 2,
+      "description": "有向容量网络，计算 s→t 最大流；边标注容量上界。每条边一行：起点,终点,容量。",
+      "version": 4,
       "category": "graph",
       "maturity": "ready",
       "deprecated": false,
       "replacementTemplateId": null,
       "nestable": true,
-      "computable": false,
-      "factory": null,
-      "parameters": [],
+      "computable": true,
+      "factory": "semantic:flow-network",
+      "parameters": [
+        {
+          "id": "arcs",
+          "label": "容量边",
+          "type": "string",
+          "defaultValue": "s,a,5;a,t,3;s,t,1",
+          "min": null,
+          "max": null,
+          "options": null
+        }
+      ],
       "defaultSlots": [
         {
           "id": "flow-network-1",
-          "label": "source",
+          "label": "s",
           "role": "source",
           "cardinality": "many",
           "accepts": [
@@ -8100,15 +10229,12 @@
             "value",
             "variable"
           ],
-          "semanticCoordinate": {
-            "layer": 2,
-            "order": 0
-          }
+          "semanticCoordinate": {}
         },
         {
           "id": "flow-network-2",
-          "label": "flow",
-          "role": "flow",
+          "label": "a",
+          "role": "junction",
           "cardinality": "many",
           "accepts": [
             "knowledge",
@@ -8116,14 +10242,11 @@
             "value",
             "variable"
           ],
-          "semanticCoordinate": {
-            "layer": 1,
-            "order": 1
-          }
+          "semanticCoordinate": {}
         },
         {
           "id": "flow-network-3",
-          "label": "sink",
+          "label": "t",
           "role": "sink",
           "cardinality": "many",
           "accepts": [
@@ -8132,45 +10255,64 @@
             "value",
             "variable"
           ],
-          "semanticCoordinate": {
-            "layer": 0,
-            "order": 2
-          }
+          "semanticCoordinate": {}
         }
       ],
       "defaultEdges": [
         {
-          "id": "flow-network-edge-1",
+          "id": "flow-0",
           "from": "flow-network-1",
           "to": "flow-network-2",
           "direction": "directed",
-          "type": "flow-network",
-          "label": "流",
+          "type": "capacity",
+          "label": "≤ 5",
           "routing": "straight"
         },
         {
-          "id": "flow-network-edge-2",
+          "id": "flow-1",
           "from": "flow-network-2",
           "to": "flow-network-3",
           "direction": "directed",
-          "type": "flow-network",
-          "label": "流",
+          "type": "capacity",
+          "label": "≤ 3",
+          "routing": "straight"
+        },
+        {
+          "id": "flow-2",
+          "from": "flow-network-1",
+          "to": "flow-network-3",
+          "direction": "directed",
+          "type": "capacity",
+          "label": "≤ 1",
           "routing": "straight"
         }
       ],
       "layout": {
-        "type": "layered"
+        "type": "manual",
+        "positions": {
+          "flow-network-1": {
+            "x": 100,
+            "y": 240,
+            "width": 190,
+            "height": 100
+          },
+          "flow-network-2": {
+            "x": 450,
+            "y": 240,
+            "width": 190,
+            "height": 100
+          },
+          "flow-network-3": {
+            "x": 850,
+            "y": 240,
+            "width": 190,
+            "height": 100
+          }
+        }
       },
       "viewCapability": {
-        "mode": "arrange",
-        "label": "可排列",
-        "defaultArrangement": "vertical-forward",
-        "options": [
-          "horizontal-forward",
-          "horizontal-reverse",
-          "vertical-forward",
-          "vertical-reverse"
-        ]
+        "mode": "fixed",
+        "label": "语义布局"
       }
     }
   ]

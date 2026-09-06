@@ -1,3 +1,4 @@
+import {lkl3ManualMarkdown} from '../lkl3/manual.js';
 import {LKL_SCHEMA_VERSION} from '../app-metadata.js';
 
 export const LKL_LIMITS=Object.freeze({
@@ -318,7 +319,9 @@ export const LKL_STRUCTURE_SOURCE_SCHEMA=Object.freeze({
 
 export function lklSchemaCatalog(){return Object.entries(LKL_SCHEMA.declarations).map(([kind,value])=>({kind,...value}))}
 
-export function lklManualMarkdown(){
+function legacyLkl2Manual(){
   const sections=`${lklSchemaCatalog().map(item=>`## ${item.kind}\n\n必填：${item.required.length?item.required.map(value=>`\`${value}\``).join('、'):'无'}\n\n字段：${item.fields.map(value=>`\`${value}\``).join('、')}\n\n子声明：${item.children.length?item.children.map(value=>`\`${value.kind}\``).join('、'):'无'}`).join('\n\n')}\n\n## 几何操作数\n\n\`geometry\` 可用 \`point slot A\` / \`point motion M1\` 表示兼容的点引用，也可用统一语法 \`operand slot A\`、\`operand motion M1\`、\`operand geometry line-1\`、\`operand plot curve-1\` 引用点、动点、派生几何及曲线/曲面。导出与重新导入会保留这些动态依赖。`;
   return`# LKL ${LKL_SCHEMA.version} 使用手册\n\n本手册由运行中的 schema 元数据生成。LKL 是数据语言；以 \`/\` 开头的是独立命令语言。\n\n${sections}\n\n## 错误诊断\n\n诊断包含行号、列号、字段路径、对象 ID 与修复建议。导入采用事务并限制对象规模。\n\n## 示例\n\n### 微积分知识包\n\n\`\`\`lkl\nlkl 2\npackage calculus {\n  title "微积分百科"\n  version "1.0"\n  language "zh-CN"\n  root knowledge math\n  defaultEntry calculus-board\n}\nknowledge math { title "数学" }\nknowledge calculus { title "微积分（数学分析）" body markdown "# 极限、导数、积分与级数" }\nboard calculus-board {\n  title "微积分结构画板"\n  owner math\n}\n\`\`\`\n\n### 模 12 排盘\n\n\`\`\`lkl\nstructure-instance chart {\n  using builtin:mod-n\n  owner calendar\n  parameter modulus = 12\n  variable hour { kind "input" type "integer" value 7 group "时间" }\n  variable wenchang { kind "derived" type "integer" expression "-(hour + 2)" group "辅星" show true }\n}\n\`\`\``;
 }
+
+export function lklManualMarkdown(){return lkl3ManualMarkdown()+'\n\n# 附录：LKL 2 语法参考\n\n'+legacyLkl2Manual();}

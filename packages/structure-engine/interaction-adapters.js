@@ -10,13 +10,14 @@ const isCanonicalEdge=(template,edge,instance)=>(template?.edges??[]).some(item=
 
 export function getStructureInteractionAdapter(template){
   const id=template?.id??'',layout=template?.layout?.type??'grid';
-  if(id==='builtin:poset-hasse')return posetAdapter;
+  if(id==='builtin:poset-hasse'||id==='builtin:lattice')return posetAdapter;
   if(id==='builtin:mod-n'||id==='builtin:mod-12')return modularAdapter;
   if(id==='builtin:boolean-algebra')return booleanAdapter;
   if(id==='builtin:lmn-432')return lmnAdapter;
   if(id==='builtin:tree'||layout==='tree')return treeAdapter;
   if(id==='builtin:coordinate-plane'||layout==='coordinate')return coordinateAdapter;
   if(template?.category==='venn'||layout==='venn')return vennAdapter;
+  if(template?.slotFactory?.startsWith('semantic:')||id==='builtin:matrix-grid')return generatedAdapter;
   if(graphLayouts.has(layout)&&!fixedGenerated.has(id))return graphAdapter;
   if(fixedGenerated.has(id))return generatedAdapter;
   return graphAdapter;
