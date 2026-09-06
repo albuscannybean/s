@@ -6,7 +6,7 @@ const browser=await chromium.launch({headless:true,...(process.env.LMN_BROWSER_E
 const page=await browser.newPage({viewport:{width:1440,height:1000},serviceWorkers:'block'}),errors=[];
 page.on('pageerror',e=>errors.push(e.message));await mkdir('qa-output',{recursive:true});
 try{
- await page.goto(process.env.LMN_QA_URL||'http://127.0.0.1:4176/apps/web/',{waitUntil:'networkidle'});await page.waitForFunction(()=>!!globalThis.lmnWorkspace);
+ await page.goto(process.env.LMN_QA_URL||'http://127.0.0.1:4174/apps/web/',{waitUntil:'networkidle'});await page.waitForFunction(()=>!!globalThis.lmnWorkspace);
  const result=await page.evaluate(async()=>{
   const app=lmnWorkspace,base=new URL('../../',location.href),model=await import(new URL('packages/structure-engine/model.js',base)),core=await import(new URL('packages/domain/core.js',base));
   app.transition.reducedMotion=()=>true;const template=app.state.structureTemplates.find(t=>t.id==='builtin:directed-graph'),root=core.createKnowledge('多层知识根'),child=core.createKnowledge('最终知识：保留用户中文');root.id='qa:根/1';child.id='qa:知识/2';child.content='这是需要搜索的独立正文 unique-deep-body';app.state.knowledge.push(root,child);
@@ -38,3 +38,4 @@ try{
  assert.equal(await page.locator('html').getAttribute('lang'),'zh-CN');assert.equal(await page.evaluate(()=>lmnWorkspace.knowledge.title),'最终知识：保留用户中文');
  assert.deepEqual(errors,[]);result.errors=errors;await writeFile('qa-output/v51-results.json',JSON.stringify(result,null,2));console.log(JSON.stringify({...result,manual:result.manual.slice(0,180)},null,2));
 }finally{await browser.close()}
+
