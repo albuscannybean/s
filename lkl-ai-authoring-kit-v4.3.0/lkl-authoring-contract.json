@@ -1,11 +1,11 @@
 {
   "contract": "LMN LKL AI Authoring Contract",
   "schemaVersion": "2.1",
-  "kitVersion": "5.0.0",
+  "kitVersion": "5.1.0",
   "target": {
     "application": "LMN Knowledge System",
-    "release": "V5.0.0",
-    "version": "5.0.0",
+    "release": "V5.1.0",
+    "version": "5.1.0",
     "lkl1": "1",
     "lkl2": "2.1",
     "lkl3": "3.0"
@@ -115,22 +115,283 @@
         "gapY": 132
       },
       "implementation": "declarative",
+      "family": null,
+      "compatibilityAliases": [],
       "scope": "runtime",
       "supportsPackageLocal": true
     },
     {
       "id": "builtin:directed-graph",
-      "version": 2,
-      "name": "有向图 · Directed Graph",
+      "version": 5,
+      "name": "有向节点图 · Directed Node Graph",
       "affordances": [
-        "force"
+        "directed-relations",
+        "sequence",
+        "dependency",
+        "temporal-order",
+        "proof-flow",
+        "network"
       ],
-      "ordering": "model-defined",
-      "parameters": [],
+      "ordering": "parameter-defined",
+      "parameters": [
+        {
+          "id": "nodeCount",
+          "label": "节点数量",
+          "labelI18n": {
+            "zh-CN": "节点数量",
+            "en": "Number of nodes"
+          },
+          "type": "number",
+          "defaultValue": 3,
+          "min": 1,
+          "max": 100
+        },
+        {
+          "id": "topology",
+          "label": "连接拓扑",
+          "labelI18n": {
+            "zh-CN": "连接拓扑",
+            "en": "Topology"
+          },
+          "type": "enum",
+          "defaultValue": "network",
+          "options": [
+            {
+              "value": "chain",
+              "label": "单向链",
+              "labelI18n": {
+                "zh-CN": "单向链",
+                "en": "Directed chain"
+              }
+            },
+            {
+              "value": "dag",
+              "label": "有向无环网络",
+              "labelI18n": {
+                "zh-CN": "有向无环网络",
+                "en": "Directed acyclic graph"
+              }
+            },
+            {
+              "value": "network",
+              "label": "自由有向网络",
+              "labelI18n": {
+                "zh-CN": "自由有向网络",
+                "en": "Directed network"
+              }
+            }
+          ]
+        },
+        {
+          "id": "layoutMode",
+          "label": "排列布局",
+          "labelI18n": {
+            "zh-CN": "排列布局",
+            "en": "Layout"
+          },
+          "type": "enum",
+          "defaultValue": "force",
+          "options": [
+            {
+              "value": "linear",
+              "label": "线性排列",
+              "labelI18n": {
+                "zh-CN": "线性排列",
+                "en": "Linear"
+              }
+            },
+            {
+              "value": "layered",
+              "label": "分层排列",
+              "labelI18n": {
+                "zh-CN": "分层排列",
+                "en": "Layered"
+              }
+            },
+            {
+              "value": "force",
+              "label": "自由网络",
+              "labelI18n": {
+                "zh-CN": "自由网络",
+                "en": "Free network"
+              }
+            }
+          ]
+        },
+        {
+          "id": "nodeLabels",
+          "label": "节点标签（逗号分隔，可留空）",
+          "labelI18n": {
+            "zh-CN": "节点标签（逗号分隔，可留空）",
+            "en": "Node labels (comma separated, optional)"
+          },
+          "type": "string",
+          "defaultValue": ""
+        },
+        {
+          "id": "numbering",
+          "label": "编号方式",
+          "labelI18n": {
+            "zh-CN": "编号方式",
+            "en": "Numbering"
+          },
+          "type": "enum",
+          "defaultValue": "alphabet",
+          "options": [
+            {
+              "value": "none",
+              "label": "不编号",
+              "labelI18n": {
+                "zh-CN": "不编号",
+                "en": "None"
+              }
+            },
+            {
+              "value": "numeric",
+              "label": "数字",
+              "labelI18n": {
+                "zh-CN": "数字",
+                "en": "Numbers"
+              }
+            },
+            {
+              "value": "alphabet",
+              "label": "大写字母",
+              "labelI18n": {
+                "zh-CN": "大写字母",
+                "en": "Uppercase letters"
+              }
+            },
+            {
+              "value": "lowercase",
+              "label": "小写字母",
+              "labelI18n": {
+                "zh-CN": "小写字母",
+                "en": "Lowercase letters"
+              }
+            },
+            {
+              "value": "roman",
+              "label": "罗马数字",
+              "labelI18n": {
+                "zh-CN": "罗马数字",
+                "en": "Roman numerals"
+              }
+            },
+            {
+              "value": "custom",
+              "label": "自定义格式",
+              "labelI18n": {
+                "zh-CN": "自定义格式",
+                "en": "Custom format"
+              }
+            }
+          ]
+        },
+        {
+          "id": "numberFormat",
+          "label": "编号格式：{n}、{A}、{a}、{i}、{label}",
+          "labelI18n": {
+            "zh-CN": "编号格式：{n}、{A}、{a}、{i}、{label}",
+            "en": "Format: {n}, {A}, {a}, {i}, {label}"
+          },
+          "type": "string",
+          "defaultValue": "{n}"
+        },
+        {
+          "id": "numberStart",
+          "label": "起始编号",
+          "labelI18n": {
+            "zh-CN": "起始编号",
+            "en": "First number"
+          },
+          "type": "number",
+          "defaultValue": 1,
+          "min": 0,
+          "max": 10000
+        },
+        {
+          "id": "relationType",
+          "label": "关系类型",
+          "labelI18n": {
+            "zh-CN": "关系类型",
+            "en": "Relation type"
+          },
+          "type": "string",
+          "defaultValue": "related"
+        },
+        {
+          "id": "relationLabel",
+          "label": "关系显示名称（可留空）",
+          "labelI18n": {
+            "zh-CN": "关系显示名称（可留空）",
+            "en": "Relation label (optional)"
+          },
+          "type": "string",
+          "defaultValue": ""
+        }
+      ],
       "layout": {
         "type": "force"
       },
-      "implementation": "declarative",
+      "implementation": "directed-node-family",
+      "family": {
+        "id": "directed-node",
+        "invariants": [
+          "independent-relation-identity",
+          "directed-incidence"
+        ],
+        "presets": [
+          {
+            "id": "chain",
+            "parameters": {
+              "topology": "chain",
+              "layoutMode": "linear"
+            }
+          },
+          {
+            "id": "dependency",
+            "parameters": {
+              "topology": "dag",
+              "layoutMode": "layered",
+              "relationType": "depends-on"
+            }
+          },
+          {
+            "id": "temporal",
+            "parameters": {
+              "topology": "chain",
+              "layoutMode": "linear",
+              "relationType": "precedes"
+            }
+          },
+          {
+            "id": "proof",
+            "parameters": {
+              "topology": "dag",
+              "layoutMode": "layered",
+              "relationType": "implies"
+            }
+          }
+        ]
+      },
+      "compatibilityAliases": [
+        {
+          "id": "builtin:dependency-dag",
+          "preset": "dependency",
+          "replacementTemplateId": "builtin:directed-graph"
+        },
+        {
+          "id": "builtin:timeline",
+          "preset": "temporal",
+          "replacementTemplateId": "builtin:directed-graph"
+        },
+        {
+          "id": "builtin:proof-tree",
+          "preset": "proof",
+          "replacementTemplateId": "builtin:directed-graph"
+        }
+      ],
       "scope": "runtime",
       "supportsPackageLocal": true
     },
@@ -147,6 +408,8 @@
         "type": "force"
       },
       "implementation": "declarative",
+      "family": null,
+      "compatibilityAliases": [],
       "scope": "runtime",
       "supportsPackageLocal": true
     },
@@ -167,41 +430,75 @@
           "options": [
             {
               "value": "blank",
-              "label": "空白偏序"
+              "label": "空白偏序",
+              "labelI18n": {
+                "zh-CN": "空白偏序",
+                "en": "Empty partial order"
+              }
             },
             {
               "value": "diamond",
-              "label": "四元素菱形示例"
+              "label": "四元素菱形示例",
+              "labelI18n": {
+                "zh-CN": "四元素菱形示例",
+                "en": "Four-element diamond"
+              }
             },
             {
               "value": "subset",
-              "label": "集合包含"
+              "label": "集合包含",
+              "labelI18n": {
+                "zh-CN": "集合包含",
+                "en": "Set inclusion"
+              }
             },
             {
               "value": "divisibility",
-              "label": "整除关系"
+              "label": "整除关系",
+              "labelI18n": {
+                "zh-CN": "整除关系",
+                "en": "Divisibility"
+              }
             },
             {
               "value": "numeric",
-              "label": "数值 ≤"
+              "label": "数值 ≤",
+              "labelI18n": {
+                "zh-CN": "数值 ≤",
+                "en": "Numeric ≤"
+              }
             },
             {
               "value": "relation-text",
-              "label": "从关系文本导入"
+              "label": "从关系文本导入",
+              "labelI18n": {
+                "zh-CN": "从关系文本导入",
+                "en": "Import relation text"
+              }
             }
-          ]
+          ],
+          "labelI18n": {
+            "zh-CN": "初始模型",
+            "en": "Initial model"
+          }
         },
         {
           "id": "relationText",
           "label": "关系文本",
           "type": "textarea",
-          "defaultValue": "a < b < c"
+          "defaultValue": "a < b < c",
+          "labelI18n": {
+            "zh-CN": "关系文本",
+            "en": "Relationship text"
+          }
         }
       ],
       "layout": {
         "type": "hasse"
       },
       "implementation": "poset",
+      "family": null,
+      "compatibilityAliases": [],
       "scope": "runtime",
       "supportsPackageLocal": true
     },
@@ -218,6 +515,8 @@
         "type": "tree"
       },
       "implementation": "declarative",
+      "family": null,
+      "compatibilityAliases": [],
       "scope": "runtime",
       "supportsPackageLocal": true
     },
@@ -236,13 +535,24 @@
           "type": "number",
           "defaultValue": 12,
           "min": 2,
-          "max": 64
+          "max": 64,
+          "labelI18n": {
+            "zh-CN": "模数 n",
+            "en": "Modulus n"
+          }
         }
       ],
       "layout": {
         "type": "radial"
       },
       "implementation": "mod-n",
+      "family": null,
+      "compatibilityAliases": [
+        {
+          "id": "builtin:mod-12",
+          "replacementTemplateId": "builtin:mod-n"
+        }
+      ],
       "scope": "runtime",
       "supportsPackageLocal": true
     },
@@ -261,7 +571,11 @@
           "type": "number",
           "defaultValue": 4,
           "min": 1,
-          "max": 8
+          "max": 8,
+          "labelI18n": {
+            "zh-CN": "维数 n",
+            "en": "Dimension n"
+          }
         },
         {
           "id": "displayMode",
@@ -271,72 +585,43 @@
           "options": [
             {
               "value": "subset",
-              "label": "子集"
+              "label": "子集",
+              "labelI18n": {
+                "zh-CN": "子集",
+                "en": "Subsets"
+              }
             },
             {
               "value": "bitset",
-              "label": "位串"
+              "label": "位串",
+              "labelI18n": {
+                "zh-CN": "位串",
+                "en": "Bit strings"
+              }
             }
-          ]
+          ],
+          "labelI18n": {
+            "zh-CN": "标签形式",
+            "en": "Label notation"
+          }
         },
         {
           "id": "atomLabels",
           "label": "原子标签",
           "type": "string",
-          "defaultValue": "a,b,c,d"
+          "defaultValue": "a,b,c,d",
+          "labelI18n": {
+            "zh-CN": "原子标签",
+            "en": "Atom labels"
+          }
         }
       ],
       "layout": {
         "type": "hasse"
       },
       "implementation": "boolean-algebra",
-      "scope": "runtime",
-      "supportsPackageLocal": true
-    },
-    {
-      "id": "builtin:venn-2",
-      "version": 1,
-      "name": "韦恩图 · Venn Diagram · 2 Sets",
-      "affordances": [
-        "venn"
-      ],
-      "ordering": "model-defined",
-      "parameters": [
-        {
-          "id": "setA",
-          "label": "集合 A / Set A",
-          "type": "string",
-          "defaultValue": "A"
-        },
-        {
-          "id": "setB",
-          "label": "集合 B / Set B",
-          "type": "string",
-          "defaultValue": "B"
-        }
-      ],
-      "layout": {
-        "type": "venn",
-        "sets": 2
-      },
-      "implementation": "declarative",
-      "scope": "runtime",
-      "supportsPackageLocal": true
-    },
-    {
-      "id": "builtin:venn-3",
-      "version": 1,
-      "name": "韦恩图 · Venn Diagram · 3 Sets",
-      "affordances": [
-        "venn"
-      ],
-      "ordering": "model-defined",
-      "parameters": [],
-      "layout": {
-        "type": "venn",
-        "sets": 3
-      },
-      "implementation": "declarative",
+      "family": null,
+      "compatibilityAliases": [],
       "scope": "runtime",
       "supportsPackageLocal": true
     },
@@ -355,7 +640,11 @@
           "type": "number",
           "defaultValue": 6,
           "min": 3,
-          "max": 24
+          "max": 24,
+          "labelI18n": {
+            "zh-CN": "边数 n",
+            "en": "Number of sides n"
+          }
         },
         {
           "id": "radius",
@@ -363,13 +652,19 @@
           "type": "number",
           "defaultValue": 180,
           "min": 80,
-          "max": 360
+          "max": 360,
+          "labelI18n": {
+            "zh-CN": "半径",
+            "en": "Radius"
+          }
         }
       ],
       "layout": {
         "type": "radial"
       },
       "implementation": "regular-polygon",
+      "family": null,
+      "compatibilityAliases": [],
       "scope": "runtime",
       "supportsPackageLocal": true
     },
@@ -390,13 +685,25 @@
           "options": [
             {
               "value": "2d",
-              "label": "二维平面"
+              "label": "二维平面",
+              "labelI18n": {
+                "zh-CN": "二维平面",
+                "en": "2D plane"
+              }
             },
             {
               "value": "3d",
-              "label": "三维空间"
+              "label": "三维空间",
+              "labelI18n": {
+                "zh-CN": "三维空间",
+                "en": "3D space"
+              }
             }
-          ]
+          ],
+          "labelI18n": {
+            "zh-CN": "维数",
+            "en": "Dimension"
+          }
         },
         {
           "id": "scale",
@@ -404,13 +711,24 @@
           "type": "number",
           "defaultValue": 40,
           "min": 16,
-          "max": 120
+          "max": 120,
+          "labelI18n": {
+            "zh-CN": "单位缩放",
+            "en": "Unit scale"
+          }
         }
       ],
       "layout": {
         "type": "coordinate"
       },
       "implementation": "declarative",
+      "family": null,
+      "compatibilityAliases": [
+        {
+          "id": "builtin:vector-space",
+          "replacementTemplateId": "builtin:coordinate-plane"
+        }
+      ],
       "scope": "runtime",
       "supportsPackageLocal": true
     },
@@ -429,7 +747,11 @@
           "type": "number",
           "defaultValue": 8,
           "min": 2,
-          "max": 64
+          "max": 64,
+          "labelI18n": {
+            "zh-CN": "阶 n",
+            "en": "Order n"
+          }
         },
         {
           "id": "generator",
@@ -437,7 +759,11 @@
           "type": "number",
           "defaultValue": 1,
           "min": 0,
-          "max": 63
+          "max": 63,
+          "labelI18n": {
+            "zh-CN": "选定元素 / 作用步长",
+            "en": "Selected element / action step"
+          }
         },
         {
           "id": "notation",
@@ -447,19 +773,33 @@
           "options": [
             {
               "value": "cyclic",
-              "label": "Cₙ"
+              "label": "Cₙ",
+              "labelI18n": {
+                "zh-CN": "Cₙ",
+                "en": "Cₙ"
+              }
             },
             {
               "value": "quotient",
-              "label": "ℤ/nℤ"
+              "label": "ℤ/nℤ",
+              "labelI18n": {
+                "zh-CN": "ℤ/nℤ",
+                "en": "ℤ/nℤ"
+              }
             }
-          ]
+          ],
+          "labelI18n": {
+            "zh-CN": "显示记号",
+            "en": "Notation"
+          }
         }
       ],
       "layout": {
         "type": "radial"
       },
       "implementation": "cyclic-group",
+      "family": null,
+      "compatibilityAliases": [],
       "scope": "runtime",
       "supportsPackageLocal": true
     },
@@ -478,7 +818,11 @@
           "type": "number",
           "defaultValue": 4,
           "min": 2,
-          "max": 12
+          "max": 12,
+          "labelI18n": {
+            "zh-CN": "元素数量 n",
+            "en": "Element count n"
+          }
         },
         {
           "id": "operation",
@@ -488,19 +832,33 @@
           "options": [
             {
               "value": "add-mod-n",
-              "label": "模 n 加法"
+              "label": "模 n 加法",
+              "labelI18n": {
+                "zh-CN": "模 n 加法",
+                "en": "Addition modulo n"
+              }
             },
             {
               "value": "multiply-mod-n",
-              "label": "模 n 乘法"
+              "label": "模 n 乘法",
+              "labelI18n": {
+                "zh-CN": "模 n 乘法",
+                "en": "Multiplication modulo n"
+              }
             }
-          ]
+          ],
+          "labelI18n": {
+            "zh-CN": "运算",
+            "en": "Operation"
+          }
         }
       ],
       "layout": {
         "type": "table"
       },
       "implementation": "operation-table",
+      "family": null,
+      "compatibilityAliases": [],
       "scope": "runtime",
       "supportsPackageLocal": true
     },
@@ -517,6 +875,8 @@
         "type": "manual"
       },
       "implementation": "declarative",
+      "family": null,
+      "compatibilityAliases": [],
       "scope": "runtime",
       "supportsPackageLocal": true
     },
@@ -533,12 +893,14 @@
         "type": "manual"
       },
       "implementation": "declarative",
+      "family": null,
+      "compatibilityAliases": [],
       "scope": "runtime",
       "supportsPackageLocal": true
     },
     {
       "id": "builtin:n-center",
-      "version": 4,
+      "version": 5,
       "name": "n 元中心 · Center & Facets",
       "affordances": [
         "center-periphery",
@@ -548,16 +910,232 @@
       "ordering": "unordered",
       "parameters": [
         {
+          "id": "nodeCount",
+          "label": "外围节点数量",
+          "defaultValue": 4,
+          "type": "number",
+          "min": 1,
+          "max": 60,
+          "labelI18n": {
+            "zh-CN": "外围节点数量",
+            "en": "Peripheral nodes"
+          }
+        },
+        {
           "id": "members",
-          "label": "面向名称（逗号分隔）",
-          "defaultValue": "面向一,面向二,面向三,面向四",
-          "type": "string"
+          "label": "面向名称（逗号分隔，可留空）",
+          "defaultValue": "",
+          "type": "string",
+          "labelI18n": {
+            "zh-CN": "面向名称（逗号分隔，可留空）",
+            "en": "Facet labels (comma separated, optional)"
+          }
+        },
+        {
+          "id": "numbering",
+          "label": "编号方式",
+          "labelI18n": {
+            "zh-CN": "编号方式",
+            "en": "Numbering"
+          },
+          "type": "enum",
+          "defaultValue": "none",
+          "options": [
+            {
+              "value": "none",
+              "label": "不编号",
+              "labelI18n": {
+                "zh-CN": "不编号",
+                "en": "None"
+              }
+            },
+            {
+              "value": "numeric",
+              "label": "数字",
+              "labelI18n": {
+                "zh-CN": "数字",
+                "en": "Numbers"
+              }
+            },
+            {
+              "value": "alphabet",
+              "label": "大写字母",
+              "labelI18n": {
+                "zh-CN": "大写字母",
+                "en": "Uppercase letters"
+              }
+            },
+            {
+              "value": "lowercase",
+              "label": "小写字母",
+              "labelI18n": {
+                "zh-CN": "小写字母",
+                "en": "Lowercase letters"
+              }
+            },
+            {
+              "value": "roman",
+              "label": "罗马数字",
+              "labelI18n": {
+                "zh-CN": "罗马数字",
+                "en": "Roman numerals"
+              }
+            },
+            {
+              "value": "custom",
+              "label": "自定义格式",
+              "labelI18n": {
+                "zh-CN": "自定义格式",
+                "en": "Custom format"
+              }
+            }
+          ]
+        },
+        {
+          "id": "numberFormat",
+          "label": "编号格式：{n}、{A}、{a}、{i}、{label}",
+          "labelI18n": {
+            "zh-CN": "编号格式：{n}、{A}、{a}、{i}、{label}",
+            "en": "Format: {n}, {A}, {a}, {i}, {label}"
+          },
+          "type": "string",
+          "defaultValue": "{n}"
+        },
+        {
+          "id": "numberStart",
+          "label": "起始编号",
+          "labelI18n": {
+            "zh-CN": "起始编号",
+            "en": "First number"
+          },
+          "type": "number",
+          "defaultValue": 1,
+          "min": 0,
+          "max": 10000
+        },
+        {
+          "id": "centerLabel",
+          "label": "中心名称",
+          "defaultValue": "中心",
+          "type": "string",
+          "labelI18n": {
+            "zh-CN": "中心名称",
+            "en": "Center label"
+          }
         }
       ],
       "layout": {
         "type": "manual"
       },
       "implementation": "semantic:n-center",
+      "family": {
+        "id": "center-facets",
+        "invariants": [
+          "one-center",
+          "unordered-facets"
+        ]
+      },
+      "compatibilityAliases": [],
+      "scope": "runtime",
+      "supportsPackageLocal": true
+    },
+    {
+      "id": "builtin:venn",
+      "version": 5,
+      "name": "韦恩图 · Venn Diagram",
+      "affordances": [
+        "set-overlap",
+        "intersection",
+        "set-difference"
+      ],
+      "ordering": "unordered",
+      "parameters": [
+        {
+          "id": "setCount",
+          "label": "集合数量",
+          "labelI18n": {
+            "zh-CN": "集合数量",
+            "en": "Number of sets"
+          },
+          "type": "enum",
+          "defaultValue": "2",
+          "options": [
+            {
+              "value": "2",
+              "label": "两个集合",
+              "labelI18n": {
+                "zh-CN": "两个集合",
+                "en": "Two sets"
+              }
+            },
+            {
+              "value": "3",
+              "label": "三个集合",
+              "labelI18n": {
+                "zh-CN": "三个集合",
+                "en": "Three sets"
+              }
+            }
+          ]
+        },
+        {
+          "id": "setA",
+          "label": "集合 A",
+          "labelI18n": {
+            "zh-CN": "集合 A",
+            "en": "Set A"
+          },
+          "type": "string",
+          "defaultValue": "A"
+        },
+        {
+          "id": "setB",
+          "label": "集合 B",
+          "labelI18n": {
+            "zh-CN": "集合 B",
+            "en": "Set B"
+          },
+          "type": "string",
+          "defaultValue": "B"
+        },
+        {
+          "id": "setC",
+          "label": "集合 C",
+          "labelI18n": {
+            "zh-CN": "集合 C",
+            "en": "Set C"
+          },
+          "type": "string",
+          "defaultValue": "C"
+        }
+      ],
+      "layout": {
+        "type": "venn",
+        "sets": 2
+      },
+      "implementation": "venn-family",
+      "family": {
+        "id": "venn",
+        "invariants": [
+          "set-region-membership"
+        ]
+      },
+      "compatibilityAliases": [
+        {
+          "id": "builtin:venn-2",
+          "parameters": {
+            "setCount": "2"
+          },
+          "replacementTemplateId": "builtin:venn"
+        },
+        {
+          "id": "builtin:venn-3",
+          "parameters": {
+            "setCount": "3"
+          },
+          "replacementTemplateId": "builtin:venn"
+        }
+      ],
       "scope": "runtime",
       "supportsPackageLocal": true
     },
@@ -576,7 +1154,11 @@
           "type": "number",
           "defaultValue": 3,
           "min": 1,
-          "max": 20
+          "max": 20,
+          "labelI18n": {
+            "zh-CN": "行数",
+            "en": "Rows"
+          }
         },
         {
           "id": "columns",
@@ -584,25 +1166,39 @@
           "type": "number",
           "defaultValue": 3,
           "min": 1,
-          "max": 20
+          "max": 20,
+          "labelI18n": {
+            "zh-CN": "列数",
+            "en": "Columns"
+          }
         },
         {
           "id": "cellPrefix",
           "label": "单元格前缀",
           "type": "string",
-          "defaultValue": "a"
+          "defaultValue": "a",
+          "labelI18n": {
+            "zh-CN": "单元格前缀",
+            "en": "Cell prefix"
+          }
         },
         {
           "id": "values",
           "label": "矩阵元素（JSON；可留空）",
           "type": "textarea",
-          "defaultValue": ""
+          "defaultValue": "",
+          "labelI18n": {
+            "zh-CN": "矩阵元素（JSON；可留空）",
+            "en": "Matrix entries (JSON, optional)"
+          }
         }
       ],
       "layout": {
         "type": "matrix"
       },
       "implementation": "matrix-grid",
+      "family": null,
+      "compatibilityAliases": [],
       "scope": "runtime",
       "supportsPackageLocal": true
     },
@@ -620,25 +1216,39 @@
           "id": "domain",
           "label": "定义域",
           "defaultValue": "a,b,c",
-          "type": "string"
+          "type": "string",
+          "labelI18n": {
+            "zh-CN": "定义域",
+            "en": "Domain"
+          }
         },
         {
           "id": "codomain",
           "label": "陪域",
           "defaultValue": "1,2",
-          "type": "string"
+          "type": "string",
+          "labelI18n": {
+            "zh-CN": "陪域",
+            "en": "Codomain"
+          }
         },
         {
           "id": "images",
           "label": "按定义域顺序列出的像",
           "defaultValue": "1,2,1",
-          "type": "string"
+          "type": "string",
+          "labelI18n": {
+            "zh-CN": "按定义域顺序列出的像",
+            "en": "Images in domain order"
+          }
         }
       ],
       "layout": {
         "type": "manual"
       },
       "implementation": "semantic:function-mapping",
+      "family": null,
+      "compatibilityAliases": [],
       "scope": "runtime",
       "supportsPackageLocal": true
     },
@@ -657,47 +1267,49 @@
           "id": "f",
           "label": "f: A → B",
           "defaultValue": "0,1,2",
-          "type": "string"
+          "type": "string",
+          "labelI18n": {
+            "zh-CN": "f: A → B",
+            "en": "f: A → B"
+          }
         },
         {
           "id": "g",
           "label": "g: A → C",
           "defaultValue": "0,1,2",
-          "type": "string"
+          "type": "string",
+          "labelI18n": {
+            "zh-CN": "g: A → C",
+            "en": "g: A → C"
+          }
         },
         {
           "id": "h",
           "label": "h: B → D",
           "defaultValue": "0,1,2",
-          "type": "string"
+          "type": "string",
+          "labelI18n": {
+            "zh-CN": "h: B → D",
+            "en": "h: B → D"
+          }
         },
         {
           "id": "k",
           "label": "k: C → D",
           "defaultValue": "0,1,2",
-          "type": "string"
+          "type": "string",
+          "labelI18n": {
+            "zh-CN": "k: C → D",
+            "en": "k: C → D"
+          }
         }
       ],
       "layout": {
         "type": "manual"
       },
       "implementation": "semantic:commutative-diagram",
-      "scope": "runtime",
-      "supportsPackageLocal": true
-    },
-    {
-      "id": "builtin:dependency-dag",
-      "version": 4,
-      "name": "依赖有向无环图 · Dependency DAG",
-      "affordances": [
-        "layered"
-      ],
-      "ordering": "model-defined",
-      "parameters": [],
-      "layout": {
-        "type": "layered"
-      },
-      "implementation": "declarative",
+      "family": null,
+      "compatibilityAliases": [],
       "scope": "runtime",
       "supportsPackageLocal": true
     },
@@ -714,22 +1326,8 @@
         "type": "grid"
       },
       "implementation": "declarative",
-      "scope": "runtime",
-      "supportsPackageLocal": true
-    },
-    {
-      "id": "builtin:timeline",
-      "version": 2,
-      "name": "时间线 · Timeline",
-      "affordances": [
-        "timeline"
-      ],
-      "ordering": "model-defined",
-      "parameters": [],
-      "layout": {
-        "type": "timeline"
-      },
-      "implementation": "declarative",
+      "family": null,
+      "compatibilityAliases": [],
       "scope": "runtime",
       "supportsPackageLocal": true
     },
@@ -747,13 +1345,19 @@
           "id": "groups",
           "label": "等价类（类内逗号，类间 |）",
           "defaultValue": "a,b|c,d|e",
-          "type": "string"
+          "type": "string",
+          "labelI18n": {
+            "zh-CN": "等价类（类内逗号，类间 |）",
+            "en": "Equivalence classes (commas within classes; | between classes)"
+          }
         }
       ],
       "layout": {
         "type": "manual"
       },
       "implementation": "semantic:equivalence-classes",
+      "family": null,
+      "compatibilityAliases": [],
       "scope": "runtime",
       "supportsPackageLocal": true
     },
@@ -771,13 +1375,19 @@
           "id": "groups",
           "label": "分块（块内逗号，块间 |）",
           "defaultValue": "a,b|c,d|e",
-          "type": "string"
+          "type": "string",
+          "labelI18n": {
+            "zh-CN": "分块（块内逗号，块间 |）",
+            "en": "Blocks (commas within blocks; | between blocks)"
+          }
         }
       ],
       "layout": {
         "type": "manual"
       },
       "implementation": "semantic:set-partition",
+      "family": null,
+      "compatibilityAliases": [],
       "scope": "runtime",
       "supportsPackageLocal": true
     },
@@ -794,22 +1404,8 @@
         "type": "hasse"
       },
       "implementation": "declarative",
-      "scope": "runtime",
-      "supportsPackageLocal": true
-    },
-    {
-      "id": "builtin:proof-tree",
-      "version": 4,
-      "name": "证明树 · Proof Tree",
-      "affordances": [
-        "tree"
-      ],
-      "ordering": "model-defined",
-      "parameters": [],
-      "layout": {
-        "type": "tree"
-      },
-      "implementation": "declarative",
+      "family": null,
+      "compatibilityAliases": [],
       "scope": "runtime",
       "supportsPackageLocal": true
     },
@@ -826,6 +1422,8 @@
         "type": "tree"
       },
       "implementation": "declarative",
+      "family": null,
+      "compatibilityAliases": [],
       "scope": "runtime",
       "supportsPackageLocal": true
     },
@@ -844,19 +1442,29 @@
           "id": "setA",
           "label": "集合 A",
           "defaultValue": "a,b",
-          "type": "string"
+          "type": "string",
+          "labelI18n": {
+            "zh-CN": "集合 A",
+            "en": "Set A"
+          }
         },
         {
           "id": "setB",
           "label": "集合 B",
           "defaultValue": "1,2,3",
-          "type": "string"
+          "type": "string",
+          "labelI18n": {
+            "zh-CN": "集合 B",
+            "en": "Set B"
+          }
         }
       ],
       "layout": {
         "type": "manual"
       },
       "implementation": "semantic:cartesian-product",
+      "family": null,
+      "compatibilityAliases": [],
       "scope": "runtime",
       "supportsPackageLocal": true
     },
@@ -875,13 +1483,19 @@
           "id": "images",
           "label": "σ(1),…,σ(n)",
           "defaultValue": "2,3,1,4",
-          "type": "string"
+          "type": "string",
+          "labelI18n": {
+            "zh-CN": "σ(1),…,σ(n)",
+            "en": "σ(1),…,σ(n)"
+          }
         }
       ],
       "layout": {
         "type": "manual"
       },
       "implementation": "semantic:permutation",
+      "family": null,
+      "compatibilityAliases": [],
       "scope": "runtime",
       "supportsPackageLocal": true
     },
@@ -902,13 +1516,19 @@
           "defaultValue": 3,
           "type": "number",
           "min": 3,
-          "max": 8
+          "max": 8,
+          "labelI18n": {
+            "zh-CN": "多边形边数 n",
+            "en": "Polygon side count n"
+          }
         }
       ],
       "layout": {
         "type": "manual"
       },
       "implementation": "semantic:transformation-group",
+      "family": null,
+      "compatibilityAliases": [],
       "scope": "runtime",
       "supportsPackageLocal": true
     },
@@ -928,7 +1548,11 @@
           "defaultValue": 3.2,
           "type": "number",
           "min": 0,
-          "max": 4
+          "max": 4,
+          "labelI18n": {
+            "zh-CN": "参数 r",
+            "en": "Parameter r"
+          }
         },
         {
           "id": "x0",
@@ -936,7 +1560,11 @@
           "defaultValue": 0.2,
           "type": "number",
           "min": 0,
-          "max": 1
+          "max": 1,
+          "labelI18n": {
+            "zh-CN": "初态 x₀",
+            "en": "Initial state x₀"
+          }
         },
         {
           "id": "steps",
@@ -944,13 +1572,19 @@
           "defaultValue": 8,
           "type": "number",
           "min": 1,
-          "max": 30
+          "max": 30,
+          "labelI18n": {
+            "zh-CN": "迭代步数",
+            "en": "Iteration steps"
+          }
         }
       ],
       "layout": {
         "type": "manual"
       },
       "implementation": "semantic:dynamical-system",
+      "family": null,
+      "compatibilityAliases": [],
       "scope": "runtime",
       "supportsPackageLocal": true
     },
@@ -969,13 +1603,19 @@
           "id": "arcs",
           "label": "容量边",
           "defaultValue": "s,a,5;a,t,3;s,t,1",
-          "type": "string"
+          "type": "string",
+          "labelI18n": {
+            "zh-CN": "容量边",
+            "en": "Capacity edges"
+          }
         }
       ],
       "layout": {
         "type": "manual"
       },
       "implementation": "semantic:flow-network",
+      "family": null,
+      "compatibilityAliases": [],
       "scope": "runtime",
       "supportsPackageLocal": true
     }
@@ -3622,6 +4262,7 @@
       "builtin:free-coordinate",
       "builtin:empty-custom",
       "builtin:n-center",
+      "builtin:venn",
       "builtin:matrix-grid",
       "builtin:function-mapping",
       "builtin:commutative-diagram",
@@ -3785,6 +4426,11 @@
         "n-center-4",
         "n-center-5"
       ],
+      "builtin:venn": [
+        "A-only",
+        "intersection",
+        "B-only"
+      ],
       "builtin:matrix-grid": [
         "cell-1-1",
         "cell-1-2",
@@ -3896,12 +4542,233 @@
     },
     "parametersByTemplate": {
       "builtin:lmn-432": [],
-      "builtin:directed-graph": [],
+      "builtin:directed-graph": [
+        {
+          "id": "nodeCount",
+          "label": "节点数量",
+          "labelI18n": {
+            "zh-CN": "节点数量",
+            "en": "Number of nodes"
+          },
+          "type": "number",
+          "defaultValue": 3,
+          "min": 1,
+          "max": 100,
+          "options": null
+        },
+        {
+          "id": "topology",
+          "label": "连接拓扑",
+          "labelI18n": {
+            "zh-CN": "连接拓扑",
+            "en": "Topology"
+          },
+          "type": "enum",
+          "defaultValue": "network",
+          "min": null,
+          "max": null,
+          "options": [
+            {
+              "value": "chain",
+              "label": "单向链",
+              "labelI18n": {
+                "zh-CN": "单向链",
+                "en": "Directed chain"
+              }
+            },
+            {
+              "value": "dag",
+              "label": "有向无环网络",
+              "labelI18n": {
+                "zh-CN": "有向无环网络",
+                "en": "Directed acyclic graph"
+              }
+            },
+            {
+              "value": "network",
+              "label": "自由有向网络",
+              "labelI18n": {
+                "zh-CN": "自由有向网络",
+                "en": "Directed network"
+              }
+            }
+          ]
+        },
+        {
+          "id": "layoutMode",
+          "label": "排列布局",
+          "labelI18n": {
+            "zh-CN": "排列布局",
+            "en": "Layout"
+          },
+          "type": "enum",
+          "defaultValue": "force",
+          "min": null,
+          "max": null,
+          "options": [
+            {
+              "value": "linear",
+              "label": "线性排列",
+              "labelI18n": {
+                "zh-CN": "线性排列",
+                "en": "Linear"
+              }
+            },
+            {
+              "value": "layered",
+              "label": "分层排列",
+              "labelI18n": {
+                "zh-CN": "分层排列",
+                "en": "Layered"
+              }
+            },
+            {
+              "value": "force",
+              "label": "自由网络",
+              "labelI18n": {
+                "zh-CN": "自由网络",
+                "en": "Free network"
+              }
+            }
+          ]
+        },
+        {
+          "id": "nodeLabels",
+          "label": "节点标签（逗号分隔，可留空）",
+          "labelI18n": {
+            "zh-CN": "节点标签（逗号分隔，可留空）",
+            "en": "Node labels (comma separated, optional)"
+          },
+          "type": "string",
+          "defaultValue": "",
+          "min": null,
+          "max": null,
+          "options": null
+        },
+        {
+          "id": "numbering",
+          "label": "编号方式",
+          "labelI18n": {
+            "zh-CN": "编号方式",
+            "en": "Numbering"
+          },
+          "type": "enum",
+          "defaultValue": "alphabet",
+          "min": null,
+          "max": null,
+          "options": [
+            {
+              "value": "none",
+              "label": "不编号",
+              "labelI18n": {
+                "zh-CN": "不编号",
+                "en": "None"
+              }
+            },
+            {
+              "value": "numeric",
+              "label": "数字",
+              "labelI18n": {
+                "zh-CN": "数字",
+                "en": "Numbers"
+              }
+            },
+            {
+              "value": "alphabet",
+              "label": "大写字母",
+              "labelI18n": {
+                "zh-CN": "大写字母",
+                "en": "Uppercase letters"
+              }
+            },
+            {
+              "value": "lowercase",
+              "label": "小写字母",
+              "labelI18n": {
+                "zh-CN": "小写字母",
+                "en": "Lowercase letters"
+              }
+            },
+            {
+              "value": "roman",
+              "label": "罗马数字",
+              "labelI18n": {
+                "zh-CN": "罗马数字",
+                "en": "Roman numerals"
+              }
+            },
+            {
+              "value": "custom",
+              "label": "自定义格式",
+              "labelI18n": {
+                "zh-CN": "自定义格式",
+                "en": "Custom format"
+              }
+            }
+          ]
+        },
+        {
+          "id": "numberFormat",
+          "label": "编号格式：{n}、{A}、{a}、{i}、{label}",
+          "labelI18n": {
+            "zh-CN": "编号格式：{n}、{A}、{a}、{i}、{label}",
+            "en": "Format: {n}, {A}, {a}, {i}, {label}"
+          },
+          "type": "string",
+          "defaultValue": "{n}",
+          "min": null,
+          "max": null,
+          "options": null
+        },
+        {
+          "id": "numberStart",
+          "label": "起始编号",
+          "labelI18n": {
+            "zh-CN": "起始编号",
+            "en": "First number"
+          },
+          "type": "number",
+          "defaultValue": 1,
+          "min": 0,
+          "max": 10000,
+          "options": null
+        },
+        {
+          "id": "relationType",
+          "label": "关系类型",
+          "labelI18n": {
+            "zh-CN": "关系类型",
+            "en": "Relation type"
+          },
+          "type": "string",
+          "defaultValue": "related",
+          "min": null,
+          "max": null,
+          "options": null
+        },
+        {
+          "id": "relationLabel",
+          "label": "关系显示名称（可留空）",
+          "labelI18n": {
+            "zh-CN": "关系显示名称（可留空）",
+            "en": "Relation label (optional)"
+          },
+          "type": "string",
+          "defaultValue": "",
+          "min": null,
+          "max": null,
+          "options": null
+        }
+      ],
       "builtin:undirected-graph": [],
       "builtin:poset-hasse": [
         {
           "id": "starter",
           "label": "初始模型",
+          "labelI18n": {
+            "zh-CN": "初始模型",
+            "en": "Initial model"
+          },
           "type": "enum",
           "defaultValue": "blank",
           "min": null,
@@ -3909,33 +4776,61 @@
           "options": [
             {
               "value": "blank",
-              "label": "空白偏序"
+              "label": "空白偏序",
+              "labelI18n": {
+                "zh-CN": "空白偏序",
+                "en": "Empty partial order"
+              }
             },
             {
               "value": "diamond",
-              "label": "四元素菱形示例"
+              "label": "四元素菱形示例",
+              "labelI18n": {
+                "zh-CN": "四元素菱形示例",
+                "en": "Four-element diamond"
+              }
             },
             {
               "value": "subset",
-              "label": "集合包含"
+              "label": "集合包含",
+              "labelI18n": {
+                "zh-CN": "集合包含",
+                "en": "Set inclusion"
+              }
             },
             {
               "value": "divisibility",
-              "label": "整除关系"
+              "label": "整除关系",
+              "labelI18n": {
+                "zh-CN": "整除关系",
+                "en": "Divisibility"
+              }
             },
             {
               "value": "numeric",
-              "label": "数值 ≤"
+              "label": "数值 ≤",
+              "labelI18n": {
+                "zh-CN": "数值 ≤",
+                "en": "Numeric ≤"
+              }
             },
             {
               "value": "relation-text",
-              "label": "从关系文本导入"
+              "label": "从关系文本导入",
+              "labelI18n": {
+                "zh-CN": "从关系文本导入",
+                "en": "Import relation text"
+              }
             }
           ]
         },
         {
           "id": "relationText",
           "label": "关系文本",
+          "labelI18n": {
+            "zh-CN": "关系文本",
+            "en": "Relationship text"
+          },
           "type": "textarea",
           "defaultValue": "a < b < c",
           "min": null,
@@ -3948,6 +4843,10 @@
         {
           "id": "modulus",
           "label": "模数 n",
+          "labelI18n": {
+            "zh-CN": "模数 n",
+            "en": "Modulus n"
+          },
           "type": "number",
           "defaultValue": 12,
           "min": 2,
@@ -3959,6 +4858,10 @@
         {
           "id": "modulus",
           "label": "模数 n",
+          "labelI18n": {
+            "zh-CN": "模数 n",
+            "en": "Modulus n"
+          },
           "type": "number",
           "defaultValue": 12,
           "min": 2,
@@ -3968,6 +4871,10 @@
         {
           "id": "hour",
           "label": "旧版时辰参数",
+          "labelI18n": {
+            "zh-CN": "旧版时辰参数",
+            "en": "旧版时辰参数"
+          },
           "type": "number",
           "defaultValue": 7,
           "min": 0,
@@ -3979,6 +4886,10 @@
         {
           "id": "rank",
           "label": "维数 n",
+          "labelI18n": {
+            "zh-CN": "维数 n",
+            "en": "Dimension n"
+          },
           "type": "number",
           "defaultValue": 4,
           "min": 1,
@@ -3988,6 +4899,10 @@
         {
           "id": "displayMode",
           "label": "标签形式",
+          "labelI18n": {
+            "zh-CN": "标签形式",
+            "en": "Label notation"
+          },
           "type": "enum",
           "defaultValue": "subset",
           "min": null,
@@ -3995,17 +4910,29 @@
           "options": [
             {
               "value": "subset",
-              "label": "子集"
+              "label": "子集",
+              "labelI18n": {
+                "zh-CN": "子集",
+                "en": "Subsets"
+              }
             },
             {
               "value": "bitset",
-              "label": "位串"
+              "label": "位串",
+              "labelI18n": {
+                "zh-CN": "位串",
+                "en": "Bit strings"
+              }
             }
           ]
         },
         {
           "id": "atomLabels",
           "label": "原子标签",
+          "labelI18n": {
+            "zh-CN": "原子标签",
+            "en": "Atom labels"
+          },
           "type": "string",
           "defaultValue": "a,b,c,d",
           "min": null,
@@ -4017,6 +4944,10 @@
         {
           "id": "setA",
           "label": "集合 A / Set A",
+          "labelI18n": {
+            "zh-CN": "集合 A / Set A",
+            "en": "集合 A / Set A"
+          },
           "type": "string",
           "defaultValue": "A",
           "min": null,
@@ -4026,6 +4957,10 @@
         {
           "id": "setB",
           "label": "集合 B / Set B",
+          "labelI18n": {
+            "zh-CN": "集合 B / Set B",
+            "en": "集合 B / Set B"
+          },
           "type": "string",
           "defaultValue": "B",
           "min": null,
@@ -4038,6 +4973,10 @@
         {
           "id": "n",
           "label": "边数 n",
+          "labelI18n": {
+            "zh-CN": "边数 n",
+            "en": "Number of sides n"
+          },
           "type": "number",
           "defaultValue": 6,
           "min": 3,
@@ -4047,6 +4986,10 @@
         {
           "id": "radius",
           "label": "半径",
+          "labelI18n": {
+            "zh-CN": "半径",
+            "en": "Radius"
+          },
           "type": "number",
           "defaultValue": 180,
           "min": 80,
@@ -4058,6 +5001,10 @@
         {
           "id": "dimension",
           "label": "维数",
+          "labelI18n": {
+            "zh-CN": "维数",
+            "en": "Dimension"
+          },
           "type": "enum",
           "defaultValue": "2d",
           "min": null,
@@ -4065,17 +5012,29 @@
           "options": [
             {
               "value": "2d",
-              "label": "二维平面"
+              "label": "二维平面",
+              "labelI18n": {
+                "zh-CN": "二维平面",
+                "en": "2D plane"
+              }
             },
             {
               "value": "3d",
-              "label": "三维空间"
+              "label": "三维空间",
+              "labelI18n": {
+                "zh-CN": "三维空间",
+                "en": "3D space"
+              }
             }
           ]
         },
         {
           "id": "scale",
           "label": "单位缩放",
+          "labelI18n": {
+            "zh-CN": "单位缩放",
+            "en": "Unit scale"
+          },
           "type": "number",
           "defaultValue": 40,
           "min": 16,
@@ -4087,6 +5046,10 @@
         {
           "id": "n",
           "label": "阶 n",
+          "labelI18n": {
+            "zh-CN": "阶 n",
+            "en": "Order n"
+          },
           "type": "number",
           "defaultValue": 8,
           "min": 2,
@@ -4096,6 +5059,10 @@
         {
           "id": "generator",
           "label": "选定元素 / 作用步长",
+          "labelI18n": {
+            "zh-CN": "选定元素 / 作用步长",
+            "en": "Selected element / action step"
+          },
           "type": "number",
           "defaultValue": 1,
           "min": 0,
@@ -4105,6 +5072,10 @@
         {
           "id": "notation",
           "label": "显示记号",
+          "labelI18n": {
+            "zh-CN": "显示记号",
+            "en": "Notation"
+          },
           "type": "enum",
           "defaultValue": "cyclic",
           "min": null,
@@ -4112,11 +5083,19 @@
           "options": [
             {
               "value": "cyclic",
-              "label": "Cₙ"
+              "label": "Cₙ",
+              "labelI18n": {
+                "zh-CN": "Cₙ",
+                "en": "Cₙ"
+              }
             },
             {
               "value": "quotient",
-              "label": "ℤ/nℤ"
+              "label": "ℤ/nℤ",
+              "labelI18n": {
+                "zh-CN": "ℤ/nℤ",
+                "en": "ℤ/nℤ"
+              }
             }
           ]
         }
@@ -4125,6 +5104,10 @@
         {
           "id": "n",
           "label": "元素数量 n",
+          "labelI18n": {
+            "zh-CN": "元素数量 n",
+            "en": "Element count n"
+          },
           "type": "number",
           "defaultValue": 4,
           "min": 2,
@@ -4134,6 +5117,10 @@
         {
           "id": "operation",
           "label": "运算",
+          "labelI18n": {
+            "zh-CN": "运算",
+            "en": "Operation"
+          },
           "type": "enum",
           "defaultValue": "add-mod-n",
           "min": null,
@@ -4141,11 +5128,19 @@
           "options": [
             {
               "value": "add-mod-n",
-              "label": "模 n 加法"
+              "label": "模 n 加法",
+              "labelI18n": {
+                "zh-CN": "模 n 加法",
+                "en": "Addition modulo n"
+              }
             },
             {
               "value": "multiply-mod-n",
-              "label": "模 n 乘法"
+              "label": "模 n 乘法",
+              "labelI18n": {
+                "zh-CN": "模 n 乘法",
+                "en": "Multiplication modulo n"
+              }
             }
           ]
         }
@@ -4154,6 +5149,10 @@
         {
           "id": "dimension",
           "label": "维数",
+          "labelI18n": {
+            "zh-CN": "维数",
+            "en": "Dimension"
+          },
           "type": "enum",
           "defaultValue": "2d",
           "min": null,
@@ -4161,17 +5160,29 @@
           "options": [
             {
               "value": "2d",
-              "label": "二维平面"
+              "label": "二维平面",
+              "labelI18n": {
+                "zh-CN": "二维平面",
+                "en": "2D plane"
+              }
             },
             {
               "value": "3d",
-              "label": "三维空间"
+              "label": "三维空间",
+              "labelI18n": {
+                "zh-CN": "三维空间",
+                "en": "3D space"
+              }
             }
           ]
         },
         {
           "id": "scale",
           "label": "单位缩放",
+          "labelI18n": {
+            "zh-CN": "单位缩放",
+            "en": "Unit scale"
+          },
           "type": "number",
           "defaultValue": 40,
           "min": 24,
@@ -4183,10 +5194,199 @@
       "builtin:empty-custom": [],
       "builtin:n-center": [
         {
+          "id": "nodeCount",
+          "label": "外围节点数量",
+          "labelI18n": {
+            "zh-CN": "外围节点数量",
+            "en": "Peripheral nodes"
+          },
+          "type": "number",
+          "defaultValue": 4,
+          "min": 1,
+          "max": 60,
+          "options": null
+        },
+        {
           "id": "members",
-          "label": "面向名称（逗号分隔）",
+          "label": "面向名称（逗号分隔，可留空）",
+          "labelI18n": {
+            "zh-CN": "面向名称（逗号分隔，可留空）",
+            "en": "Facet labels (comma separated, optional)"
+          },
           "type": "string",
-          "defaultValue": "面向一,面向二,面向三,面向四",
+          "defaultValue": "",
+          "min": null,
+          "max": null,
+          "options": null
+        },
+        {
+          "id": "numbering",
+          "label": "编号方式",
+          "labelI18n": {
+            "zh-CN": "编号方式",
+            "en": "Numbering"
+          },
+          "type": "enum",
+          "defaultValue": "none",
+          "min": null,
+          "max": null,
+          "options": [
+            {
+              "value": "none",
+              "label": "不编号",
+              "labelI18n": {
+                "zh-CN": "不编号",
+                "en": "None"
+              }
+            },
+            {
+              "value": "numeric",
+              "label": "数字",
+              "labelI18n": {
+                "zh-CN": "数字",
+                "en": "Numbers"
+              }
+            },
+            {
+              "value": "alphabet",
+              "label": "大写字母",
+              "labelI18n": {
+                "zh-CN": "大写字母",
+                "en": "Uppercase letters"
+              }
+            },
+            {
+              "value": "lowercase",
+              "label": "小写字母",
+              "labelI18n": {
+                "zh-CN": "小写字母",
+                "en": "Lowercase letters"
+              }
+            },
+            {
+              "value": "roman",
+              "label": "罗马数字",
+              "labelI18n": {
+                "zh-CN": "罗马数字",
+                "en": "Roman numerals"
+              }
+            },
+            {
+              "value": "custom",
+              "label": "自定义格式",
+              "labelI18n": {
+                "zh-CN": "自定义格式",
+                "en": "Custom format"
+              }
+            }
+          ]
+        },
+        {
+          "id": "numberFormat",
+          "label": "编号格式：{n}、{A}、{a}、{i}、{label}",
+          "labelI18n": {
+            "zh-CN": "编号格式：{n}、{A}、{a}、{i}、{label}",
+            "en": "Format: {n}, {A}, {a}, {i}, {label}"
+          },
+          "type": "string",
+          "defaultValue": "{n}",
+          "min": null,
+          "max": null,
+          "options": null
+        },
+        {
+          "id": "numberStart",
+          "label": "起始编号",
+          "labelI18n": {
+            "zh-CN": "起始编号",
+            "en": "First number"
+          },
+          "type": "number",
+          "defaultValue": 1,
+          "min": 0,
+          "max": 10000,
+          "options": null
+        },
+        {
+          "id": "centerLabel",
+          "label": "中心名称",
+          "labelI18n": {
+            "zh-CN": "中心名称",
+            "en": "Center label"
+          },
+          "type": "string",
+          "defaultValue": "中心",
+          "min": null,
+          "max": null,
+          "options": null
+        }
+      ],
+      "builtin:venn": [
+        {
+          "id": "setCount",
+          "label": "集合数量",
+          "labelI18n": {
+            "zh-CN": "集合数量",
+            "en": "Number of sets"
+          },
+          "type": "enum",
+          "defaultValue": "2",
+          "min": null,
+          "max": null,
+          "options": [
+            {
+              "value": "2",
+              "label": "两个集合",
+              "labelI18n": {
+                "zh-CN": "两个集合",
+                "en": "Two sets"
+              }
+            },
+            {
+              "value": "3",
+              "label": "三个集合",
+              "labelI18n": {
+                "zh-CN": "三个集合",
+                "en": "Three sets"
+              }
+            }
+          ]
+        },
+        {
+          "id": "setA",
+          "label": "集合 A",
+          "labelI18n": {
+            "zh-CN": "集合 A",
+            "en": "Set A"
+          },
+          "type": "string",
+          "defaultValue": "A",
+          "min": null,
+          "max": null,
+          "options": null
+        },
+        {
+          "id": "setB",
+          "label": "集合 B",
+          "labelI18n": {
+            "zh-CN": "集合 B",
+            "en": "Set B"
+          },
+          "type": "string",
+          "defaultValue": "B",
+          "min": null,
+          "max": null,
+          "options": null
+        },
+        {
+          "id": "setC",
+          "label": "集合 C",
+          "labelI18n": {
+            "zh-CN": "集合 C",
+            "en": "Set C"
+          },
+          "type": "string",
+          "defaultValue": "C",
           "min": null,
           "max": null,
           "options": null
@@ -4196,6 +5396,10 @@
         {
           "id": "rows",
           "label": "行数",
+          "labelI18n": {
+            "zh-CN": "行数",
+            "en": "Rows"
+          },
           "type": "number",
           "defaultValue": 3,
           "min": 1,
@@ -4205,6 +5409,10 @@
         {
           "id": "columns",
           "label": "列数",
+          "labelI18n": {
+            "zh-CN": "列数",
+            "en": "Columns"
+          },
           "type": "number",
           "defaultValue": 3,
           "min": 1,
@@ -4214,6 +5422,10 @@
         {
           "id": "cellPrefix",
           "label": "单元格前缀",
+          "labelI18n": {
+            "zh-CN": "单元格前缀",
+            "en": "Cell prefix"
+          },
           "type": "string",
           "defaultValue": "a",
           "min": null,
@@ -4223,6 +5435,10 @@
         {
           "id": "values",
           "label": "矩阵元素（JSON；可留空）",
+          "labelI18n": {
+            "zh-CN": "矩阵元素（JSON；可留空）",
+            "en": "Matrix entries (JSON, optional)"
+          },
           "type": "textarea",
           "defaultValue": "",
           "min": null,
@@ -4234,6 +5450,10 @@
         {
           "id": "domain",
           "label": "定义域",
+          "labelI18n": {
+            "zh-CN": "定义域",
+            "en": "Domain"
+          },
           "type": "string",
           "defaultValue": "a,b,c",
           "min": null,
@@ -4243,6 +5463,10 @@
         {
           "id": "codomain",
           "label": "陪域",
+          "labelI18n": {
+            "zh-CN": "陪域",
+            "en": "Codomain"
+          },
           "type": "string",
           "defaultValue": "1,2",
           "min": null,
@@ -4252,6 +5476,10 @@
         {
           "id": "images",
           "label": "按定义域顺序列出的像",
+          "labelI18n": {
+            "zh-CN": "按定义域顺序列出的像",
+            "en": "Images in domain order"
+          },
           "type": "string",
           "defaultValue": "1,2,1",
           "min": null,
@@ -4263,6 +5491,10 @@
         {
           "id": "f",
           "label": "f: A → B",
+          "labelI18n": {
+            "zh-CN": "f: A → B",
+            "en": "f: A → B"
+          },
           "type": "string",
           "defaultValue": "0,1,2",
           "min": null,
@@ -4272,6 +5504,10 @@
         {
           "id": "g",
           "label": "g: A → C",
+          "labelI18n": {
+            "zh-CN": "g: A → C",
+            "en": "g: A → C"
+          },
           "type": "string",
           "defaultValue": "0,1,2",
           "min": null,
@@ -4281,6 +5517,10 @@
         {
           "id": "h",
           "label": "h: B → D",
+          "labelI18n": {
+            "zh-CN": "h: B → D",
+            "en": "h: B → D"
+          },
           "type": "string",
           "defaultValue": "0,1,2",
           "min": null,
@@ -4290,6 +5530,10 @@
         {
           "id": "k",
           "label": "k: C → D",
+          "labelI18n": {
+            "zh-CN": "k: C → D",
+            "en": "k: C → D"
+          },
           "type": "string",
           "defaultValue": "0,1,2",
           "min": null,
@@ -4304,6 +5548,10 @@
         {
           "id": "groups",
           "label": "等价类（类内逗号，类间 |）",
+          "labelI18n": {
+            "zh-CN": "等价类（类内逗号，类间 |）",
+            "en": "Equivalence classes (commas within classes; | between classes)"
+          },
           "type": "string",
           "defaultValue": "a,b|c,d|e",
           "min": null,
@@ -4315,6 +5563,10 @@
         {
           "id": "groups",
           "label": "分块（块内逗号，块间 |）",
+          "labelI18n": {
+            "zh-CN": "分块（块内逗号，块间 |）",
+            "en": "Blocks (commas within blocks; | between blocks)"
+          },
           "type": "string",
           "defaultValue": "a,b|c,d|e",
           "min": null,
@@ -4329,6 +5581,10 @@
         {
           "id": "setA",
           "label": "集合 A",
+          "labelI18n": {
+            "zh-CN": "集合 A",
+            "en": "Set A"
+          },
           "type": "string",
           "defaultValue": "a,b",
           "min": null,
@@ -4338,6 +5594,10 @@
         {
           "id": "setB",
           "label": "集合 B",
+          "labelI18n": {
+            "zh-CN": "集合 B",
+            "en": "Set B"
+          },
           "type": "string",
           "defaultValue": "1,2,3",
           "min": null,
@@ -4349,6 +5609,10 @@
         {
           "id": "images",
           "label": "σ(1),…,σ(n)",
+          "labelI18n": {
+            "zh-CN": "σ(1),…,σ(n)",
+            "en": "σ(1),…,σ(n)"
+          },
           "type": "string",
           "defaultValue": "2,3,1,4",
           "min": null,
@@ -4360,6 +5624,10 @@
         {
           "id": "n",
           "label": "多边形边数 n",
+          "labelI18n": {
+            "zh-CN": "多边形边数 n",
+            "en": "Polygon side count n"
+          },
           "type": "number",
           "defaultValue": 3,
           "min": 3,
@@ -4371,6 +5639,10 @@
         {
           "id": "r",
           "label": "参数 r",
+          "labelI18n": {
+            "zh-CN": "参数 r",
+            "en": "Parameter r"
+          },
           "type": "number",
           "defaultValue": 3.2,
           "min": 0,
@@ -4380,6 +5652,10 @@
         {
           "id": "x0",
           "label": "初态 x₀",
+          "labelI18n": {
+            "zh-CN": "初态 x₀",
+            "en": "Initial state x₀"
+          },
           "type": "number",
           "defaultValue": 0.2,
           "min": 0,
@@ -4389,6 +5665,10 @@
         {
           "id": "steps",
           "label": "迭代步数",
+          "labelI18n": {
+            "zh-CN": "迭代步数",
+            "en": "Iteration steps"
+          },
           "type": "number",
           "defaultValue": 8,
           "min": 1,
@@ -4400,6 +5680,10 @@
         {
           "id": "arcs",
           "label": "容量边",
+          "labelI18n": {
+            "zh-CN": "容量边",
+            "en": "Capacity edges"
+          },
           "type": "string",
           "defaultValue": "s,a,5;a,t,3;s,t,1",
           "min": null,
@@ -4426,6 +5710,9 @@
       "nestable": true,
       "computable": false,
       "factory": null,
+      "hidden": false,
+      "family": null,
+      "familyAlias": null,
       "parameters": [],
       "defaultSlots": [
         {
@@ -4680,59 +5967,327 @@
     },
     {
       "id": "builtin:directed-graph",
-      "name": "有向图 · Directed Graph",
+      "name": "有向节点图 · Directed Node Graph",
       "names": {
-        "zh-CN": "有向图",
-        "en": "Directed Graph"
+        "zh-CN": "有向节点图",
+        "en": "Directed Node Graph"
       },
-      "description": "稳定力导向布局的可扩展语义图",
-      "version": 2,
+      "description": "统一有向链、依赖与一般有向网络；节点数量、拓扑、布局和命名独立配置。具体关系的含义由实例保留。",
+      "version": 5,
       "category": "graph",
       "maturity": "ready",
       "deprecated": false,
       "replacementTemplateId": null,
       "nestable": true,
       "computable": false,
-      "factory": null,
-      "parameters": [],
+      "factory": "directed-node-family",
+      "hidden": false,
+      "family": {
+        "id": "directed-node",
+        "invariants": [
+          "independent-relation-identity",
+          "directed-incidence"
+        ],
+        "presets": [
+          {
+            "id": "chain",
+            "parameters": {
+              "topology": "chain",
+              "layoutMode": "linear"
+            }
+          },
+          {
+            "id": "dependency",
+            "parameters": {
+              "topology": "dag",
+              "layoutMode": "layered",
+              "relationType": "depends-on"
+            }
+          },
+          {
+            "id": "temporal",
+            "parameters": {
+              "topology": "chain",
+              "layoutMode": "linear",
+              "relationType": "precedes"
+            }
+          },
+          {
+            "id": "proof",
+            "parameters": {
+              "topology": "dag",
+              "layoutMode": "layered",
+              "relationType": "implies"
+            }
+          }
+        ]
+      },
+      "familyAlias": null,
+      "parameters": [
+        {
+          "id": "nodeCount",
+          "label": "节点数量",
+          "labelI18n": {
+            "zh-CN": "节点数量",
+            "en": "Number of nodes"
+          },
+          "type": "number",
+          "defaultValue": 3,
+          "min": 1,
+          "max": 100,
+          "options": null
+        },
+        {
+          "id": "topology",
+          "label": "连接拓扑",
+          "labelI18n": {
+            "zh-CN": "连接拓扑",
+            "en": "Topology"
+          },
+          "type": "enum",
+          "defaultValue": "network",
+          "min": null,
+          "max": null,
+          "options": [
+            {
+              "value": "chain",
+              "label": "单向链",
+              "labelI18n": {
+                "zh-CN": "单向链",
+                "en": "Directed chain"
+              }
+            },
+            {
+              "value": "dag",
+              "label": "有向无环网络",
+              "labelI18n": {
+                "zh-CN": "有向无环网络",
+                "en": "Directed acyclic graph"
+              }
+            },
+            {
+              "value": "network",
+              "label": "自由有向网络",
+              "labelI18n": {
+                "zh-CN": "自由有向网络",
+                "en": "Directed network"
+              }
+            }
+          ]
+        },
+        {
+          "id": "layoutMode",
+          "label": "排列布局",
+          "labelI18n": {
+            "zh-CN": "排列布局",
+            "en": "Layout"
+          },
+          "type": "enum",
+          "defaultValue": "force",
+          "min": null,
+          "max": null,
+          "options": [
+            {
+              "value": "linear",
+              "label": "线性排列",
+              "labelI18n": {
+                "zh-CN": "线性排列",
+                "en": "Linear"
+              }
+            },
+            {
+              "value": "layered",
+              "label": "分层排列",
+              "labelI18n": {
+                "zh-CN": "分层排列",
+                "en": "Layered"
+              }
+            },
+            {
+              "value": "force",
+              "label": "自由网络",
+              "labelI18n": {
+                "zh-CN": "自由网络",
+                "en": "Free network"
+              }
+            }
+          ]
+        },
+        {
+          "id": "nodeLabels",
+          "label": "节点标签（逗号分隔，可留空）",
+          "labelI18n": {
+            "zh-CN": "节点标签（逗号分隔，可留空）",
+            "en": "Node labels (comma separated, optional)"
+          },
+          "type": "string",
+          "defaultValue": "",
+          "min": null,
+          "max": null,
+          "options": null
+        },
+        {
+          "id": "numbering",
+          "label": "编号方式",
+          "labelI18n": {
+            "zh-CN": "编号方式",
+            "en": "Numbering"
+          },
+          "type": "enum",
+          "defaultValue": "alphabet",
+          "min": null,
+          "max": null,
+          "options": [
+            {
+              "value": "none",
+              "label": "不编号",
+              "labelI18n": {
+                "zh-CN": "不编号",
+                "en": "None"
+              }
+            },
+            {
+              "value": "numeric",
+              "label": "数字",
+              "labelI18n": {
+                "zh-CN": "数字",
+                "en": "Numbers"
+              }
+            },
+            {
+              "value": "alphabet",
+              "label": "大写字母",
+              "labelI18n": {
+                "zh-CN": "大写字母",
+                "en": "Uppercase letters"
+              }
+            },
+            {
+              "value": "lowercase",
+              "label": "小写字母",
+              "labelI18n": {
+                "zh-CN": "小写字母",
+                "en": "Lowercase letters"
+              }
+            },
+            {
+              "value": "roman",
+              "label": "罗马数字",
+              "labelI18n": {
+                "zh-CN": "罗马数字",
+                "en": "Roman numerals"
+              }
+            },
+            {
+              "value": "custom",
+              "label": "自定义格式",
+              "labelI18n": {
+                "zh-CN": "自定义格式",
+                "en": "Custom format"
+              }
+            }
+          ]
+        },
+        {
+          "id": "numberFormat",
+          "label": "编号格式：{n}、{A}、{a}、{i}、{label}",
+          "labelI18n": {
+            "zh-CN": "编号格式：{n}、{A}、{a}、{i}、{label}",
+            "en": "Format: {n}, {A}, {a}, {i}, {label}"
+          },
+          "type": "string",
+          "defaultValue": "{n}",
+          "min": null,
+          "max": null,
+          "options": null
+        },
+        {
+          "id": "numberStart",
+          "label": "起始编号",
+          "labelI18n": {
+            "zh-CN": "起始编号",
+            "en": "First number"
+          },
+          "type": "number",
+          "defaultValue": 1,
+          "min": 0,
+          "max": 10000,
+          "options": null
+        },
+        {
+          "id": "relationType",
+          "label": "关系类型",
+          "labelI18n": {
+            "zh-CN": "关系类型",
+            "en": "Relation type"
+          },
+          "type": "string",
+          "defaultValue": "related",
+          "min": null,
+          "max": null,
+          "options": null
+        },
+        {
+          "id": "relationLabel",
+          "label": "关系显示名称（可留空）",
+          "labelI18n": {
+            "zh-CN": "关系显示名称（可留空）",
+            "en": "Relation label (optional)"
+          },
+          "type": "string",
+          "defaultValue": "",
+          "min": null,
+          "max": null,
+          "options": null
+        }
+      ],
       "defaultSlots": [
         {
           "id": "A",
-          "label": "节点 A / Node A",
+          "label": "A",
           "role": "node",
           "cardinality": "many",
           "accepts": [
             "knowledge",
-            "structure"
+            "structure",
+            "value",
+            "variable"
           ],
           "semanticCoordinate": {
-            "order": 1
+            "order": 0,
+            "layer": 0
           }
         },
         {
           "id": "B",
-          "label": "节点 B / Node B",
+          "label": "B",
           "role": "node",
           "cardinality": "many",
           "accepts": [
             "knowledge",
-            "structure"
+            "structure",
+            "value",
+            "variable"
           ],
           "semanticCoordinate": {
-            "order": 2
+            "order": 1,
+            "layer": 1
           }
         },
         {
           "id": "C",
-          "label": "节点 C / Node C",
+          "label": "C",
           "role": "node",
           "cardinality": "many",
           "accepts": [
             "knowledge",
-            "structure"
+            "structure",
+            "value",
+            "variable"
           ],
           "semanticCoordinate": {
-            "order": 3
+            "order": 2,
+            "layer": 2
           }
         }
       ],
@@ -4744,7 +6299,7 @@
           "direction": "directed",
           "type": "related",
           "label": "",
-          "routing": null
+          "routing": "straight"
         },
         {
           "id": "bc",
@@ -4753,13 +6308,23 @@
           "direction": "directed",
           "type": "related",
           "label": "",
-          "routing": null
+          "routing": "straight"
         }
       ],
       "layout": {
         "type": "force"
       },
-      "viewCapability": null
+      "viewCapability": {
+        "mode": "arrange",
+        "label": "可排列",
+        "defaultArrangement": "horizontal-forward",
+        "options": [
+          "horizontal-forward",
+          "horizontal-reverse",
+          "vertical-forward",
+          "vertical-reverse"
+        ]
+      }
     },
     {
       "id": "builtin:undirected-graph",
@@ -4777,6 +6342,9 @@
       "nestable": true,
       "computable": false,
       "factory": null,
+      "hidden": false,
+      "family": null,
+      "familyAlias": null,
       "parameters": [],
       "defaultSlots": [
         {
@@ -4848,8 +6416,8 @@
       "id": "builtin:poset-hasse",
       "name": "偏序 Poset / Hasse",
       "names": {
-        "zh-CN": "偏序 Poset",
-        "en": "Hasse"
+        "zh-CN": "偏序与哈斯图",
+        "en": "Partial Order / Hasse"
       },
       "description": "专用偏序工作台：关系文本、覆盖关系、有效性、传递约简与格的基础检测。",
       "version": 3,
@@ -4860,10 +6428,17 @@
       "nestable": true,
       "computable": true,
       "factory": "poset",
+      "hidden": false,
+      "family": null,
+      "familyAlias": null,
       "parameters": [
         {
           "id": "starter",
           "label": "初始模型",
+          "labelI18n": {
+            "zh-CN": "初始模型",
+            "en": "Initial model"
+          },
           "type": "enum",
           "defaultValue": "blank",
           "min": null,
@@ -4871,33 +6446,61 @@
           "options": [
             {
               "value": "blank",
-              "label": "空白偏序"
+              "label": "空白偏序",
+              "labelI18n": {
+                "zh-CN": "空白偏序",
+                "en": "Empty partial order"
+              }
             },
             {
               "value": "diamond",
-              "label": "四元素菱形示例"
+              "label": "四元素菱形示例",
+              "labelI18n": {
+                "zh-CN": "四元素菱形示例",
+                "en": "Four-element diamond"
+              }
             },
             {
               "value": "subset",
-              "label": "集合包含"
+              "label": "集合包含",
+              "labelI18n": {
+                "zh-CN": "集合包含",
+                "en": "Set inclusion"
+              }
             },
             {
               "value": "divisibility",
-              "label": "整除关系"
+              "label": "整除关系",
+              "labelI18n": {
+                "zh-CN": "整除关系",
+                "en": "Divisibility"
+              }
             },
             {
               "value": "numeric",
-              "label": "数值 ≤"
+              "label": "数值 ≤",
+              "labelI18n": {
+                "zh-CN": "数值 ≤",
+                "en": "Numeric ≤"
+              }
             },
             {
               "value": "relation-text",
-              "label": "从关系文本导入"
+              "label": "从关系文本导入",
+              "labelI18n": {
+                "zh-CN": "从关系文本导入",
+                "en": "Import relation text"
+              }
             }
           ]
         },
         {
           "id": "relationText",
           "label": "关系文本",
+          "labelI18n": {
+            "zh-CN": "关系文本",
+            "en": "Relationship text"
+          },
           "type": "textarea",
           "defaultValue": "a < b < c",
           "min": null,
@@ -4938,6 +6541,9 @@
       "nestable": true,
       "computable": false,
       "factory": null,
+      "hidden": false,
+      "family": null,
+      "familyAlias": null,
       "parameters": [],
       "defaultSlots": [
         {
@@ -5022,8 +6628,8 @@
       "id": "builtin:mod-n",
       "name": "模结构 Modular Ring · ℤ/nℤ",
       "names": {
-        "zh-CN": "模结构 Modular Ring",
-        "en": "ℤ/nℤ"
+        "zh-CN": "模结构 ℤ/nℤ",
+        "en": "Modular Space ℤ/nℤ"
       },
       "description": "模 n 位置空间：用于周期参数、变量映射与位置计算。",
       "version": 3,
@@ -5034,10 +6640,17 @@
       "nestable": true,
       "computable": true,
       "factory": "mod-n",
+      "hidden": false,
+      "family": null,
+      "familyAlias": null,
       "parameters": [
         {
           "id": "modulus",
           "label": "模数 n",
+          "labelI18n": {
+            "zh-CN": "模数 n",
+            "en": "Modulus n"
+          },
           "type": "number",
           "defaultValue": 12,
           "min": 2,
@@ -5370,10 +6983,17 @@
       "nestable": true,
       "computable": true,
       "factory": "mod-n",
+      "hidden": true,
+      "family": null,
+      "familyAlias": null,
       "parameters": [
         {
           "id": "modulus",
           "label": "模数 n",
+          "labelI18n": {
+            "zh-CN": "模数 n",
+            "en": "Modulus n"
+          },
           "type": "number",
           "defaultValue": 12,
           "min": 2,
@@ -5383,6 +7003,10 @@
         {
           "id": "hour",
           "label": "旧版时辰参数",
+          "labelI18n": {
+            "zh-CN": "旧版时辰参数",
+            "en": "旧版时辰参数"
+          },
           "type": "number",
           "defaultValue": 7,
           "min": 0,
@@ -5703,8 +7327,8 @@
       "id": "builtin:boolean-algebra",
       "name": "布尔代数 Boolean Algebra Bₙ",
       "names": {
-        "zh-CN": "布尔代数 Boolean Algebra Bₙ",
-        "en": "布尔代数 Boolean Algebra Bₙ"
+        "zh-CN": "布尔代数 Bₙ",
+        "en": "Boolean Algebra Bₙ"
       },
       "description": "动态生成 2ⁿ 个元素、Hasse 覆盖边与格运算",
       "version": 2,
@@ -5715,10 +7339,17 @@
       "nestable": true,
       "computable": true,
       "factory": "boolean-algebra",
+      "hidden": false,
+      "family": null,
+      "familyAlias": null,
       "parameters": [
         {
           "id": "rank",
           "label": "维数 n",
+          "labelI18n": {
+            "zh-CN": "维数 n",
+            "en": "Dimension n"
+          },
           "type": "number",
           "defaultValue": 4,
           "min": 1,
@@ -5728,6 +7359,10 @@
         {
           "id": "displayMode",
           "label": "标签形式",
+          "labelI18n": {
+            "zh-CN": "标签形式",
+            "en": "Label notation"
+          },
           "type": "enum",
           "defaultValue": "subset",
           "min": null,
@@ -5735,17 +7370,29 @@
           "options": [
             {
               "value": "subset",
-              "label": "子集"
+              "label": "子集",
+              "labelI18n": {
+                "zh-CN": "子集",
+                "en": "Subsets"
+              }
             },
             {
               "value": "bitset",
-              "label": "位串"
+              "label": "位串",
+              "labelI18n": {
+                "zh-CN": "位串",
+                "en": "Bit strings"
+              }
             }
           ]
         },
         {
           "id": "atomLabels",
           "label": "原子标签",
+          "labelI18n": {
+            "zh-CN": "原子标签",
+            "en": "Atom labels"
+          },
           "type": "string",
           "defaultValue": "a,b,c,d",
           "min": null,
@@ -6317,15 +7964,27 @@
       "version": 1,
       "category": "venn",
       "maturity": "ready",
-      "deprecated": false,
-      "replacementTemplateId": null,
+      "deprecated": true,
+      "replacementTemplateId": "builtin:venn",
       "nestable": true,
       "computable": false,
       "factory": null,
+      "hidden": true,
+      "family": null,
+      "familyAlias": {
+        "id": "builtin:venn",
+        "parameters": {
+          "setCount": "2"
+        }
+      },
       "parameters": [
         {
           "id": "setA",
           "label": "集合 A / Set A",
+          "labelI18n": {
+            "zh-CN": "集合 A / Set A",
+            "en": "集合 A / Set A"
+          },
           "type": "string",
           "defaultValue": "A",
           "min": null,
@@ -6335,6 +7994,10 @@
         {
           "id": "setB",
           "label": "集合 B / Set B",
+          "labelI18n": {
+            "zh-CN": "集合 B / Set B",
+            "en": "集合 B / Set B"
+          },
           "type": "string",
           "defaultValue": "B",
           "min": null,
@@ -6414,11 +8077,19 @@
       "version": 1,
       "category": "venn",
       "maturity": "ready",
-      "deprecated": false,
-      "replacementTemplateId": null,
+      "deprecated": true,
+      "replacementTemplateId": "builtin:venn",
       "nestable": true,
       "computable": false,
       "factory": null,
+      "hidden": true,
+      "family": null,
+      "familyAlias": {
+        "id": "builtin:venn",
+        "parameters": {
+          "setCount": "3"
+        }
+      },
       "parameters": [],
       "defaultSlots": [
         {
@@ -6543,8 +8214,8 @@
       "id": "builtin:regular-polygon",
       "name": "正 n 边形 Regular n-gon",
       "names": {
-        "zh-CN": "正 n 边形 Regular n-gon",
-        "en": "正 n 边形 Regular n-gon"
+        "zh-CN": "正 n 边形",
+        "en": "Regular n-gon"
       },
       "description": "具有顶点、边与循环顺序语义的正 n 边形",
       "version": 1,
@@ -6555,10 +8226,17 @@
       "nestable": true,
       "computable": true,
       "factory": "regular-polygon",
+      "hidden": false,
+      "family": null,
+      "familyAlias": null,
       "parameters": [
         {
           "id": "n",
           "label": "边数 n",
+          "labelI18n": {
+            "zh-CN": "边数 n",
+            "en": "Number of sides n"
+          },
           "type": "number",
           "defaultValue": 6,
           "min": 3,
@@ -6568,6 +8246,10 @@
         {
           "id": "radius",
           "label": "半径",
+          "labelI18n": {
+            "zh-CN": "半径",
+            "en": "Radius"
+          },
           "type": "number",
           "defaultValue": 180,
           "min": 80,
@@ -6738,8 +8420,8 @@
       "id": "builtin:coordinate-plane",
       "name": "向量空间 Vector Space",
       "names": {
-        "zh-CN": "向量空间 Vector Space",
-        "en": "向量空间 Vector Space"
+        "zh-CN": "向量空间",
+        "en": "Vector Space"
       },
       "description": "统一二维/三维向量、点、参数曲线、动态点与曲面的无限作图工作台。",
       "version": 5,
@@ -6750,10 +8432,17 @@
       "nestable": true,
       "computable": true,
       "factory": null,
+      "hidden": false,
+      "family": null,
+      "familyAlias": null,
       "parameters": [
         {
           "id": "dimension",
           "label": "维数",
+          "labelI18n": {
+            "zh-CN": "维数",
+            "en": "Dimension"
+          },
           "type": "enum",
           "defaultValue": "2d",
           "min": null,
@@ -6761,17 +8450,29 @@
           "options": [
             {
               "value": "2d",
-              "label": "二维平面"
+              "label": "二维平面",
+              "labelI18n": {
+                "zh-CN": "二维平面",
+                "en": "2D plane"
+              }
             },
             {
               "value": "3d",
-              "label": "三维空间"
+              "label": "三维空间",
+              "labelI18n": {
+                "zh-CN": "三维空间",
+                "en": "3D space"
+              }
             }
           ]
         },
         {
           "id": "scale",
           "label": "单位缩放",
+          "labelI18n": {
+            "zh-CN": "单位缩放",
+            "en": "Unit scale"
+          },
           "type": "number",
           "defaultValue": 40,
           "min": 16,
@@ -6858,8 +8559,8 @@
       "id": "builtin:cyclic-group",
       "name": "循环群 Cyclic Group · Cₙ",
       "names": {
-        "zh-CN": "循环群 Cyclic Group",
-        "en": "Cₙ"
+        "zh-CN": "循环群 Cₙ",
+        "en": "Cyclic Group Cₙ"
       },
       "description": "群元素、选定元素的作用、元素阶、生成子群与 Cayley 图解释。",
       "version": 3,
@@ -6870,10 +8571,17 @@
       "nestable": true,
       "computable": true,
       "factory": "cyclic-group",
+      "hidden": false,
+      "family": null,
+      "familyAlias": null,
       "parameters": [
         {
           "id": "n",
           "label": "阶 n",
+          "labelI18n": {
+            "zh-CN": "阶 n",
+            "en": "Order n"
+          },
           "type": "number",
           "defaultValue": 8,
           "min": 2,
@@ -6883,6 +8591,10 @@
         {
           "id": "generator",
           "label": "选定元素 / 作用步长",
+          "labelI18n": {
+            "zh-CN": "选定元素 / 作用步长",
+            "en": "Selected element / action step"
+          },
           "type": "number",
           "defaultValue": 1,
           "min": 0,
@@ -6892,6 +8604,10 @@
         {
           "id": "notation",
           "label": "显示记号",
+          "labelI18n": {
+            "zh-CN": "显示记号",
+            "en": "Notation"
+          },
           "type": "enum",
           "defaultValue": "cyclic",
           "min": null,
@@ -6899,11 +8615,19 @@
           "options": [
             {
               "value": "cyclic",
-              "label": "Cₙ"
+              "label": "Cₙ",
+              "labelI18n": {
+                "zh-CN": "Cₙ",
+                "en": "Cₙ"
+              }
             },
             {
               "value": "quotient",
-              "label": "ℤ/nℤ"
+              "label": "ℤ/nℤ",
+              "labelI18n": {
+                "zh-CN": "ℤ/nℤ",
+                "en": "ℤ/nℤ"
+              }
             }
           ]
         }
@@ -7105,8 +8829,8 @@
       "id": "builtin:operation-table",
       "name": "有限运算表 Finite Operation Table",
       "names": {
-        "zh-CN": "有限运算表 Finite Operation Table",
-        "en": "有限运算表 Finite Operation Table"
+        "zh-CN": "有限运算表",
+        "en": "Finite Operation Table"
       },
       "description": "有限集合上的运算表；不预设该运算一定构成群。",
       "version": 2,
@@ -7117,10 +8841,17 @@
       "nestable": true,
       "computable": true,
       "factory": "operation-table",
+      "hidden": false,
+      "family": null,
+      "familyAlias": null,
       "parameters": [
         {
           "id": "n",
           "label": "元素数量 n",
+          "labelI18n": {
+            "zh-CN": "元素数量 n",
+            "en": "Element count n"
+          },
           "type": "number",
           "defaultValue": 4,
           "min": 2,
@@ -7130,6 +8861,10 @@
         {
           "id": "operation",
           "label": "运算",
+          "labelI18n": {
+            "zh-CN": "运算",
+            "en": "Operation"
+          },
           "type": "enum",
           "defaultValue": "add-mod-n",
           "min": null,
@@ -7137,11 +8872,19 @@
           "options": [
             {
               "value": "add-mod-n",
-              "label": "模 n 加法"
+              "label": "模 n 加法",
+              "labelI18n": {
+                "zh-CN": "模 n 加法",
+                "en": "Addition modulo n"
+              }
             },
             {
               "value": "multiply-mod-n",
-              "label": "模 n 乘法"
+              "label": "模 n 乘法",
+              "labelI18n": {
+                "zh-CN": "模 n 乘法",
+                "en": "Multiplication modulo n"
+              }
             }
           ]
         }
@@ -7410,10 +9153,17 @@
       "nestable": true,
       "computable": true,
       "factory": null,
+      "hidden": true,
+      "family": null,
+      "familyAlias": null,
       "parameters": [
         {
           "id": "dimension",
           "label": "维数",
+          "labelI18n": {
+            "zh-CN": "维数",
+            "en": "Dimension"
+          },
           "type": "enum",
           "defaultValue": "2d",
           "min": null,
@@ -7421,17 +9171,29 @@
           "options": [
             {
               "value": "2d",
-              "label": "二维平面"
+              "label": "二维平面",
+              "labelI18n": {
+                "zh-CN": "二维平面",
+                "en": "2D plane"
+              }
             },
             {
               "value": "3d",
-              "label": "三维空间"
+              "label": "三维空间",
+              "labelI18n": {
+                "zh-CN": "三维空间",
+                "en": "3D space"
+              }
             }
           ]
         },
         {
           "id": "scale",
           "label": "单位缩放",
+          "labelI18n": {
+            "zh-CN": "单位缩放",
+            "en": "Unit scale"
+          },
           "type": "number",
           "defaultValue": 40,
           "min": 24,
@@ -7554,6 +9316,9 @@
       "nestable": true,
       "computable": false,
       "factory": null,
+      "hidden": false,
+      "family": null,
+      "familyAlias": null,
       "parameters": [],
       "defaultSlots": [
         {
@@ -7593,6 +9358,9 @@
       "nestable": true,
       "computable": false,
       "factory": null,
+      "hidden": false,
+      "family": null,
+      "familyAlias": null,
       "parameters": [],
       "defaultSlots": [],
       "defaultEdges": [],
@@ -7609,20 +9377,147 @@
         "en": "Center & Facets"
       },
       "description": "一个中心与无序的并列面向。圆周位置不表示先后、依赖或等级。",
-      "version": 4,
+      "version": 5,
       "category": "graph",
       "maturity": "ready",
       "deprecated": false,
       "replacementTemplateId": null,
       "nestable": true,
-      "computable": true,
+      "computable": false,
       "factory": "semantic:n-center",
+      "hidden": false,
+      "family": {
+        "id": "center-facets",
+        "invariants": [
+          "one-center",
+          "unordered-facets"
+        ]
+      },
+      "familyAlias": null,
       "parameters": [
         {
+          "id": "nodeCount",
+          "label": "外围节点数量",
+          "labelI18n": {
+            "zh-CN": "外围节点数量",
+            "en": "Peripheral nodes"
+          },
+          "type": "number",
+          "defaultValue": 4,
+          "min": 1,
+          "max": 60,
+          "options": null
+        },
+        {
           "id": "members",
-          "label": "面向名称（逗号分隔）",
+          "label": "面向名称（逗号分隔，可留空）",
+          "labelI18n": {
+            "zh-CN": "面向名称（逗号分隔，可留空）",
+            "en": "Facet labels (comma separated, optional)"
+          },
           "type": "string",
-          "defaultValue": "面向一,面向二,面向三,面向四",
+          "defaultValue": "",
+          "min": null,
+          "max": null,
+          "options": null
+        },
+        {
+          "id": "numbering",
+          "label": "编号方式",
+          "labelI18n": {
+            "zh-CN": "编号方式",
+            "en": "Numbering"
+          },
+          "type": "enum",
+          "defaultValue": "none",
+          "min": null,
+          "max": null,
+          "options": [
+            {
+              "value": "none",
+              "label": "不编号",
+              "labelI18n": {
+                "zh-CN": "不编号",
+                "en": "None"
+              }
+            },
+            {
+              "value": "numeric",
+              "label": "数字",
+              "labelI18n": {
+                "zh-CN": "数字",
+                "en": "Numbers"
+              }
+            },
+            {
+              "value": "alphabet",
+              "label": "大写字母",
+              "labelI18n": {
+                "zh-CN": "大写字母",
+                "en": "Uppercase letters"
+              }
+            },
+            {
+              "value": "lowercase",
+              "label": "小写字母",
+              "labelI18n": {
+                "zh-CN": "小写字母",
+                "en": "Lowercase letters"
+              }
+            },
+            {
+              "value": "roman",
+              "label": "罗马数字",
+              "labelI18n": {
+                "zh-CN": "罗马数字",
+                "en": "Roman numerals"
+              }
+            },
+            {
+              "value": "custom",
+              "label": "自定义格式",
+              "labelI18n": {
+                "zh-CN": "自定义格式",
+                "en": "Custom format"
+              }
+            }
+          ]
+        },
+        {
+          "id": "numberFormat",
+          "label": "编号格式：{n}、{A}、{a}、{i}、{label}",
+          "labelI18n": {
+            "zh-CN": "编号格式：{n}、{A}、{a}、{i}、{label}",
+            "en": "Format: {n}, {A}, {a}, {i}, {label}"
+          },
+          "type": "string",
+          "defaultValue": "{n}",
+          "min": null,
+          "max": null,
+          "options": null
+        },
+        {
+          "id": "numberStart",
+          "label": "起始编号",
+          "labelI18n": {
+            "zh-CN": "起始编号",
+            "en": "First number"
+          },
+          "type": "number",
+          "defaultValue": 1,
+          "min": 0,
+          "max": 10000,
+          "options": null
+        },
+        {
+          "id": "centerLabel",
+          "label": "中心名称",
+          "labelI18n": {
+            "zh-CN": "中心名称",
+            "en": "Center label"
+          },
+          "type": "string",
+          "defaultValue": "中心",
           "min": null,
           "max": null,
           "options": null
@@ -7644,7 +9539,7 @@
         },
         {
           "id": "n-center-2",
-          "label": "面向一",
+          "label": "",
           "role": "facet",
           "cardinality": "many",
           "accepts": [
@@ -7653,11 +9548,14 @@
             "value",
             "variable"
           ],
-          "semanticCoordinate": {}
+          "semanticCoordinate": {
+            "facetIndex": 0,
+            "angle": 0
+          }
         },
         {
           "id": "n-center-3",
-          "label": "面向二",
+          "label": "",
           "role": "facet",
           "cardinality": "many",
           "accepts": [
@@ -7666,11 +9564,14 @@
             "value",
             "variable"
           ],
-          "semanticCoordinate": {}
+          "semanticCoordinate": {
+            "facetIndex": 1,
+            "angle": 90
+          }
         },
         {
           "id": "n-center-4",
-          "label": "面向三",
+          "label": "",
           "role": "facet",
           "cardinality": "many",
           "accepts": [
@@ -7679,11 +9580,14 @@
             "value",
             "variable"
           ],
-          "semanticCoordinate": {}
+          "semanticCoordinate": {
+            "facetIndex": 2,
+            "angle": 180
+          }
         },
         {
           "id": "n-center-5",
-          "label": "面向四",
+          "label": "",
           "role": "facet",
           "cardinality": "many",
           "accepts": [
@@ -7692,7 +9596,10 @@
             "value",
             "variable"
           ],
-          "semanticCoordinate": {}
+          "semanticCoordinate": {
+            "facetIndex": 3,
+            "angle": 270
+          }
         }
       ],
       "defaultEdges": [
@@ -7774,6 +9681,169 @@
       }
     },
     {
+      "id": "builtin:venn",
+      "name": "韦恩图 · Venn Diagram",
+      "names": {
+        "zh-CN": "韦恩图",
+        "en": "Venn Diagram"
+      },
+      "description": "以二或三个集合的交、差与归属区域表示集合关系。",
+      "version": 5,
+      "category": "venn",
+      "maturity": "ready",
+      "deprecated": false,
+      "replacementTemplateId": null,
+      "nestable": true,
+      "computable": false,
+      "factory": "venn-family",
+      "hidden": false,
+      "family": {
+        "id": "venn",
+        "invariants": [
+          "set-region-membership"
+        ]
+      },
+      "familyAlias": null,
+      "parameters": [
+        {
+          "id": "setCount",
+          "label": "集合数量",
+          "labelI18n": {
+            "zh-CN": "集合数量",
+            "en": "Number of sets"
+          },
+          "type": "enum",
+          "defaultValue": "2",
+          "min": null,
+          "max": null,
+          "options": [
+            {
+              "value": "2",
+              "label": "两个集合",
+              "labelI18n": {
+                "zh-CN": "两个集合",
+                "en": "Two sets"
+              }
+            },
+            {
+              "value": "3",
+              "label": "三个集合",
+              "labelI18n": {
+                "zh-CN": "三个集合",
+                "en": "Three sets"
+              }
+            }
+          ]
+        },
+        {
+          "id": "setA",
+          "label": "集合 A",
+          "labelI18n": {
+            "zh-CN": "集合 A",
+            "en": "Set A"
+          },
+          "type": "string",
+          "defaultValue": "A",
+          "min": null,
+          "max": null,
+          "options": null
+        },
+        {
+          "id": "setB",
+          "label": "集合 B",
+          "labelI18n": {
+            "zh-CN": "集合 B",
+            "en": "Set B"
+          },
+          "type": "string",
+          "defaultValue": "B",
+          "min": null,
+          "max": null,
+          "options": null
+        },
+        {
+          "id": "setC",
+          "label": "集合 C",
+          "labelI18n": {
+            "zh-CN": "集合 C",
+            "en": "Set C"
+          },
+          "type": "string",
+          "defaultValue": "C",
+          "min": null,
+          "max": null,
+          "options": null
+        }
+      ],
+      "defaultSlots": [
+        {
+          "id": "A-only",
+          "label": "(A)∖(B)",
+          "role": "set-region",
+          "cardinality": "many",
+          "accepts": [
+            "knowledge",
+            "structure",
+            "value",
+            "variable"
+          ],
+          "semanticCoordinate": {
+            "sets": [
+              "A"
+            ],
+            "excludes": [
+              "B"
+            ]
+          }
+        },
+        {
+          "id": "intersection",
+          "label": "A∩B",
+          "role": "set-region",
+          "cardinality": "many",
+          "accepts": [
+            "knowledge",
+            "structure",
+            "value",
+            "variable"
+          ],
+          "semanticCoordinate": {
+            "sets": [
+              "A",
+              "B"
+            ],
+            "excludes": []
+          }
+        },
+        {
+          "id": "B-only",
+          "label": "(B)∖(A)",
+          "role": "set-region",
+          "cardinality": "many",
+          "accepts": [
+            "knowledge",
+            "structure",
+            "value",
+            "variable"
+          ],
+          "semanticCoordinate": {
+            "sets": [
+              "B"
+            ],
+            "excludes": [
+              "A"
+            ]
+          }
+        }
+      ],
+      "defaultEdges": [],
+      "layout": {
+        "type": "venn",
+        "sets": 2
+      },
+      "viewCapability": null
+    },
+    {
       "id": "builtin:matrix-grid",
       "name": "矩阵 / 网格 · Matrix / Grid",
       "names": {
@@ -7789,10 +9859,17 @@
       "nestable": true,
       "computable": true,
       "factory": "matrix-grid",
+      "hidden": false,
+      "family": null,
+      "familyAlias": null,
       "parameters": [
         {
           "id": "rows",
           "label": "行数",
+          "labelI18n": {
+            "zh-CN": "行数",
+            "en": "Rows"
+          },
           "type": "number",
           "defaultValue": 3,
           "min": 1,
@@ -7802,6 +9879,10 @@
         {
           "id": "columns",
           "label": "列数",
+          "labelI18n": {
+            "zh-CN": "列数",
+            "en": "Columns"
+          },
           "type": "number",
           "defaultValue": 3,
           "min": 1,
@@ -7811,6 +9892,10 @@
         {
           "id": "cellPrefix",
           "label": "单元格前缀",
+          "labelI18n": {
+            "zh-CN": "单元格前缀",
+            "en": "Cell prefix"
+          },
           "type": "string",
           "defaultValue": "a",
           "min": null,
@@ -7820,6 +9905,10 @@
         {
           "id": "values",
           "label": "矩阵元素（JSON；可留空）",
+          "labelI18n": {
+            "zh-CN": "矩阵元素（JSON；可留空）",
+            "en": "Matrix entries (JSON, optional)"
+          },
           "type": "textarea",
           "defaultValue": "",
           "min": null,
@@ -8004,10 +10093,17 @@
       "nestable": true,
       "computable": true,
       "factory": "semantic:function-mapping",
+      "hidden": false,
+      "family": null,
+      "familyAlias": null,
       "parameters": [
         {
           "id": "domain",
           "label": "定义域",
+          "labelI18n": {
+            "zh-CN": "定义域",
+            "en": "Domain"
+          },
           "type": "string",
           "defaultValue": "a,b,c",
           "min": null,
@@ -8017,6 +10113,10 @@
         {
           "id": "codomain",
           "label": "陪域",
+          "labelI18n": {
+            "zh-CN": "陪域",
+            "en": "Codomain"
+          },
           "type": "string",
           "defaultValue": "1,2",
           "min": null,
@@ -8026,6 +10126,10 @@
         {
           "id": "images",
           "label": "按定义域顺序列出的像",
+          "labelI18n": {
+            "zh-CN": "按定义域顺序列出的像",
+            "en": "Images in domain order"
+          },
           "type": "string",
           "defaultValue": "1,2,1",
           "min": null,
@@ -8185,10 +10289,17 @@
       "nestable": true,
       "computable": true,
       "factory": "semantic:commutative-diagram",
+      "hidden": false,
+      "family": null,
+      "familyAlias": null,
       "parameters": [
         {
           "id": "f",
           "label": "f: A → B",
+          "labelI18n": {
+            "zh-CN": "f: A → B",
+            "en": "f: A → B"
+          },
           "type": "string",
           "defaultValue": "0,1,2",
           "min": null,
@@ -8198,6 +10309,10 @@
         {
           "id": "g",
           "label": "g: A → C",
+          "labelI18n": {
+            "zh-CN": "g: A → C",
+            "en": "g: A → C"
+          },
           "type": "string",
           "defaultValue": "0,1,2",
           "min": null,
@@ -8207,6 +10322,10 @@
         {
           "id": "h",
           "label": "h: B → D",
+          "labelI18n": {
+            "zh-CN": "h: B → D",
+            "en": "h: B → D"
+          },
           "type": "string",
           "defaultValue": "0,1,2",
           "min": null,
@@ -8216,6 +10335,10 @@
         {
           "id": "k",
           "label": "k: C → D",
+          "labelI18n": {
+            "zh-CN": "k: C → D",
+            "en": "k: C → D"
+          },
           "type": "string",
           "defaultValue": "0,1,2",
           "min": null,
@@ -8360,11 +10483,17 @@
       "version": 4,
       "category": "graph",
       "maturity": "ready",
-      "deprecated": false,
-      "replacementTemplateId": null,
+      "deprecated": true,
+      "replacementTemplateId": "builtin:directed-graph",
       "nestable": true,
       "computable": false,
       "factory": null,
+      "hidden": true,
+      "family": null,
+      "familyAlias": {
+        "id": "builtin:directed-graph",
+        "preset": "dependency"
+      },
       "parameters": [],
       "defaultSlots": [
         {
@@ -8492,6 +10621,9 @@
       "nestable": true,
       "computable": false,
       "factory": null,
+      "hidden": false,
+      "family": null,
+      "familyAlias": null,
       "parameters": [],
       "defaultSlots": [
         {
@@ -8591,11 +10723,17 @@
       "version": 2,
       "category": "graph",
       "maturity": "ready",
-      "deprecated": false,
-      "replacementTemplateId": null,
+      "deprecated": true,
+      "replacementTemplateId": "builtin:directed-graph",
       "nestable": true,
       "computable": false,
       "factory": null,
+      "hidden": true,
+      "family": null,
+      "familyAlias": {
+        "id": "builtin:directed-graph",
+        "preset": "temporal"
+      },
       "parameters": [],
       "defaultSlots": [
         {
@@ -8698,10 +10836,17 @@
       "nestable": true,
       "computable": true,
       "factory": "semantic:equivalence-classes",
+      "hidden": false,
+      "family": null,
+      "familyAlias": null,
       "parameters": [
         {
           "id": "groups",
           "label": "等价类（类内逗号，类间 |）",
+          "labelI18n": {
+            "zh-CN": "等价类（类内逗号，类间 |）",
+            "en": "Equivalence classes (commas within classes; | between classes)"
+          },
           "type": "string",
           "defaultValue": "a,b|c,d|e",
           "min": null,
@@ -8795,10 +10940,17 @@
       "nestable": true,
       "computable": true,
       "factory": "semantic:set-partition",
+      "hidden": false,
+      "family": null,
+      "familyAlias": null,
       "parameters": [
         {
           "id": "groups",
           "label": "分块（块内逗号，块间 |）",
+          "labelI18n": {
+            "zh-CN": "分块（块内逗号，块间 |）",
+            "en": "Blocks (commas within blocks; | between blocks)"
+          },
           "type": "string",
           "defaultValue": "a,b|c,d|e",
           "min": null,
@@ -8892,6 +11044,9 @@
       "nestable": true,
       "computable": false,
       "factory": null,
+      "hidden": false,
+      "family": null,
+      "familyAlias": null,
       "parameters": [],
       "defaultSlots": [
         {
@@ -9019,11 +11174,17 @@
       "version": 4,
       "category": "logic",
       "maturity": "ready",
-      "deprecated": false,
-      "replacementTemplateId": null,
+      "deprecated": true,
+      "replacementTemplateId": "builtin:directed-graph",
       "nestable": true,
       "computable": false,
       "factory": null,
+      "hidden": true,
+      "family": null,
+      "familyAlias": {
+        "id": "builtin:directed-graph",
+        "preset": "proof"
+      },
       "parameters": [],
       "defaultSlots": [
         {
@@ -9151,6 +11312,9 @@
       "nestable": true,
       "computable": false,
       "factory": null,
+      "hidden": false,
+      "family": null,
+      "familyAlias": null,
       "parameters": [],
       "defaultSlots": [
         {
@@ -9253,10 +11417,17 @@
       "nestable": true,
       "computable": true,
       "factory": "semantic:cartesian-product",
+      "hidden": false,
+      "family": null,
+      "familyAlias": null,
       "parameters": [
         {
           "id": "setA",
           "label": "集合 A",
+          "labelI18n": {
+            "zh-CN": "集合 A",
+            "en": "Set A"
+          },
           "type": "string",
           "defaultValue": "a,b",
           "min": null,
@@ -9266,6 +11437,10 @@
         {
           "id": "setB",
           "label": "集合 B",
+          "labelI18n": {
+            "zh-CN": "集合 B",
+            "en": "Set B"
+          },
           "type": "string",
           "defaultValue": "1,2,3",
           "min": null,
@@ -9515,10 +11690,17 @@
       "nestable": true,
       "computable": true,
       "factory": "semantic:permutation",
+      "hidden": false,
+      "family": null,
+      "familyAlias": null,
       "parameters": [
         {
           "id": "images",
           "label": "σ(1),…,σ(n)",
+          "labelI18n": {
+            "zh-CN": "σ(1),…,σ(n)",
+            "en": "σ(1),…,σ(n)"
+          },
           "type": "string",
           "defaultValue": "2,3,1,4",
           "min": null,
@@ -9668,10 +11850,17 @@
       "nestable": true,
       "computable": true,
       "factory": "semantic:transformation-group",
+      "hidden": false,
+      "family": null,
+      "familyAlias": null,
       "parameters": [
         {
           "id": "n",
           "label": "多边形边数 n",
+          "labelI18n": {
+            "zh-CN": "多边形边数 n",
+            "en": "Polygon side count n"
+          },
           "type": "number",
           "defaultValue": 3,
           "min": 3,
@@ -9904,10 +12093,17 @@
       "nestable": true,
       "computable": true,
       "factory": "semantic:dynamical-system",
+      "hidden": false,
+      "family": null,
+      "familyAlias": null,
       "parameters": [
         {
           "id": "r",
           "label": "参数 r",
+          "labelI18n": {
+            "zh-CN": "参数 r",
+            "en": "Parameter r"
+          },
           "type": "number",
           "defaultValue": 3.2,
           "min": 0,
@@ -9917,6 +12113,10 @@
         {
           "id": "x0",
           "label": "初态 x₀",
+          "labelI18n": {
+            "zh-CN": "初态 x₀",
+            "en": "Initial state x₀"
+          },
           "type": "number",
           "defaultValue": 0.2,
           "min": 0,
@@ -9926,6 +12126,10 @@
         {
           "id": "steps",
           "label": "迭代步数",
+          "labelI18n": {
+            "zh-CN": "迭代步数",
+            "en": "Iteration steps"
+          },
           "type": "number",
           "defaultValue": 8,
           "min": 1,
@@ -10206,10 +12410,17 @@
       "nestable": true,
       "computable": true,
       "factory": "semantic:flow-network",
+      "hidden": false,
+      "family": null,
+      "familyAlias": null,
       "parameters": [
         {
           "id": "arcs",
           "label": "容量边",
+          "labelI18n": {
+            "zh-CN": "容量边",
+            "en": "Capacity edges"
+          },
           "type": "string",
           "defaultValue": "s,a,5;a,t,3;s,t,1",
           "min": null,

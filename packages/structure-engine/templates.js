@@ -2,7 +2,8 @@ import {SEMANTIC_TEMPLATES,upgradeSemanticTemplate,materializeSemanticTemplate,s
 import {generateBooleanAlgebra} from './boolean-algebra.js';
 import {analyzeCyclicElement} from './cyclic-group.js';
 import {analyzePoset,createPosetStarter,serializePosetRelationText} from './poset.js';
-import {ensureLocalizedRecord} from '../ui/localization.js';
+import {ensureBuiltinLocalizedRecord} from '../ui/localization.js';
+import {VENN_FAMILY,consolidateStructureFamily,materializeStructureFamily} from './structure-families.js';
 
 const slot=(id,label,role,coordinate={},accepts=['knowledge','structure'],cardinality='many')=>({id,label,role,semanticCoordinate:coordinate,accepts,cardinality});
 const lmnSlot=(id,label,role,coordinate={})=>slot(id,label,role,coordinate,['knowledge','structure'],'many');
@@ -55,10 +56,12 @@ export const BUILTIN_TEMPLATES=Object.freeze([
   {id:'builtin:free-coordinate',name:'自由坐标结构 · Free Coordinate Structure',description:'带可定义语义坐标的自由结构',version:1,category:'coordinate',builtin:true,nestable:true,computable:false,slots:[slot('slot-1','位置 1 / Slot 1','custom',{x:0,y:0})],edges:[],parameters:[],constraints:[],rules:[],layout:{type:'manual'},visual:{accent:'#596B63'}},
   {id:'builtin:empty-custom',name:'空白自定义结构 · Empty Custom Structure',description:'从 Slot、Edge、Parameter 与 Rule 开始创建模板',version:1,category:'custom',builtin:true,nestable:true,computable:false,slots:[],edges:[],parameters:[],variables:[],constraints:[],rules:[],layout:{type:'manual'},visual:{accent:'#596B63'}},
   SEMANTIC_TEMPLATES.find(t=>t.id==='builtin:n-center'),
+  VENN_FAMILY,
   ...EXTENDED_TEMPLATES
-].map(template=>Object.freeze(ensureLocalizedRecord({...upgradeSemanticTemplate(template),maturity:template.maturity??'ready'}))));
+].map(template=>Object.freeze(ensureBuiltinLocalizedRecord({...consolidateStructureFamily(upgradeSemanticTemplate(template)),maturity:template.maturity??'ready'}))));
 
 export function materializeTemplate(template,parameters={}){
+  const family=materializeStructureFamily(template,parameters);if(family)return family;
   const semantic=materializeSemanticTemplate(template,parameters);if(semantic)return semantic;
   const p=Object.fromEntries(template.parameters.map(x=>[x.id,parameters[x.id]??x.defaultValue]));
   if(template.slotFactory==='matrix-grid'){

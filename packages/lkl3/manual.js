@@ -1,6 +1,7 @@
 import {RECORD_STORES,LKL3_SCHEMA} from './schema.js';
 import {objectProfile} from '../domain/object-profile.js';
-export function lkl3ManualMarkdown() {
+export function lkl3ManualMarkdown(language='zh-CN') {
+ if(String(language).startsWith('en'))return englishManual();
  const fence=String.fromCharCode(96).repeat(3);
  const data={id:'knowledge:limits',title:'极限',content:'极限描述函数值趋近某个值的行为。',sources:[]};
  const example='lkl 3\n'+JSON.stringify({schema:LKL3_SCHEMA,package:{id:'example:limits',title:'我的第一个知识包',roots:[data.id]},records:[{kind:'knowledge',id:data.id,profile:objectProfile(data,'knowledge'),members:[],data}]},null,2);
@@ -34,7 +35,9 @@ export function lkl3ManualMarkdown() {
  '第一行写三个反引号紧接 plot，第二行写 z=sin(x)*cos(y)，第三行写三个反引号。下面是它的预览：',fence+'plot','z=sin(x)*cos(y)',fence,
  '可用表达式：y=sin(x)、z=x^2+y^2、x=cos(t); y=sin(t)、x=u; y=v; z=u*v。坐标工作台还提供区间、预设和点/向量创建。',
  '## 5. 正确选择结构',
- '- 一个中心与并列面向：n 元中心。面向顺序不表示依赖，中心复用所属 Knowledge。',
+ '- 先按实际关系和操作需求比较当前结构库。主题、名称与配色不同，不构成自定义结构的理由。可通过内置参数、布局与组合表达时，使用同一个结构族。',
+ '- 有向序列、依赖、证明与时间排列共享有向节点结构族。数学约束或计算能力不同的模型仍保留独立身份。',
+ '- 一个中心与并列面向：n 元中心，可设置面向数量及可选编号。编号不表示先后与依赖，中心复用所属知识。',
  '- 集合分组：集合划分或等价类；重复元素会被拒绝。',
  '- 有序对：笛卡尔积；完整展示 A×B，不使用泛化的流程箭头。',
  '- 映射：函数映射检验有限函数；交换图逐元素核验两条路径是否相等。',
@@ -43,7 +46,7 @@ export function lkl3ManualMarkdown() {
  '- 矩阵：在“矩阵运算”中输入元素，计算转置、加减乘、行列式、逆、秩、行最简形或线性方程。',
  '库预览来自同一数学模型。旧版骨架实例保留其原有定义；新建结构使用新的模型。',
  '## 6. ID、归属、关系与视图',
- 'Knowledge 保持稳定意义身份；正文是内容；Relation 需要真实语义依据；Structure 表达和组织这些对象。construct 表示唯一主要归属，reference 允许第二视角复用。中心锚点显示所属 Knowledge，不产生反向 construct 环。',
+ '知识保持稳定意义身份；正文表达内容；关系需要真实语义依据；结构表达和组织这些对象。construct 表示主要归属，reference 允许第二视角复用。搜索结果在原始位置打开。中心锚点显示所属知识，不产生反向归属环。每条关系独立持有 ID、端点和显示设置；共享端点也不合并定义。新节点和关系沿用已有命名格式。',
  '临时任务角色、激活分数和练习表现不等于知识事实。完整档案将对象数据与信息目录保存在对应对象范围；工作区设置默认不随知识导出。',
  '## 7. 导入失败与旧版本迁移',
  '- JSON 格式错误：检查引号、逗号、括号和第一行。',
@@ -54,6 +57,49 @@ export function lkl3ManualMarkdown() {
  'LKL 3 的完整档案导出与旧 LKL 2 的可达知识包导出用途不同；旧格式可能无法携带新对象的全部扩展信息。需要完整保留时使用 LKL 3。',
  '创建副本会同时隔离运行时 ID 和旧 LKL 包命名空间。兼容的内置模板复用当前库的显示设置，不修改全局模板；数学模型不兼容则停止导入。',
  '## 8. 给 AI 与开发者',
- '编译前读取当前 Structure Capability Catalog；不要按学科强制套模板，也不要虚构 renderer 或可执行字段。新 LKL 3 使用严格数据格式，不执行 JavaScript。LKL 2 的语法参考保留在下面，供阅读旧包和 Structure Source 使用。',
+ '编译前联网读取当前完整结构能力目录及匹配的语法契约，不按学科强制套模板。自定义前证明内置配置、布局与组合不能等价替代；不虚构渲染器或可执行字段。正文负责定义、解释、证据与限定，结构负责关系与操作的可视表达。LKL 3 使用严格数据格式，不执行 JavaScript。下面的 LKL 2 语法参考可用于旧包和结构源码编辑。',
+ ].join('\n\n');
+}
+
+function englishManual(){
+ const fence=String.fromCharCode(96).repeat(3),data={id:'knowledge:limits',title:'Limits',content:'A limit describes how a function approaches a value.',sources:[]};
+ const example='lkl 3\n'+JSON.stringify({schema:LKL3_SCHEMA,package:{id:'example:limits',title:'My first knowledge package',roots:[data.id]},records:[{kind:'knowledge',id:data.id,profile:objectProfile(data,'knowledge'),members:[],data}]},null,2);
+ return[
+ '# LKL guide',
+ '## 1. Start with a knowledge package',
+ 'LKL is the knowledge exchange format for LMN. Save files with the .lkl extension. One import brings in knowledge, documents, structures and their references. Embedded images and plot definitions travel with the package.',
+ 'LKL 3 is the complete archive format. Older LKL 2 knowledge packages and LKL 1 templates remain importable. The structure source editor uses the concise LKL 2 editing syntax.',
+ '1. Open the top-right menu and choose “Import package”.\n2. Paste the example below, or choose a .lkl file.\n3. Select “Validate preview” and review objects, errors and identity conflicts.\n4. Choose merge, replacement of matching IDs, or an isolated copy; then confirm.\n5. Open “Limits” in the knowledge library, edit the document, and export a complete LKL 3 archive.',
+ '## 2. A complete importable example',
+ fence+'lkl',example,fence,
+ 'This example creates one knowledge object. It does not invent relationships to fill a diagram. Edit data.title and data.content to change its title and text; keep the ID stable to preserve its identity.',
+ '## 3. Understand the file',
+ '- The first line, lkl 3, declares the language version. What follows is strict JSON: use double quotes and omit comments and trailing commas.\n- schema identifies the archive contract: '+LKL3_SCHEMA+'.\n- package contains the package ID, title and root knowledge IDs. A complete workspace may have several roots.\n- records contains object archives with kind, id, profile, members and data.\n- profile is an information directory: identity, type, title, summary, sources, authors, versions, times, evidence state and extension metadata. Unknown sources and dates stay empty.\n- members describes nested variables, containers, geometry and moving points, with paths into their complete data.\n- data retains the complete runtime object, including parameters, geometry dependencies, view state, appearance and document content.',
+ 'Profile sources, authors, evidence state and extension metadata must agree with data. A disagreement blocks import. Edit data.sources, data.authors or data.profile and export again to refresh the directory. Title and document edits update the title directory automatically.',
+ 'Record kinds: '+Object.keys(RECORD_STORES).join(', ')+'.',
+ 'The record kind and IDs must agree with the underlying object. References use stable IDs. Display names and canvas coordinates cannot substitute for identity. Edit mathematical definitions in the corresponding data fields.',
+ '## 4. Documents, images and live plots',
+ 'All documents share one Markdown and LaTeX editor. Insert, paste or drop PNG, JPEG, WebP and GIF images up to 5 MB each. Images are embedded as portable data and do not depend on temporary file paths.',
+ 'Choose “Plot” to turn the selected expression into a plot block. Preview and split modes use the vector-space renderer. For example:',
+ fence+'plot','z=sin(x)*cos(y)',fence,
+ 'Supported examples include y=sin(x), z=x^2+y^2, x=cos(t); y=sin(t), and x=u; y=v; z=u*v. The coordinate workbench also provides parameter ranges, presets, points, vectors and numerical calculations.',
+ '## 5. Choose a representation',
+ 'Begin with the relationships or operations the reader needs to understand. Browse the current structure library and compare its actual parameters, mathematical constraints and interaction capabilities. No subject requires a fixed template.',
+ 'Use a configured built-in structure when it can express the same objects and relationships. Directed sequence, dependency, proof and time arrangements share a directed-node family; changing labels or direction alone does not require a new custom template. Distinct mathematical operations or constraints can still require distinct models.',
+ 'A centered family takes a member count and optional numbering format. Numbering identifies positions; it does not assert precedence or dependency. Matrices provide arithmetic, transpose, determinant, inverse, rank, row reduction and unique linear-system solutions. Read each model description for its supported mathematical scope.',
+ 'Create a reusable custom structure only when built-in parameters, arrangement and composition cannot provide the needed representation. Keep titles and subject-specific explanations in knowledge or document objects. Keep real relationships in separately identified edges. Text explains definitions, evidence and qualifications; structures make relationships and operations visible.',
+ '## 6. Identity, location, relationships and views',
+ 'Knowledge is a stable, reusable meaning unit. Documents contain definitions, proofs, examples and explanations. A relationship needs semantic evidence. A structure organizes and displays those objects.',
+ 'construct assigns primary ownership; reference adds another view without duplicating identity. Search results open at the object’s canonical location. A center anchor displays its owner knowledge without creating a reverse ownership cycle.',
+ 'Each relationship has its own ID, endpoints and display settings. Parallel or reverse relationships remain independent even when their endpoints match. A display label is not a global relationship definition. New nodes and edges continue the existing naming pattern when one is available.',
+ 'Temporary task roles, activation scores and practice results are not objective knowledge facts. Local interface preferences are independent of knowledge exports.',
+ '## 7. Resolve import errors',
+ '- Invalid JSON: check the first line, quotes, commas and brackets.\n- Missing or mismatched IDs: check roots and references from relationships, containers and views.\n- Invalid mathematical parameters: check partition disjointness, permutation bijections, matrix shapes, mappings and parameter ranges.\n- Identity conflicts: merge updates matching objects with incoming fields; replace replaces objects with matching IDs; copy rebuilds IDs and references. Objects absent from the package are not silently deleted.\n- Import cannot commit: fix the diagnostics and validate again. Archive imports are planned first and saved as one transaction.',
+ 'LKL 3 complete archives and older LKL 2 reachable knowledge packages have different purposes. Older formats may not carry every new extension field. Use LKL 3 when complete preservation is required.',
+ 'Creating a copy isolates runtime IDs and legacy package namespaces. Compatible built-in templates reuse the current library without overwriting its global settings. Incompatible mathematical models stop the import.',
+ '## 8. For AI authors and developers',
+ 'Before compiling, read the current published structure capability catalog and the matching runtime grammar. Compare all available families by semantic fit. Do not invent a renderer, factory or executable field, and do not select structures from a fixed subject list.',
+ 'Custom templates need a non-replaceability justification against available built-in configurations. Names, subject matter and cosmetic differences are insufficient. Check both global navigation and the representation of each main knowledge object.',
+ 'LKL 3 is strict data and never executes JavaScript. The schema-generated LKL 2 reference below remains useful for reading older packages and editing structure source.'
  ].join('\n\n');
 }

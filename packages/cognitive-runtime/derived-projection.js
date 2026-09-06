@@ -1,4 +1,4 @@
-import {addInstanceEdge,addInstanceSlot,bindTarget,createStructureInstance,normalizeInstance} from '../structure-engine/model.js';
+import {addInstanceEdge,addInstanceSlot,bindTarget,createStructureInstance,materializeInstanceDefinition,normalizeInstance} from '../structure-engine/model.js';
 import {createCognitivePlan} from './cognitive-plan.js';
 import {inferCognitiveRoles} from './role-inference.js';
 import {induceTopology,PROJECTION_TEMPLATES,rankProjectionCandidates} from './topology.js';
@@ -22,7 +22,7 @@ export function createDerivedProjection({taskContext={},activation,state={},proj
   if(!orderedIds.length)return createNoStructureProjection({taskContext,activation,topology:model,projectionType,recommendation,reason:'Derived projection requires active Knowledge'});
   const supportedIds=new Set(recommendation.supportingRelations??[]),semanticEdges=(model.edges??[]).filter(edge=>!supportedIds.size||supportedIds.has(edge.id));
   if(!semanticEdges.length)return createNoStructureProjection({taskContext,activation,topology:model,projectionType,recommendation});
-  const ownerKnowledgeId=orderedIds[0],instance=createStructureInstance(template,ownerKnowledgeId,parameters);instance.id=`projection:${uid()}`;instance.overrides.removedSlotIds=[...(template.slots??[]).map(item=>item.id)];instance.overrides.removedEdgeIds=[...(template.edges??[]).map(item=>item.id)];instance.objectContent.title=`派生投影 · ${taskContext.goal||projectionType}`;
+  const familyParameters=template.slotFactory==='directed-node-family'?{nodeCount:1,topology:['dependency','proof'].includes(projectionType)?'dag':'network',layoutMode:['dependency','proof'].includes(projectionType)?'layered':'force'}:{};const ownerKnowledgeId=orderedIds[0],instance=createStructureInstance(template,ownerKnowledgeId,{...familyParameters,...parameters});const initialDefinition=materializeInstanceDefinition(template,instance);instance.id=`projection:${uid()}`;instance.overrides.removedSlotIds=[...(initialDefinition.slots??[]).map(item=>item.id)];instance.overrides.removedEdgeIds=[...(initialDefinition.edges??[]).map(item=>item.id)];instance.objectContent.title=`派生投影 · ${taskContext.goal||projectionType}`;
   const slotByKnowledge=new Map();for(const[index,id]of orderedIds.entries()){
     const knowledge=state.knowledge.find(item=>item.id===id),inferred=roles.byKnowledgeId?.[id],slot=addInstanceSlot(instance,{id:`active-${index+1}`,label:knowledge?.title??id,role:inferred?.primaryRole??(index===0?'focus':'relevant-knowledge'),semanticCoordinate:{order:index,cognitiveRoles:(inferred?.roles??[]).map(item=>item.role)},accepts:['knowledge'],cardinality:'one'});slotByKnowledge.set(id,slot.id);bindTarget(instance,template,slot.id,'knowledge',id,{activationScore:activation.activationScore?.[id]??0,reasons:activation.activationReasons?.[id]??[],cognitiveRole:inferred?.primaryRole??null,roleConfidence:inferred?.confidence??null})
   }
