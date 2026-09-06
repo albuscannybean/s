@@ -82,7 +82,7 @@ test('mathematics proof-learning compiles real evidence into a valid ephemeral P
   assert.equal(result.projectionRanking[0].type,'proof');
   assert.equal(result.selectedProjection.type,'proof');
   assert.equal(result.projection.kind,'derived-projection');
-  assert.equal(result.projection.templateId,'builtin:proof-tree');
+  assert.equal(result.projection.templateId,'builtin:directed-graph');assert.equal(result.projection.instance.parameters.topology,'dag');
   assert.equal(result.projection.ephemeral,true);
   assert.equal(fixture.state.structureInstances.length,0);
   assert.ok(result.projection.instance.overrides.addedSlots.some(slot=>['goal','conclusion'].includes(slot.role)));

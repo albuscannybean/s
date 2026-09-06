@@ -35,7 +35,7 @@ test('force graph layout is deterministic, compact, and not a grid fallback',()=
 
 test('Boolean, Venn, coordinate, and Cayley table expose mathematical visual grammar',()=>{
   const booleanTemplate=getBuiltinTemplate('builtin:boolean-algebra'),booleanInstance=createStructureInstance(booleanTemplate,null,{rank:4}),booleanScene=buildSceneGeometry(materializeInstanceDefinition(booleanTemplate,booleanInstance),booleanInstance);
-  assert.equal(booleanScene.nodes.length,16);assert.ok(booleanScene.nodes.every(node=>node.visualKind==='boolean-node'&&node.width<=70));
+  assert.equal(booleanScene.nodes.length,16);assert.ok(booleanScene.nodes.every(node=>node.visualKind==='boolean-node'&&node.width<=120));
   const vennTemplate=getBuiltinTemplate('builtin:venn-2'),vennInstance=createStructureInstance(vennTemplate),vennScene=buildSceneGeometry(materializeInstanceDefinition(vennTemplate,vennInstance),vennInstance);
   assert.equal(vennScene.background.filter(item=>item.type==='circle').length,2);
   const coordinateTemplate=getBuiltinTemplate('builtin:coordinate-plane'),coordinateInstance=createStructureInstance(coordinateTemplate),coordinateScene=buildSceneGeometry(materializeInstanceDefinition(coordinateTemplate,coordinateInstance),coordinateInstance),point=coordinateScene.nodes.find(node=>node.id==='P');

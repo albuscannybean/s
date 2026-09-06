@@ -1,10 +1,12 @@
 // Mathematical models are independent of UI, authoring agents and persistence.
+import {NUMBERING_PARAMETERS} from './structure-families.js';
+import {formatSequenceName} from '../domain/naming-policy.js';
 const param=(id,label,defaultValue,type='string',extra={})=>({id,label,defaultValue,type,...extra});
 const node=(id,label,role='element',extra={})=>({id,label,role,semanticCoordinate:{},accepts:['knowledge','structure','value','variable'],cardinality:'many',...extra});
 const edge=(id,from,to,label='',type='maps-to',direction='directed')=>({id,sourceSlotId:from,targetSlotId:to,label,relationType:type,direction,routing:'straight'});
 const spec=(id,name,description,parameters,affordances)=>({id:'builtin:'+id,name,description,version:4,category:({'n-center':'graph','function-mapping':'algebra','commutative-diagram':'algebra','equivalence-classes':'set','set-partition':'set','cartesian-product':'set','permutation':'algebra','transformation-group':'geometry','dynamical-system':'analysis','flow-network':'graph'}[id]??'graph'),maturity:'ready',builtin:true,nestable:true,computable:true,parameterized:!!parameters.length,slotFactory:'semantic:'+id,slots:[],edges:[],parameters,variables:[],constraints:[],rules:[],layout:{type:'manual'},viewCapability:{mode:'fixed',label:'语义布局'},capability:{affordances,ordering:id==='n-center'?'unordered':'model-defined',evidenceRequired:true},visual:{accent:'#2f7658'}});
 export const SEMANTIC_TEMPLATES=[
- spec('n-center','n 元中心 · Center & Facets','一个中心与无序的并列面向。圆周位置不表示先后、依赖或等级。',[param('members','面向名称（逗号分隔）','面向一,面向二,面向三,面向四')],['center-periphery','unordered-facets','overview']),
+ {...spec('n-center','n 元中心 · Center & Facets','一个中心与无序的并列面向。圆周位置不表示先后、依赖或等级。',[param('nodeCount','外围节点数量',4,'number',{min:1,max:60,labelI18n:{'zh-CN':'外围节点数量',en:'Peripheral nodes'}}),param('members','面向名称（逗号分隔，可留空）','', 'string',{labelI18n:{'zh-CN':'面向名称（逗号分隔，可留空）',en:'Facet labels (comma separated, optional)'}}),...NUMBERING_PARAMETERS.map(p=>p.id==='numbering'?{...p,defaultValue:'none'}:p),param('centerLabel','中心名称','中心','string',{labelI18n:{'zh-CN':'中心名称',en:'Center label'}})],['center-periphery','unordered-facets','overview']),version:5,computable:false,family:{id:'center-facets',invariants:['one-center','unordered-facets']}},
  spec('function-mapping','函数映射 · Function Mapping','有限集合间的函数：定义域每个元素恰有一个像；自动检验单射、满射。',[param('domain','定义域','a,b,c'),param('codomain','陪域','1,2'),param('images','按定义域顺序列出的像','1,2,1')],['mapping','finite-function']),
  spec('commutative-diagram','交换图 · Commutative Diagram','四个有限集上的映射方形；逐元素验证 h∘f = k∘g。映射用 0…n−1 的像列表定义。',[param('f','f: A → B','0,1,2'),param('g','g: A → C','0,1,2'),param('h','h: B → D','0,1,2'),param('k','k: C → D','0,1,2')],['mapping','composition','commutativity']),
  spec('equivalence-classes','等价类 · Equivalence Classes','同一分组内的元素等价；各等价类互斥，组成商集。每个元素只能属于一个类。',[param('groups','等价类（类内逗号，类间 |）','a,b|c,d|e')],['equivalence','quotient-set']),
@@ -24,10 +26,13 @@ export function materializeSemanticTemplate(template,parameters={}) {
  let slots=[],edges=[],positions=[],description=template.description,info={};
  const add=(label,role,x,y,extra={})=>{const s=node(id+'-'+(slots.length+1),label,role,extra);slots.push(s);positions.push([x,y]);return s.id;};
  if(id==='n-center') {
-  const members=unique(split(p.members),'面向'),n=members.length,radius=Math.max(290,n*42),cx=radius+150,cy=radius+120;
-  add('中心','host-anchor',cx,cy,{hostAnchor:true});
-  members.forEach((label,i)=>{const a=-Math.PI/2+2*Math.PI*i/n;const target=add(label,'facet',cx+radius*Math.cos(a),cy+radius*Math.sin(a));edges.push(edge('facet-'+i,slots[0].id,target,'','facet-membership','undirected'));});
-  info={ordering:'unordered',hostAnchorSlot:slots[0].id};template={...template,capability:{...template.capability,ordering:'unordered'}};
+  const labels=String(p.members??'').split(/[,，\n]/).map(s=>s.trim()),hasLabels=labels.some(Boolean),n=Number(Object.hasOwn(parameters,'nodeCount')?parameters.nodeCount:hasLabels?labels.length:p.nodeCount);
+  if(!Number.isInteger(n)||n<1||n>60)throw new Error('外围节点数量须为 1–60 的整数。');
+  if(hasLabels&&labels.length>n)throw new Error('面向标签数量不能超过外围节点数量。');
+  const radius=Math.max(290,n*42),cx=radius+150,cy=radius+120;
+  add(String(p.centerLabel??'中心'),'host-anchor',cx,cy,{hostAnchor:true});
+  Array.from({length:n},(_,i)=>{const a=-Math.PI/2+2*Math.PI*i/n,label=formatSequenceName(i,{style:p.numbering,format:p.numberFormat,start:p.numberStart,label:labels[i]??''}),target=add(label,'facet',cx+radius*Math.cos(a),cy+radius*Math.sin(a),{semanticCoordinate:{facetIndex:i,angle:360*i/n}});edges.push(edge('facet-'+i,slots[0].id,target,'','facet-membership','undirected'));});
+  info={ordering:'unordered',hostAnchorSlot:slots[0].id,facetCount:n,naming:{style:p.numbering,format:p.numberFormat,start:p.numberStart}};template={...template,parameters:template.parameters.map(parameter=>parameter.id==='nodeCount'?{...parameter,defaultValue:n}:parameter),capability:{...template.capability,ordering:'unordered'}};
  } else if(id==='function-mapping') {
   const domain=unique(split(p.domain),'定义域'),codomain=unique(split(p.codomain),'陪域'),images=split(p.images);
   if(images.length!==domain.length||images.some(v=>!codomain.includes(v)))throw new Error('每个定义域元素须恰有一个属于陪域的像。');
@@ -78,7 +83,7 @@ export function materializeSemanticTemplate(template,parameters={}) {
   edges=arcs.map((a,i)=>edge('flow-'+i,slots[names.indexOf(a.from)].id,slots[names.indexOf(a.to)].id,'≤ '+a.capacity,'capacity'));
   info={maxFlow,arcs};description+=' 最大流 = '+maxFlow+'。边标注容量上界；反向残量不冒充实际流量。';
  }
- return {...template,description,slots,edges,layout:place(slots,positions),runtimeMetadata:{...info,semanticModel:id,computed:true}};
+ return {...template,description,slots,edges,layout:place(slots,positions),runtimeMetadata:{...info,semanticModel:id,computed:template.computable!==false}};
 }
 
 export function upgradeSemanticTemplate(original) {
@@ -104,5 +109,5 @@ export function upgradeSemanticTemplate(original) {
 }
 
 export function structureCapabilityCatalog(templates) {
- return templates.filter(t=>!t.hidden).map(t=>({id:t.id,version:t.version,name:t.name,affordances:t.capability?.affordances??[t.layout.type],ordering:t.capability?.ordering??'model-defined',parameters:t.parameters,layout:t.layout,implementation:t.slotFactory??'declarative',scope:'runtime',supportsPackageLocal:true}));
+ return templates.filter(t=>!t.hidden&&!t.deprecated).map(t=>({id:t.id,version:t.version,name:t.name,affordances:t.capability?.affordances??[t.layout.type],ordering:t.capability?.ordering??'model-defined',parameters:t.parameters,layout:t.layout,implementation:t.slotFactory??'declarative',family:t.family??null,compatibilityAliases:templates.filter(alias=>alias.replacementTemplateId===t.id).map(alias=>({...alias.familyAlias,id:alias.id,replacementTemplateId:alias.replacementTemplateId})),scope:'runtime',supportsPackageLocal:true}));
 }

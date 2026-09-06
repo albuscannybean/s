@@ -4,7 +4,7 @@ import {getEffectiveTitle} from '../domain/identity.js';
 
 const choose=(n,k)=>{let value=1;for(let index=1;index<=k;index++)value=value*(n-index+1)/index;return Math.round(value)};
 const itemTypeLabel=type=>({knowledge:'知识',structure:'结构',content:'正文',variable:'变量',formula:'公式',link:'链接',attachment:'附件'}[type]??'内容');
-const semanticSlotTitle=(slot,entry)=>[entry?.container?.localDisplayTitle,slot?.localDisplayTitle,slot?.displayLabel,slot?.canonicalDefaultLabel,slot?.label,slot?.id].map(value=>String(value??'').trim()).find(Boolean)??'';
+const semanticSlotTitle=(slot,entry)=>[entry?.container?.localDisplayTitle,slot?.localDisplayTitle,slot?.displayLabel,slot?.canonicalDefaultLabel,slot?.label].map(value=>String(value??'').trim()).find(Boolean)??(slot?.label===''?'':slot?.id??'');
 
 export function resolveContainerPresentation(slot,entry,state={},context={}){
   const slotTitle=semanticSlotTitle(slot,entry),persistent=persistentContainerItems(entry),labels=persistent.map(item=>containerItemLabel(item,state)).filter(Boolean);

@@ -44,7 +44,10 @@ const templateRecord=template=>{
     nestable:template.nestable!==false,
     computable:!!template.computable,
     factory:template.slotFactory??null,
-    parameters:(template.parameters??[]).map(({id,label,type,defaultValue,min,max,options})=>({id,label,type,defaultValue,min:min??null,max:max??null,options:options??null})),
+    hidden:!!template.hidden,
+    family:template.family??null,
+    familyAlias:template.familyAlias??null,
+    parameters:(template.parameters??[]).map(({id,label,labelI18n,type,defaultValue,min,max,options})=>({id,label,labelI18n,type,defaultValue,min:min??null,max:max??null,options:options??null})),
     defaultSlots:(materialized.slots??[]).map(slot=>({id:slot.id,label:slot.label,role:slot.role,cardinality:slot.cardinality,accepts:slot.accepts,semanticCoordinate:slot.semanticCoordinate})),
     defaultEdges:(materialized.edges??[]).map(edge=>({id:edge.id,from:edge.sourceSlotId,to:edge.targetSlotId,direction:edge.direction,type:edge.relationType,label:edge.label??'',routing:edge.routing??null})),
     layout:materialized.layout??template.layout,
@@ -118,4 +121,4 @@ await mkdir(machineRoot,{recursive:true});
 await writeFile(path.join(machineRoot,'lkl-authoring-contract.json'),`${JSON.stringify(contract,null,2)}\n`,'utf8');
 console.log(`Generated ${contract.builtins.length} built-in templates for ${APP_RELEASE}.`);
 
-const docsRoot=path.resolve(kitRoot,'..','docs');await mkdir(docsRoot,{recursive:true});await writeFile(path.join(docsRoot,'LKL-3-入门.md'),lkl3ManualMarkdown()+'\n','utf8');await writeFile(path.join(docsRoot,'LKL-3-contract.json'),JSON.stringify(LKL3_CONTRACT,null,2)+'\n','utf8');
+const docsRoot=path.resolve(kitRoot,'..','docs');await mkdir(docsRoot,{recursive:true});await writeFile(path.join(docsRoot,'LKL-3-入门.md'),lkl3ManualMarkdown()+'\n','utf8');await writeFile(path.join(docsRoot,'LKL-3-Guide.md'),lkl3ManualMarkdown('en')+'\n','utf8');await writeFile(path.join(docsRoot,'LKL-3-contract.json'),JSON.stringify(LKL3_CONTRACT,null,2)+'\n','utf8');

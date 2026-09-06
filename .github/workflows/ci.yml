@@ -8,6 +8,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: 20 }
+      - run: npm run build:web
       - run: npm test
       - run: mkdir -p site/apps && cp -r apps/web site/apps/ && cp -r packages site/
       - uses: actions/upload-pages-artifact@v3
@@ -22,6 +23,7 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: node tests/local-server.mjs 4174 > /tmp/lmn-server.log 2>&1 &
       - run: node tests/qa-vnext-web.mjs
+      - run: node tests/qa-v51-web.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with: { name: web-browser-validation, path: qa-output }

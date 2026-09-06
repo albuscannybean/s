@@ -58,7 +58,7 @@ test('Workspace openSlot is the shared Canvas and Navigator resolver with an exp
   const [source,renderer]=await Promise.all([readFile(new URL('../packages/ui/workspace-controller.js',import.meta.url),'utf8'),readFile(new URL('../packages/ui/structure-renderer.js',import.meta.url),'utf8')]);
   assert.match(source,/onOpenContainer:[^\n]+this\.openSlot\(/);
   assert.match(source,/open\.onclick=\(\)=>\{this\.openInstance\(instance\.id,false\);this\.openSlot\(slot\.id\)\}/);
-  assert.match(source,/label:'打开容器'[^\n]+forceContainer:true/);
+  assert.match(source,/label:t\('打开容器'\)[^\n]+forceContainer:true/);
   assert.match(renderer,/article\.addEventListener\('click'[^\n]+onOpenContainer/);
   assert.match(renderer,/event\.key==='Enter'\|\|event\.key===' '[^\n]+onOpenContainer/);
 });
@@ -67,6 +67,6 @@ test('special mathematical presentation remains semantic and deployment cache ad
   const matrix=getBuiltinTemplate('builtin:matrix-grid'),instance=createStructureInstance(matrix,'root'),definition=materializeInstanceDefinition(matrix,instance),slot=definition.slots[0],entry=buildPositionIndex(instance,definition).bySlotId[slot.id];
   assert.equal(nodeContainerPresentation(matrix,{slot,entry,state:{},instance,definition}),null);
   const [serviceWorker,metadata]=await Promise.all([readFile(new URL('../apps/web/sw.js',import.meta.url),'utf8'),readFile(new URL('../packages/app-metadata.js',import.meta.url),'utf8')]);
-  assert.match(serviceWorker,/lmn-v5\.0\.0-web-20260906-1/);
-  assert.match(metadata,/V5\.0\.0/);
+  assert.match(serviceWorker,/lmn-v5\.1\.0-web-[a-f0-9]{12}/);
+  assert.match(metadata,/V5\.1\.0/);
 });

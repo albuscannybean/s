@@ -2,7 +2,7 @@ const normalize=value=>String(value??'').normalize('NFKC').toLowerCase();
 const round=value=>Number(Math.max(0,Math.min(1,value)).toFixed(3));
 const unique=value=>[...new Set((value??[]).filter(Boolean))];
 
-export const PROJECTION_TEMPLATES=Object.freeze({network:'builtin:directed-graph',dependency:'builtin:dependency-dag',proof:'builtin:proof-tree',hierarchy:'builtin:tree',comparison:'builtin:directed-graph',decision:'builtin:decision-tree',lmn:'builtin:lmn-432','no-structure':null});
+export const PROJECTION_TEMPLATES=Object.freeze({network:'builtin:directed-graph',dependency:'builtin:directed-graph',proof:'builtin:directed-graph',hierarchy:'builtin:tree',comparison:'builtin:directed-graph',decision:'builtin:decision-tree',lmn:'builtin:lmn-432','no-structure':null});
 
 const TYPE_GROUPS=Object.freeze({
   proof:['proves','proof-of','implies','derives','entails','supports','depends-on','requires','prerequisite'],

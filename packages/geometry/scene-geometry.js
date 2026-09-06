@@ -1,3 +1,4 @@
+import {routeIndependentRelations} from './relation-routing.js';
 import {ensureStructureView,modularAngle} from '../structure-engine/structure-view.js';
 import {resolveRelationStyle} from '../structure-engine/relation-style-resolver.js';
 import {evaluatePlotPoint,parsePlotExpression,samplePlotExpressionCached} from '../structure-engine/plotting.js';
@@ -12,7 +13,9 @@ const measured=(sizes,slot,fallback=DEFAULT_NODE_SIZE)=>sizes?.get(slot.id)??fal
 export function estimateRelationLabelWidth(label){
   const characters=Array.from(String(label??''));
   const textWidth=characters.reduce((width,char)=>width+(/[\u2E80-\u9FFF\uF900-\uFAFF]/.test(char)?11:/[A-ZMW@#%]/.test(char)?8:6.5),0);
-  return clamp(Math.ceil(textWidth)+18,36,260);
+  if(!characters.length)return 0;
+  let width=textWidth;try{const context=globalThis.document?.createElement('canvas').getContext('2d');if(context){context.font='12px system-ui, sans-serif';width=Math.max(width,context.measureText(String(label)).width)}}catch{}
+  return clamp(Math.ceil(width)+24,36,340);
 }
 
 export function requiredRelationCorridor(edge,{sidePadding=12,arrowClearance=18,endpointClearance=6}={}){
@@ -62,10 +65,6 @@ export function anchorPoint(node,toward){
     const radius=Math.min(node.width,node.height)/2,length=Math.hypot(dx,dy)||1;
     return{x:center.x+dx/length*radius,y:center.y+dy/length*radius};
   }
-  if(node.shape==='pill'){
-    const rx=node.width/2,ry=node.height/2,length=Math.sqrt((dx*dx)/(rx*rx)+(dy*dy)/(ry*ry))||1;
-    return{x:center.x+dx/length,y:center.y+dy/length};
-  }
   const halfW=node.width/2,halfH=node.height/2,scale=1/Math.max(Math.abs(dx)/halfW,Math.abs(dy)/halfH);
   const raw={x:center.x+dx*scale,y:center.y+dy*scale};
   if(node.shape!=='roundedRect')return raw;
@@ -107,7 +106,8 @@ export function routeEdge(source,target,style='straight',options={}){
 function gridLayout(definition,options={},sizes){
   const slots=definition.slots,columns=options.columns??Math.max(1,Math.ceil(Math.sqrt(slots.length))),gapX=options.gapX??56,gapY=options.gapY??32,colWidths=Array(columns).fill(0),rowHeights=[];
   slots.forEach((slot,index)=>{const size=measured(sizes,slot,{width:options.width??DEFAULT_NODE_SIZE.width,height:options.height??DEFAULT_NODE_SIZE.height}),col=index%columns,row=Math.floor(index/columns);colWidths[col]=Math.max(colWidths[col],size.width);rowHeights[row]=Math.max(rowHeights[row]??0,size.height)});
-  const xAt=col=>(options.x??96)+colWidths.slice(0,col).reduce((sum,value)=>sum+value+gapX,0),yAt=row=>(options.y??116)+rowHeights.slice(0,row).reduce((sum,value)=>sum+value+gapY,0);
+  const columnGaps=Array(Math.max(0,columns-1)).fill(gapX);for(let row=0;row<rowHeights.length;row++){const rowSlots=slots.slice(row*columns,(row+1)*columns),needed=computeRowGaps(rowSlots,definition.edges,sizes,{baseGap:gapX});needed.forEach((value,index)=>columnGaps[index]=Math.max(columnGaps[index],value))}
+  const xAt=col=>(options.x??96)+colWidths.slice(0,col).reduce((sum,value,index)=>sum+value+(columnGaps[index]??0),0),yAt=row=>(options.y??116)+rowHeights.slice(0,row).reduce((sum,value)=>sum+value+gapY,0);
   return slots.map((slot,index)=>{const size=measured(sizes,slot),col=index%columns,row=Math.floor(index/columns);return{...slot,x:xAt(col)+(colWidths[col]-size.width)/2,y:yAt(row),...size,...nodeGrammar(definition,slot,slot.visual?.shape??'roundedRect')}});
 }
 
@@ -138,7 +138,7 @@ function radialLayout(definition,instance){
 function layeredLayout(definition,{horizontal=false,compact=false,sizes=null,layoutDesign={}}={}){
   const groups=new Map();
   for(const slot of definition.slots){const layer=Number(slot.semanticCoordinate?.rank??slot.semanticCoordinate?.layer??0);if(!groups.has(layer))groups.set(layer,[]);groups.get(layer).push(slot)}
-  const layers=[...groups.keys()].sort((a,b)=>b-a),maxCount=Math.max(1,...[...groups.values()].map(items=>items.length)),isBoolean=String(definition.id).includes('boolean-algebra'),fallback={width:isBoolean?(maxCount>16?54:68):compact?(maxCount>10?108:132):(maxCount>10?176:188),height:isBoolean?42:compact?(maxCount>10?58:66):(maxCount>10?86:92)},automatic=layoutDesign.autoSpacing!==false,gapX=automatic?(isBoolean?(maxCount>16?10:18):(maxCount>10?18:30)):Number(layoutDesign.nodeGap??30),baseGapY=automatic?(isBoolean?62:compact?74:94):Number(layoutDesign.layerGap??94),maxLabelWidth=Math.max(0,...(definition.edges??[]).map(edge=>estimateRelationLabelWidth(edge.displayLabel??edge.label??edge.relationType))),rows=layers.map(layer=>groups.get(layer).sort((a,b)=>(a.semanticCoordinate?.order??0)-(b.semanticCoordinate?.order??0))),rowHeights=rows.map(items=>Math.max(...items.map(slot=>measured(sizes,slot,fallback).height))),maxNodeWidth=Math.max(...definition.slots.map(slot=>measured(sizes,slot,fallback).width)),minRowHeight=Math.min(...rowHeights),gapY=automatic?horizontal?Math.max(baseGapY,maxNodeWidth-minRowHeight+maxLabelWidth+36):Math.max(baseGapY,maxLabelWidth+30):baseGapY,yAt=row=>112+rowHeights.slice(0,row).reduce((sum,value)=>sum+value+gapY,0);
+  const layers=[...groups.keys()].sort((a,b)=>b-a),maxCount=Math.max(1,...[...groups.values()].map(items=>items.length)),isBoolean=String(definition.id).includes('boolean-algebra'),fallback={width:isBoolean?(maxCount>16?54:68):compact?(maxCount>10?108:132):(maxCount>10?176:188),height:isBoolean?42:compact?(maxCount>10?58:66):(maxCount>10?86:92)},automatic=layoutDesign.autoSpacing!==false,gapX=automatic?(isBoolean?(maxCount>16?20:42):(maxCount>10?18:30)):Number(layoutDesign.nodeGap??30),baseGapY=automatic?(isBoolean?36:compact?74:94):Number(layoutDesign.layerGap??94),maxLabelWidth=Math.max(0,...(definition.edges??[]).map(edge=>estimateRelationLabelWidth(edge.displayLabel??edge.label??edge.relationType))),rows=layers.map(layer=>groups.get(layer).sort((a,b)=>(a.semanticCoordinate?.order??0)-(b.semanticCoordinate?.order??0))),rowHeights=rows.map(items=>Math.max(...items.map(slot=>measured(sizes,slot,fallback).height))),maxNodeWidth=Math.max(...definition.slots.map(slot=>measured(sizes,slot,fallback).width)),minRowHeight=Math.min(...rowHeights),gapY=automatic&&isBoolean?baseGapY:automatic?horizontal?Math.max(baseGapY,maxNodeWidth-minRowHeight+maxLabelWidth+36):Math.max(baseGapY,maxLabelWidth+30):baseGapY,yAt=row=>112+rowHeights.slice(0,row).reduce((sum,value)=>sum+value+gapY,0);
   return rows.flatMap((items,row)=>{const widths=items.map(slot=>measured(sizes,slot,fallback).width),rowGaps=automatic?computeRowGaps(items,definition.edges,sizes,{baseGap:gapX,fallback}):Array(Math.max(0,items.length-1)).fill(gapX),total=widths.reduce((sum,value)=>sum+value,0)+rowGaps.reduce((sum,value)=>sum+value,0),start=Math.max(70,(1040-total)/2);let cursor=start;return items.map((slot,index)=>{const size=measured(sizes,slot,fallback),node={...slot,x:cursor,y:yAt(row)+(rowHeights[row]-size.height)/2,...size,...nodeGrammar(definition,slot)};cursor+=size.width+(rowGaps[index]??0);return node})});
 }
 
@@ -153,6 +153,8 @@ function forceLayout(definition,sizes){
     const cooling=1-iteration/230;
     for(const slot of slots){const point=positions.get(slot.id),force=forces.get(slot.id),speed=velocity.get(slot.id);force.x+=(center.x-point.x)*.006;force.y+=(center.y-point.y)*.006;speed.x=(speed.x+force.x)*.76*cooling;speed.y=(speed.y+force.y)*.76*cooling;point.x=clamp(point.x+speed.x,105,935);point.y=clamp(point.y+speed.y,105,650)}
   }
+  // Resolve rectangle collisions after the force simulation, without a fixed-size cage.
+  for(let pass=0;pass<80;pass++){let collisions=0;for(let i=0;i<slots.length;i++)for(let j=i+1;j<slots.length;j++){const a=positions.get(slots[i].id),b=positions.get(slots[j].id),sa=measured(sizes,slots[i]),sb=measured(sizes,slots[j]),dx=b.x-a.x,dy=b.y-a.y,ox=(sa.width+sb.width)/2+28-Math.abs(dx),oy=(sa.height+sb.height)/2+28-Math.abs(dy);if(ox<=0||oy<=0)continue;collisions++;if(ox<oy){const shift=(ox/2+.1)*(Math.sign(dx)||1);a.x-=shift;b.x+=shift}else{const shift=(oy/2+.1)*(Math.sign(dy)||1);a.y-=shift;b.y+=shift}}if(!collisions)break}
   return slots.map(slot=>{const point=positions.get(slot.id),size=measured(sizes,slot,{width:104,height:48});return{...slot,x:point.x-size.width/2,y:point.y-size.height/2,...size,...nodeGrammar(definition,slot)}});
 }
 
@@ -214,7 +216,7 @@ function sceneBackground(definition,instance,options={}){
     for(const[column,label,position]of columns){const axisPosition=reverse?1012-position:position;if(vertical)items.push({type:'text',className:`lmn-column-title lmn-${column.toLowerCase()}`,x:42,y:axisPosition-110,text:label});else items.push({type:'text',className:`lmn-column-title lmn-${column.toLowerCase()}`,x:axisPosition,y:82,text:label});if(column==='L'&&!vertical)items.push({type:'line',className:'lmn-ontology-spine',x1:axisPosition,y1:132,x2:axisPosition,y2:690})}
   }
   if(layout==='venn'){
-    const names=instance.parameters?.setLabels??(Number(definition.layout?.sets)===2?['A','B']:['A','B','C']),sets=Number(definition.layout?.sets)===2?[{x:430,y:340,label:names[0]},{x:610,y:340,label:names[1]}]:[{x:420,y:300,label:names[0]},{x:600,y:300,label:names[1]},{x:510,y:450,label:names[2]}];
+    const names=instance.parameters?.setLabels??definition.runtimeMetadata?.setNames??(Number(definition.layout?.sets)===2?['A','B']:['A','B','C']),sets=Number(definition.layout?.sets)===2?[{x:430,y:340,label:names[0]},{x:610,y:340,label:names[1]}]:[{x:420,y:300,label:names[0]},{x:600,y:300,label:names[1]},{x:510,y:450,label:names[2]}];
     for(const [index,set] of sets.entries()){items.push({type:'circle',className:`venn-set venn-set-${index+1}`,cx:set.x,cy:set.y,r:178});items.push({type:'text',className:'venn-set-label',x:set.x+(index===0?-125:sets.length===2?125:0),y:set.y-145,text:set.label})}
   }
   if(layout==='coordinate')addCoordinateBackground(items,instance,options);
@@ -259,10 +261,11 @@ export function buildSceneGeometry(definition,instance={},options={}){
   else nodes=gridLayout(definition,{columns:layout==='timeline'?definition.slots.length:undefined,gapX:instance.designStyles?.layout?.autoSpacing===false?Number(instance.designStyles.layout.nodeGap??30):undefined,gapY:instance.designStyles?.layout?.autoSpacing===false?Number(instance.designStyles.layout.layerGap??32):undefined},sizes);
   if(baseAxis&&arrangement){const desiredVertical=arrangement.startsWith('vertical'),baseVertical=baseAxis.startsWith('vertical'),reverse=arrangement.endsWith('reverse');nodes=nodes.map(node=>{const centerX=node.x+node.width/2,centerY=node.y+node.height/2,u=baseVertical?-(centerY-370):centerX-520,v=baseVertical?centerX-520:centerY-370,axis=reverse?-u:u,nextCenterX=desiredVertical?520+v:520+axis,nextCenterY=desiredVertical?370+axis:370+v,width=node.width,height=node.height;return{...node,x:nextCenterX-width/2,y:nextCenterY-height/2,width,height}})}nodes=applyOffsets(nodes,instance).filter(node=>instance.objectVisibility?.[`slot:${node.id}`]!==false);const byId=new Map(nodes.map(node=>[node.id,node]));
   const center=layout==='radial'?{x:500,y:390}:undefined;
-  const edges=definition.edges.flatMap(edge=>{if(instance.objectVisibility?.[`edge:${edge.id}`]===false)return[];const source=byId.get(edge.sourceSlotId),target=byId.get(edge.targetSlotId);if(!source||!target)return[];const visual=resolveRelationStyle(edge,instance,{structureDefault:definition.relationStyle??definition.visual?.relationStyle??{routing:definition.visual?.edgeRouting}}),routing=visual.routing??(layout==='radial'?'radial-arc':'straight'),coordinateEndpoints=layout==='coordinate'?{start:{x:source.x+source.width/2,y:source.y+source.height/2},end:{x:target.x+target.width/2,y:target.y+target.height/2}}:null,routed=coordinateEndpoints?{...coordinateEndpoints,points:[coordinateEndpoints.start,coordinateEndpoints.end],path:`M ${coordinateEndpoints.start.x} ${coordinateEndpoints.start.y} L ${coordinateEndpoints.end.x} ${coordinateEndpoints.end.y}`} : routeEdge(source,target,routing,{center});return[{...edge,routing,visual,...routed}]});
+  let edges=definition.edges.flatMap(edge=>{if(instance.objectVisibility?.[`edge:${edge.id}`]===false)return[];const source=byId.get(edge.sourceSlotId),target=byId.get(edge.targetSlotId);if(!source||!target)return[];const visual=resolveRelationStyle(edge,instance,{structureDefault:definition.relationStyle??definition.visual?.relationStyle??{routing:definition.visual?.edgeRouting}}),routing=visual.routing??(layout==='radial'?'radial-arc':'straight'),coordinateEndpoints=layout==='coordinate'?{start:{x:source.x+source.width/2,y:source.y+source.height/2},end:{x:target.x+target.width/2,y:target.y+target.height/2}}:null,routed=coordinateEndpoints?{...coordinateEndpoints,points:[coordinateEndpoints.start,coordinateEndpoints.end],path:`M ${coordinateEndpoints.start.x} ${coordinateEndpoints.start.y} L ${coordinateEndpoints.end.x} ${coordinateEndpoints.end.y}`} : routeEdge(source,target,routing,{center});return[{...edge,routing,visual,...routed}]});
+  if(layout!=='coordinate')edges=routeIndependentRelations(edges,nodes,{route:routeEdge,anchor:anchorPoint,labelWidth:estimateRelationLabelWidth});
   const background=sceneBackground(definition,instance,options),plotBoxes=background.map(item=>item.plotBounds).filter(b=>b&&Number.isFinite(b.xMin));
   const tightPlots=layout==='coordinate'&&plotBoxes.length;
-  const minX=Math.min(tightPlots?Infinity:0,...plotBoxes.map(b=>b.xMin),...nodes.map(node=>node.x))-64,minY=Math.min(tightPlots?Infinity:0,...plotBoxes.map(b=>b.yMin),...nodes.map(node=>node.y))-64,maxX=Math.max(tightPlots?-Infinity:960,...plotBoxes.map(b=>b.xMax),...nodes.map(node=>node.x+node.width))+64,maxY=Math.max(tightPlots?-Infinity:650,...plotBoxes.map(b=>b.yMax),...nodes.map(node=>node.y+node.height))+64;
+  const minX=Math.min(tightPlots?Infinity:0,...plotBoxes.map(b=>b.xMin),...nodes.map(node=>node.x),...edges.flatMap(e=>(e.points??[]).map(p=>p.x)))-64,minY=Math.min(tightPlots?Infinity:0,...plotBoxes.map(b=>b.yMin),...nodes.map(node=>node.y),...edges.flatMap(e=>(e.points??[]).map(p=>p.y)))-64,maxX=Math.max(tightPlots?-Infinity:960,...plotBoxes.map(b=>b.xMax),...nodes.map(node=>node.x+node.width),...edges.flatMap(e=>(e.points??[]).map(p=>p.x)))+64,maxY=Math.max(tightPlots?-Infinity:650,...plotBoxes.map(b=>b.yMax),...nodes.map(node=>node.y+node.height),...edges.flatMap(e=>(e.points??[]).map(p=>p.y)))+64;
   return{instanceId:instance.id,templateId:definition.id,layout,nodes,edges,geometry:layout==='coordinate'?buildGeometryPrimitiveScene(instance,definition,{projectCoordinate,evaluatePlotPoint}):[],background,tokens:sceneTokens(definition,instance,nodes),bounds:{x:minX,y:minY,width:maxX-minX,height:maxY-minY},viewport:options.viewport??null};
 }
 
