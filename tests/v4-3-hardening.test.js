@@ -62,7 +62,7 @@ test('LKL rejects unsafe sources, publishes limits and schema-generated manual',
 
 test('built-in templates and variable schemes expose bilingual metadata and semantic defaults',()=>{
   assert.deepEqual(validateLocalizedRecords(BUILTIN_TEMPLATES),[]);assert.deepEqual(validateLocalizedRecords(BUILTIN_VARIABLE_SCHEMES),[]);
-  const coordinate=createStructureInstance(getBuiltinTemplate('builtin:coordinate-plane'),'knowledge'),graph=createStructureInstance(getBuiltinTemplate('builtin:directed-graph'),'knowledge'),edge=addInstanceEdge(graph,'graph-source','graph-target');
+  const coordinate=createStructureInstance(getBuiltinTemplate('builtin:coordinate-plane'),'knowledge'),graph=createStructureInstance(getBuiltinTemplate('builtin:directed-graph'),'knowledge'),edge=addInstanceEdge(graph,'A','B');
   assert.equal(coordinate.structureView.previewPolicy,'off');assert.equal(edge.routing,'straight');assert.equal(workspaceExportFilename(7),`lmn-workspace-v${APP_VERSION}-7.json`);
 });
 

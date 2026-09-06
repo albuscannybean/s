@@ -51,6 +51,9 @@ export function materializeStructureFamily(template,parameters={}){
 /** Validate incidence independently of edge labels and parallel relation identities. */
 export function validateGraphFamily(definition){
  if(definition.runtimeMetadata?.family!=='directed-node')return[];
+ const ids=new Set(definition.slots.map(s=>s.id)),incidenceErrors=[];
+ for(const edge of definition.edges){if(!ids.has(edge.sourceSlotId)||!ids.has(edge.targetSlotId))incidenceErrors.push('关系端点必须属于当前结构。');if(!['directed','conditional','derived'].includes(edge.direction??'directed'))incidenceErrors.push('有向节点图中的关系必须为单向；无向关系请使用无向图。');}
+ if(incidenceErrors.length)return [...new Set(incidenceErrors)];
  const topology=definition.runtimeMetadata.topology;if(topology==='network')return[];
  const adjacency=new Map(definition.slots.map(s=>[s.id,new Set()])),incoming=new Map(definition.slots.map(s=>[s.id,new Set()]));
  for(const e of definition.edges){adjacency.get(e.sourceSlotId)?.add(e.targetSlotId);incoming.get(e.targetSlotId)?.add(e.sourceSlotId);}
