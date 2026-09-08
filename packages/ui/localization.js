@@ -61,6 +61,12 @@ export function translateUIFragment(source,language=LANGUAGE_FALLBACK){
   return translateText(part);
  }).join('');
 }
+
+// Preserve complete tags while keeping interpolated user content opaque to translation.
+export function translateUITemplate(strings,values,language=LANGUAGE_FALLBACK){
+ const source=strings.map((part,index)=>part+(index<values.length?`\uE000${index}\uE001`:'')).join('');
+ return translateUIFragment(source,language).replace(/\uE000(\d+)\uE001/g,(_match,index)=>String(values[Number(index)]??''));
+}
 const UI_FRAGMENT_PATTERN=new RegExp(Object.keys(UI_CATALOG).filter(key=>key.length>1).sort((a,b)=>b.length-a.length).map(key=>key.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|'),'g');
 
 export function applyUITranslations(root,language=LANGUAGE_FALLBACK){

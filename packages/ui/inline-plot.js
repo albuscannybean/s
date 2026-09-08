@@ -8,7 +8,7 @@ import {fitScene} from '../geometry/scene-geometry.js';
 export function mountInlinePlot(root, source) {
   const doc=root.ownerDocument, template=BUILTIN_TEMPLATES.find(t=>t.id==='builtin:coordinate-plane');
   const parsed=parsePlotExpression(source), instance=createStructureInstance(template,null,{dimension:parsed.dimension,scale:40});
-  instance.plotExpressions=[{id:'document-plot',label:source,source,rangeMode:'manual',range:parsed.range,ranges:parsed.ranges,color:'#2f7658'}];
+  instance.plotExpressions=[{id:'document-plot',label:source,source,rangeMode:'viewport',range:parsed.range,ranges:parsed.ranges,color:'#2f7658'}];
   const viewport=doc.createElement('div');viewport.className='document-plot-viewport';
   const sceneRoot=doc.createElement('div');sceneRoot.className='scene-root';
   const layers={};for(const key of ['backgroundLayer','geometryLayer','edgeLayer']){layers[key]=doc.createElementNS('http://www.w3.org/2000/svg','svg');sceneRoot.append(layers[key]);}

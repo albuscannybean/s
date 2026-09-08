@@ -44,6 +44,7 @@ export function installContentLibrary(Controller){
   },
   renderNavigator(){
    if(this.navigatorMode!=='outline'&&this.navigatorMode!=='knowledge')return prior.renderNavigator.call(this);
+   const navigatorRoot=$('#navigatorContent'),scroll=navigatorRoot.scrollTop,focused=document.activeElement?.closest('#navigatorContent [data-nav-key]')?.dataset.navKey;
    this._renderingNavigator=true;this._contentRenderEntries=listContentEntries(this.state,{language:this.preferences.language,index:this.navigationIndex()});this._contentRenderByKey=new Map(this._contentRenderEntries.map(e=>[e.key,e]));prior.renderNavigator.call(this);if(this.navigatorMode!=='outline'){this._contentRenderEntries=null;this._contentRenderByKey=null;this._renderingNavigator=false;if(!this._renderingAll)this._renderIndex=null;return;}
    const root=$('#navigatorContent'),entries=this.contentEntries(),byKey=new Map(entries.map(e=>[e.key,e]));
    this.contentSelection??=new Set();for(const key of this.contentSelection)if(!byKey.has(key))this.contentSelection.delete(key);
@@ -67,6 +68,8 @@ export function installContentLibrary(Controller){
      event.preventDefault();event.stopImmediatePropagation();this.contentSelection.has(entry.key)?this.contentSelection.delete(entry.key):this.contentSelection.add(entry.key);this.contentSelectionMode=true;this.renderNavigator();
     },true);
    }
+   navigatorRoot.scrollTop=scroll;
+   if(focused)[...navigatorRoot.querySelectorAll('[data-nav-key]')].find(row=>row.dataset.navKey===focused)?.focus({preventScroll:true});
    this._contentRenderEntries=null;this._contentRenderByKey=null;this._renderingNavigator=false;if(!this._renderingAll)this._renderIndex=null;
   },
   openNavigatorMenu(event){

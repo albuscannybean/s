@@ -13,7 +13,7 @@ await page.addInitScript(()=>{
 try{
  await page.goto(process.env.LMN_QA_URL||'http://127.0.0.1:4174/apps/web/',{waitUntil:'networkidle'});
  await page.waitForFunction(()=>!!globalThis.lmnWorkspace);
- assert.equal(await page.locator('.brand em').innerText(),'V5.1.2');
+ assert.equal(await page.locator('.brand em').innerText(),'V5.1.3');
  const startup=await page.evaluate(()=>__dbMetrics);assert.equal(startup.opens,1);
  await page.evaluate(()=>{lmnWorkspace.transition.reducedMotion=()=>true;lmnWorkspace.openLibrary()});
  assert.ok(await page.locator('#templateGrid .template-miniature').count()>=28);

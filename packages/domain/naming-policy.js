@@ -44,9 +44,10 @@ function displayNames(instance={},definition={}){
   return new Set([
     ...(definition.slots??[]).map(item=>item.displayLabel??item.label),
     ...(instance.overrides?.addedSlots??[]).map(item=>item.displayLabel??item.label),
-    ...(instance.variables??[]).flatMap(item=>[item.displayName,item.label]),
+    ...(instance.variables??[]).flatMap(item=>[item.displayName,item.label,item.id]),
     ...(instance.plotExpressions??[]).map(item=>item.label),
-    ...(instance.motionPoints??[]).map(item=>item.label)
+    ...(instance.motionPoints??[]).map(item=>item.label),
+    ...(instance.geometryPrimitives??[]).flatMap(item=>[item.displayName,item.label])
   ].filter(Boolean).map(String));
 }
 
@@ -55,15 +56,12 @@ function firstAvailable(names,make){for(let index=0;index<10000;index++){const c
 export function nextObjectName({kind,instance={},definition={},language='zh-CN'}={}){
   if(kind==='node'||kind==='relation')return nextStructureObjectName({kind,instance,definition,language});
   const names=displayNames(instance,definition);
-  const allSlots=[...(definition.slots??[]),...(instance.overrides?.addedSlots??[])],isSurface=p=>p.kind==='surface'||/^\s*z\s*=/.test(p.source??'')||/^S[₀-₉\d]/.test(p.label??'');
-  const candidates=kind==='point'?allSlots.filter(s=>s.role==='point'||(!s.role&&/^[A-Z]+$/.test(s.label??''))):kind==='vector'?allSlots.filter(s=>['vector','vector-end'].includes(s.role)):kind==='motion'?(instance.motionPoints??[]):kind==='curve'?(instance.plotExpressions??[]).filter(p=>!isSurface(p)):kind==='surface'?(instance.plotExpressions??[]).filter(isSurface):[];
-  const observed=[...new Set(candidates.map(s=>s.displayName??s.displayLabel??s.label).filter(Boolean))];
-  if(observed.length){let displayName=nextSequentialLabel(observed,{fallback:({point:'P',vector:'v',curve:'C',surface:'S',motion:'M'})[kind]??'Object'});for(let attempts=0;attempts<10000&&names.has(displayName);attempts++)displayName=nextSequentialLabel([...observed,displayName],{fallback:kind});return{id:`${kind}-${globalThis.crypto?.randomUUID?.()??Date.now()}`,displayName};}
-  if(kind==='point')return{id:`point-${Date.now()}`,displayName:firstAvailable(names,index=>spreadsheetName(index))};
-  if(kind==='vector'){const displayName=firstAvailable(names,index=>`v${subscript(index+1)}`);return{id:`v${Math.max(1,(instance.overrides?.addedSlots??[]).filter(item=>item.role==='vector-end').length+1)}`,displayName}}
-  if(kind==='curve')return{id:`curve-${Date.now()}`,displayName:firstAvailable(names,index=>`C${subscript(index+1)}`)};
-  if(kind==='surface')return{id:`surface-${Date.now()}`,displayName:firstAvailable(names,index=>`S${subscript(index+1)}`)};
-  if(kind==='motion')return{id:`motion-${Date.now()}`,displayName:firstAvailable(names,index=>`M${index+1}`)};
+  const prefix={point:'P',motion:'P',vector:'v',curve:'C',surface:'S'}[kind];
+  if(prefix){
+    // Legacy ASCII indices still reserve the equivalent display subscript.
+    for(const name of names){const indexed=name.match(/^([vPCS])_?(\d+)$/);if(indexed)names.add(indexed[1]+subscript(Number(indexed[2])));}
+    return{id:`${kind}-${globalThis.crypto?.randomUUID?.()??Date.now()}`,displayName:firstAvailable(names,index=>prefix+subscript(index))};
+  }
   if(kind==='timeline')return{id:`timeline-${Date.now()}`,displayName:firstAvailable(names,index=>`timeline${index+1}`)};
   if(['line','area','volume'].includes(kind))return{id:`${kind}-${Date.now()}`,displayName:''};
   return{id:`object-${Date.now()}`,displayName:firstAvailable(names,index=>`对象 ${index+1}`)};
