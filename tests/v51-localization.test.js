@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {translateUI,translateUIFragment,systemRelationLabel,contentTypeLabel,ensureBuiltinLocalizedRecord} from '../packages/ui/localization.js';
+import {translateUI,translateUIFragment,translateUITemplate,systemRelationLabel,contentTypeLabel,ensureBuiltinLocalizedRecord} from '../packages/ui/localization.js';
 import {BUILTIN_TEMPLATES} from '../packages/structure-engine/templates.js';
 import {lklManualMarkdown} from '../packages/lkl2/schema.js';
 
@@ -30,6 +30,13 @@ test('relation display vocabulary is localized without changing unknown content 
  assert.equal(systemRelationLabel(relation.label,'zh-CN'),'局部化');assert.deepEqual(relation,snapshot);
  assert.equal(systemRelationLabel('用户的 localize 标签','zh-CN'),'用户的 localize 标签');
  assert.equal(systemRelationLabel('not-sufficient','en'),'Not sufficient');
+});
+
+test('interpolated input attributes retain HTML names and user values in both languages',()=>{
+ const parts=['<input name="start" value="','" aria-label="参数起点"><input name="end" value="','" aria-label="参数终点"><input name="color" type="color" value="','" aria-label="颜色"><p>','</p>'],values=['0','6.283185307179586','#2f7658','User Knowledge 定义'];
+ for(const language of['zh-CN','en']){
+  const html=translateUITemplate(parts,values,language);assert.equal((html.match(/<input /g)||[]).length,3);assert.match(html,/name="start"/);assert.match(html,/name="end"/);assert.match(html,/name="color"/);assert.match(html,/type="color"/);assert.doesNotMatch(html,/<输入|name="终点"/);for(const value of values)assert.ok(html.includes(value));
+ }
 });
 test('the English guide has a full tutorial and schema reference',()=>{
  const guide=lklManualMarkdown('en');assert.match(guide,/# LKL guide/);assert.match(guide,/## 8\. For AI authors/);assert.match(guide,/preview-policy/);assert.match(guide,/## geometry/);assert.doesNotMatch(guide,/[\u4e00-\u9fff]/);

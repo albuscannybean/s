@@ -45,5 +45,12 @@ test('unified variable registry includes every coordinate object family',()=>{
 });
 
 test('naming policy separates stable ids and collision-free display names',()=>{
-  assert.equal(spreadsheetName(25),'Z');assert.equal(spreadsheetName(26),'AA');const definition={slots:[{label:'A'},{label:'B'}]},point=nextObjectName({kind:'point',instance:{},definition});assert.equal(point.displayName,'C');assert.notEqual(point.id,point.displayName);const vector=nextObjectName({kind:'vector',instance:{overrides:{addedSlots:[{role:'vector-end',label:'v₁'}]}},definition:{slots:[{label:'v₁'}]}});assert.equal(vector.displayName,'v₂');assert.equal(nextObjectName({kind:'line'}).displayName,'');
+  assert.equal(spreadsheetName(25),'Z');assert.equal(spreadsheetName(26),'AA');const definition={slots:[{label:'A'},{label:'B'}]},point=nextObjectName({kind:'point',instance:{},definition});assert.equal(point.displayName,'P₀');assert.notEqual(point.id,point.displayName);const vector=nextObjectName({kind:'vector',instance:{overrides:{addedSlots:[{role:'vector-end',label:'v₁'}]}},definition:{slots:[{label:'v₁'}]}});assert.equal(vector.displayName,'v₀');assert.equal(nextObjectName({kind:'line'}).displayName,'');
+});
+
+test('geometric families use zero-based subscripts and points share a sequence with moving points',()=>{
+  for(const [kind,name]of Object.entries({point:'P₀',motion:'P₀',vector:'v₀',curve:'C₀',surface:'S₀'}))assert.equal(nextObjectName({kind}).displayName,name);
+  const instance={motionPoints:[{label:'P₁'}],variables:[{displayName:'P0'},{label:'v₀'}],plotExpressions:[{label:'C₀'},{label:'S₀'}]},definition={slots:[{label:'A'},{label:'OP'},{label:'P₂'}]};
+  assert.equal(nextObjectName({kind:'point',instance,definition}).displayName,'P₃');assert.equal(nextObjectName({kind:'motion',instance,definition}).displayName,'P₃');
+  assert.equal(nextObjectName({kind:'vector',instance,definition}).displayName,'v₁');assert.equal(nextObjectName({kind:'curve',instance,definition}).displayName,'C₁');assert.equal(nextObjectName({kind:'surface',instance,definition}).displayName,'S₁');
 });

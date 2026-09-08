@@ -34,6 +34,18 @@ export function analyzePoset(slots=[],edges=[]){
 
 export function validatePoset(slots,edges){const analysis=analyzePoset(slots,edges);return{valid:analysis.valid,errors:analysis.errors,analysis}}
 
+/** Preferred ranks own placement; declared order still requires each successor above its predecessors. */
+export function resolvePosetRanks(slots,edges,analysis=analyzePoset(slots,edges)){
+ const ranks={},adjusted=[];
+ const preferred=slot=>{const value=slot.semanticCoordinate?.preferredRank;return value!=null&&Number.isFinite(Number(value))?Math.max(0,Math.min(1000,Math.floor(Number(value)))):null};
+ for(const slot of [...slots].sort((a,b)=>(analysis.ranks[a.id]??0)-(analysis.ranks[b.id]??0))){
+  const requested=preferred(slot),minimum=analysis.valid?Math.max(0,...edges.filter(e=>e.targetSlotId===slot.id&&e.sourceSlotId!==slot.id).map(e=>(ranks[e.sourceSlotId]??analysis.ranks[e.sourceSlotId]??0)+1)):analysis.ranks[slot.id]??0;
+  ranks[slot.id]=Math.max(minimum,requested??analysis.ranks[slot.id]??0);
+  if(requested!=null&&requested<minimum)adjusted.push(slot.id);
+ }
+ return{ranks,adjusted};
+}
+
 export function pairBounds(left,right,idsOrAnalysis,closureMaybe){
   const ids=idsOrAnalysis instanceof Set?idsOrAnalysis:new Set(idsOrAnalysis?.closure?.keys?.()??[]),closure=closureMaybe??idsOrAnalysis.closure;
   const le=(a,b)=>a===b||closure.get(a)?.has(b),upper=[...ids].filter(candidate=>le(left,candidate)&&le(right,candidate)),lower=[...ids].filter(candidate=>le(candidate,left)&&le(candidate,right));

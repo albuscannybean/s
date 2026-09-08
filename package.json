@@ -1,6 +1,6 @@
 {
   "name": "lmn-knowledge-system",
-  "version": "5.1.2",
+  "version": "5.1.3",
   "private": true,
   "type": "module",
   "scripts": {
@@ -9,7 +9,7 @@
     "web": "npx serve .",
     "build:web": "node tools/generate-contract.mjs && node tools/generate-web-assets.mjs",
     "qa:regression": "node tests/qa-v51-web.mjs",
-    "qa:release": "node tests/qa-v512-web.mjs"
+    "qa:release": "node tests/qa-v513-web.mjs"
   },
   "engines": {
     "node": ">=18"

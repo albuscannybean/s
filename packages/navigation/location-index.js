@@ -121,9 +121,26 @@ export function revealNavigatorTarget(index,target,expanded=new Set()){
  const path=index.pathFor(target);for(const segment of path??[])expanded.add(segment.key);return path;
 }
 
-export function flattenNavigator(index,{expanded=new Set(),query='',maxIndent=3}={}){
- if(String(query).trim())return searchNavigatorIndex(index,query).map(hit=>({...index.find(hit),depth:0,indent:0,reference:false,expandable:false,path:hit.canonicalPath,searchResult:true,meta:hit.path.slice(0,-1).join(' › ')}));
- const rows=[],stack=index.roots.map(entry=>({entry,depth:0,reference:false,rowKey:entry.key})).reverse();
- while(stack.length){const {entry,depth,reference,rowKey}=stack.pop(),childLinks=reference?[]:index.children.get(entry.key)??[],open=expanded.has(entry.key),path=index.pathFor(entry);rows.push({...entry,rowKey,depth,indent:Math.min(depth,maxIndent),reference,expandable:childLinks.length>0,expanded:open,childCount:childLinks.length,path});if(!open)continue;for(let i=childLinks.length-1;i>=0;i--){const e=childLinks[i];stack.push({entry:index.objects.get(e.child),depth:depth+1,reference:e.reference,rowKey:e.key});}}
+/** Hide empty diagram positions in the outline without deleting their canonical addresses. */
+export function contentNavigatorKeys(index){
+ const visible=new Set(),ancestors=new Map();
+ const filled=record=>hasBody(record)||!!record?.displayFormula?.trim()||!!record?.objectContent?.sources?.length||!!record?.objectContent?.links?.length||!!record?.sources?.length||!!record?.links?.length;
+ for(const [parent,links]of index.children)for(const link of links){if(!ancestors.has(link.child))ancestors.set(link.child,[]);ancestors.get(link.child).push(parent);}
+ for(const entry of index.objects.values()){
+  if(entry.synthetic||entry.kind==='group')continue;
+  if(entry.kind==='slot'&&!filled(entry.record)&&!filled(entry.container?.content))continue;
+  if(entry.kind==='relation'&&entry.instanceId&&!filled(entry.record))continue;
+  visible.add(entry.key);
+ }
+ // Retain paths to attached content, including reference appearances in other containers.
+ const queue=[...visible];for(let at=0;at<queue.length;at++)for(const parent of ancestors.get(queue[at])??[])if(!visible.has(parent)){visible.add(parent);queue.push(parent);}
+ return visible;
+}
+
+export function flattenNavigator(index,{expanded=new Set(),query='',maxIndent=3,visibleKeys=null}={}){
+ const visible=entry=>!visibleKeys||visibleKeys.has(entry.key);
+ if(String(query).trim())return searchNavigatorIndex(index,query).filter(visible).map(hit=>({...index.find(hit),depth:0,indent:0,reference:false,expandable:false,path:hit.canonicalPath,searchResult:true,meta:hit.path.slice(0,-1).join(' › ')}));
+ const rows=[],stack=index.roots.filter(visible).map(entry=>({entry,depth:0,reference:false,rowKey:entry.key})).reverse();
+ while(stack.length){const {entry,depth,reference,rowKey}=stack.pop(),childLinks=reference?[]:(index.children.get(entry.key)??[]).filter(e=>visibleKeys==null||visibleKeys.has(e.child)),open=expanded.has(entry.key),path=index.pathFor(entry);rows.push({...entry,rowKey,depth,indent:Math.min(depth,maxIndent),reference,expandable:childLinks.length>0,expanded:open,childCount:childLinks.length,path});if(!open)continue;for(let i=childLinks.length-1;i>=0;i--){const e=childLinks[i];stack.push({entry:index.objects.get(e.child),depth:depth+1,reference:e.reference,rowKey:e.key});}}
  return rows;
 }

@@ -32,26 +32,26 @@ export function mountMathWorkbench(root,context) {
   const tabs=element(root,'nav','','math-tabs coordinate-operation-switch');panel.append(tabs);
   for(const[key,label]of [['geometry',t('几何')],['algebra',t('代数')]]){const button=action(tabs,t(label),()=>onMode(key));button.classList.toggle('active',mode===key);}
   if(mode==='geometry') {
-    const space=element(root,'div','','math-tabs plot-dimension');space.append(element(root,'b',t('坐标空间')));for(const[key,label]of [['2d',t('二维')],['3d',t('三维')]]){const b=action(space,t(label),()=>onDimension(key));b.classList.toggle('active',dimension===key);}panel.append(space);
     const section=element(root,'section','','math-form coordinate-operation-section');panel.append(section);
     section.append(element(root,'h3',t('定义几何对象')));
     const kind=select(section,t('对象类型'),[['plot',t('函数、曲线或曲面')],['point',t('点')],['vector',t('向量')]]);
     const name=field(section,t('对象名称'),''),expression=field(section,t('表达式'),'y=sin(x)','textarea');
     expression.id='plotExpressionInput';
-    const domains=element(root,'div','','math-field-grid');section.append(domains);
+    const rangeMode=select(section,t('显示范围'),[['viewport',t('随可视画布自动铺展')],['manual',t('自定义参数区间')]]);
+    const domains=element(root,'div','','math-field-grid');domains.hidden=true;section.append(domains);rangeMode.onchange=()=>{domains.hidden=rangeMode.value!=='manual'};
     const start=field(domains,t('参数起点'),'-6'),end=field(domains,t('参数终点'),'6'),vstart=field(domains,t('曲面第二参数起点'),'-6'),vend=field(domains,t('曲面第二参数终点'),'6');
     const presets=element(root,'div','','math-tabs plot-presets');section.append(presets);
     for(const p of Object.values(PLOT_PRESETS))action(presets,t(p.label),()=>{kind.value='plot';expression.value=p.source;const parsed=parsePlotExpression(p.source);[start.value,end.value]=parsed.range??parsed.ranges?.u??[-6,6];[vstart.value,vend.value]=parsed.ranges?.v??[-6,6];});
-    kind.onchange=()=>{expression.value=kind.value==='plot'?'y=sin(x)':dimension==='3d'?'1, 2, 3':'1, 2';domains.hidden=presets.hidden=kind.value!=='plot';};
+    kind.onchange=()=>{expression.value=kind.value==='plot'?'y=sin(x)':dimension==='3d'?'1, 2, 3':'1, 2';presets.hidden=kind.value!=='plot';rangeMode.parentElement.hidden=kind.value!=='plot';domains.hidden=kind.value!=='plot'||rangeMode.value!=='manual';};
     section.append(element(root,'small',t('函数 y=sin(x)；曲面 z=x^2+y^2；参数曲线 x=cos(t); y=sin(t)；参数曲面 x=u; y=v; z=u*v。点和向量输入坐标。'),'math-hint'));
     const output=element(root,'output',t('对象定义后会进入统一变量表。'),'math-result'),actions=element(root,'div','','math-actions');section.append(actions,output);
     action(actions,t('创建对象'),()=>show(output,()=>{
       if(kind.value==='point'||kind.value==='vector'){const p=parseVector(expression.value);if(p.length!==(dimension==='3d'?3:2))throw new Error(t('坐标数量须与空间维数相同。'));(kind.value==='point'?onPoint:onVector)(name.value||undefined,...p, ...(p.length===2?[0]:[]));return t('已创建');}
-      const parsed=parsePlotExpression(expression.value),a=number(start.value),b=number(end.value),c=number(vstart.value),d=number(vend.value);
+      const parsed=parsePlotExpression(expression.value),manual=rangeMode.value==='manual',[a,b]=manual?[number(start.value),number(end.value)]:(parsed.range??parsed.ranges?.u??[-6,6]),[c,d]=manual?[number(vstart.value),number(vend.value)]:(parsed.ranges?.v??[-6,6]);
       if(a>=b||c>=d)throw new Error(t('参数起点必须小于终点。'));
       const sample=samplePlotExpression(parsed.source,{samples:80,range:[a,b],ranges:{u:[a,b],v:[c,d]}});
       if(!sample.segments.length)throw new Error(t('表达式在该范围没有可绘制的实数点。'));
-      onPlot({source:parsed.source,label:name.value||parsed.source,range:[a,b],ranges:{u:[a,b],v:[c,d]},dimension:parsed.dimension});[...space.querySelectorAll('button')].forEach((button,i)=>button.classList.toggle('active',(i===0?'2d':'3d')===parsed.dimension));return t('已创建 ')+(parsed.kind==='surface'?t('曲面'):t('曲线'));
+      onPlot({source:parsed.source,label:name.value,rangeMode:rangeMode.value,...(rangeMode.value==='manual'?{range:[a,b],ranges:{u:[a,b],v:[c,d]}}:{}),dimension:parsed.dimension});return t('已创建 ')+(parsed.kind==='surface'?t('曲面'):t('曲线'));
     }));
     action(actions,t('添加标准基'),()=>show(output,()=>{onBasis();return t('已添加标准基');}));
     const construction=element(root,'section','','coordinate-operation-section math-form');construction.append(element(root,'h3',t('几何构造与测量')),element(root,'p',t('Shift 选择画布对象后构造；依赖对象变化时重新计算。')),element(root,'small',geometrySummary||t('当前尚未选择操作数。')));panel.append(construction);

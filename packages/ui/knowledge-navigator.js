@@ -1,4 +1,4 @@
-import {flattenNavigator} from '../navigation/location-index.js';
+import {contentNavigatorKeys,flattenNavigator} from '../navigation/location-index.js';
 
 const glyph={knowledge:'◇',structure:'⬡',slot:'▣',content:'✎',note:'✎',variable:'ƒ',relation:'↝',geometry:'⌖',board:'▦',group:'≡'};
 const messages={
@@ -8,22 +8,22 @@ const messages={
 export function renderKnowledgeNavigator(root,options={}){
  const {index,expanded=new Set(),activeTarget,query='',language='zh-CN',onOpen,onToggle,onMenu,onDrag,onDrop}=options;
  const strings=messages[language]??messages['zh-CN'],scroll=root.scrollTop,focused=root.ownerDocument.activeElement?.closest('[data-nav-key]')?.dataset.navKey;
- const rows=flattenNavigator(index,{expanded,query}),active=index.find(activeTarget??{})?.key,doc=root.ownerDocument;
+ const visibleKeys=contentNavigatorKeys(index),rows=flattenNavigator(index,{expanded,query,visibleKeys}),active=index.find(activeTarget??{})?.key,doc=root.ownerDocument,groups=[root];
  root.replaceChildren();root.classList.add('knowledge-location-tree');root.setAttribute('role','tree');root.setAttribute('aria-label',language==='en'?'Content library':'内容库');
  if(!rows.length){const empty=doc.createElement('p');empty.className='nav-empty';empty.textContent=query?strings.none:strings.empty;root.append(empty);return}
- const count=doc.createElement('p');count.className='nav-location-count';count.textContent=`${query?rows.length:index.objects.size} ${query?strings.result:strings.items}`;root.append(count);
+ const count=doc.createElement('p');count.className='nav-location-count';count.textContent=`${query?rows.length:visibleKeys.size} ${query?strings.result:strings.items}`;root.append(count);
  rows.forEach((entry,position)=>{
   const row=doc.createElement('div');row.className='nav-location-row';row.dataset.navKey=entry.rowKey??entry.key;row.dataset.objectKey=entry.key;row.dataset.kind=entry.kind;row.style.setProperty('--indent',String(entry.indent));
   row.setAttribute('role','treeitem');row.setAttribute('aria-level',String(entry.depth+1));if(entry.expandable)row.setAttribute('aria-expanded',String(entry.expanded));
   row.tabIndex=position===0?0:-1;
   if(entry.key===active&&!entry.reference){row.classList.add('active');row.setAttribute('aria-current','page')}
   if(entry.reference)row.classList.add('reference');
-  const toggle=doc.createElement('button');toggle.className='nav-location-toggle';toggle.tabIndex=-1;toggle.textContent=entry.expandable?(entry.expanded?'▾':'▸'):'·';toggle.disabled=!entry.expandable;toggle.title=entry.expanded?strings.collapse:strings.expand;toggle.setAttribute('aria-label',toggle.title);toggle.onclick=event=>{event.stopPropagation();row.focus();onToggle?.(entry.key)};
+  const toggle=doc.createElement('button');toggle.className='nav-location-toggle';toggle.tabIndex=-1;toggle.textContent=entry.expandable?(entry.expanded?'▾':'▸'):'·';toggle.disabled=!entry.expandable;toggle.title=entry.expanded?strings.collapse:strings.expand;toggle.setAttribute('aria-label',toggle.title);toggle.onclick=event=>{event.stopPropagation();row.focus({preventScroll:true});onToggle?.(entry.key)};
   const open=doc.createElement('button');open.className='nav-location-open';open.tabIndex=-1;const symbol=doc.createElement('span');symbol.className='nav-location-icon';symbol.textContent=entry.reference?'↗':glyph[entry.kind]??'·';
   const label=doc.createElement('span');label.className='nav-location-label';label.textContent=entry.label;open.append(symbol,label);
   const path=entry.path?.map(s=>s.label).join(' › ')??entry.label;open.title=entry.reference?strings.reference+'\n'+path:path;
   if(entry.reference||entry.searchResult||entry.recovered){const meta=doc.createElement('small');meta.textContent=entry.reference?strings.reference:entry.recovered?strings.recovered:entry.meta;open.append(meta)}
-  open.onclick=()=>{if(entry.synthetic){row.focus();onToggle?.(entry.key)}else onOpen?.(entry)};row.append(toggle,open);
+  open.onclick=()=>{if(entry.synthetic){row.focus({preventScroll:true});onToggle?.(entry.key)}else onOpen?.(entry)};row.append(toggle,open);
   if(entry.expandable){const badge=doc.createElement('small');badge.className='nav-location-badge';badge.textContent=entry.childCount;row.append(badge)}
   if(onMenu&&!entry.synthetic&&entry.kind!=='group'){const menu=doc.createElement('button');menu.className='nav-location-menu';menu.tabIndex=-1;menu.textContent='⋯';menu.title=strings.menu;menu.onclick=e=>onMenu(entry,e);row.append(menu)}
   if(!entry.reference){onDrag?.(row,entry);onDrop?.(row,entry)}
@@ -35,7 +35,10 @@ export function renderKnowledgeNavigator(root,options={}){
    else if(event.key==='Enter'||event.key===' '){entry.synthetic?onToggle?.(entry.key):onOpen?.(entry)}
    else return;event.preventDefault();
   };
-  root.append(row);
+  const branch=doc.createElement('div');branch.className='nav-location-branch';branch.dataset.depth=String(entry.depth);branch.append(row);(groups[entry.depth]??root).append(branch);groups.length=entry.depth+1;
+  if(entry.expandable&&entry.expanded){
+   branch.classList.add('nav-branch-expanded');const children=doc.createElement('div');children.className='nav-location-children';children.id=`nav-children-${position}`;children.setAttribute('role','group');children.setAttribute('aria-label',entry.label);children.style.setProperty('--branch-inset',entry.depth<3?'10px':'0px');row.setAttribute('aria-owns',children.id);branch.append(children);groups[entry.depth+1]=children;
+  }
  });
  root.scrollTop=scroll;if(focused){const target=[...root.querySelectorAll('[data-nav-key]')].find(e=>e.dataset.navKey===focused);target?.focus({preventScroll:true})}
 }

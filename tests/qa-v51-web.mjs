@@ -37,6 +37,20 @@ try{
  await page.evaluate(()=>lmnWorkspace.openLklManual());result.manual=await page.locator('#lklManualContent').innerText();assert.ok(result.manual.includes('LKL'));
  await page.evaluate(()=>{const app=lmnWorkspace;app.openGlobalSettings();const input=document.querySelector('[data-global-pref=language]');input.value='zh-CN';app.updateGlobalPreference(input);app.openKnowledge(app.__qa51.child)});
  assert.equal(await page.locator('html').getAttribute('lang'),'zh-CN');assert.equal(await page.evaluate(()=>lmnWorkspace.knowledge.title),'最终知识：保留用户中文');
+ result.contentOutline=await page.evaluate(async()=>{
+  const app=lmnWorkspace,{createStructureInstance}=await import(new URL('../../packages/structure-engine/model.js',location.href)),template=app.state.structureTemplates.find(t=>t.id==='builtin:directed-graph');
+  for(let i=0;i<40;i++){const instance=createStructureInstance(template);instance.id=`qa-scroll-${i}`;instance.displayTitle=`滚动位置 ${i}`;instance.containers.A.content.body='已填充正文';app.state.structureInstances.push(instance);}
+  app.renderNavigator();const key=app.navigationIndex().find({kind:'structure',id:'qa-scroll-25'}).key,row=[...document.querySelectorAll('.nav-location-row')].find(e=>e.dataset.objectKey===key);row.scrollIntoView({block:'center'});app.__qa51.scrollKey=key;
+  return {before:document.querySelector('#navigatorContent').scrollTop,key};
+ });
+ const scrollToggle=page.locator('.nav-location-row').filter({has:page.locator('.nav-location-label',{hasText:/^滚动位置 25$/})}).locator('.nav-location-toggle');
+ await scrollToggle.click();
+ result.contentOutline.expanded=await page.evaluate(()=>{
+  const root=document.querySelector('#navigatorContent'),row=[...root.querySelectorAll('.nav-location-row')].find(e=>e.dataset.objectKey===lmnWorkspace.__qa51.scrollKey),branch=row.parentElement;
+  return {scroll:root.scrollTop,slots:branch.querySelectorAll('[data-kind=slot]').length,relations:branch.querySelectorAll('[data-kind=relation]').length,groups:branch.querySelectorAll('.nav-location-children').length,overflow:root.scrollWidth-root.clientWidth};
+ });
+ assert.ok(result.contentOutline.before>500);assert.ok(Math.abs(result.contentOutline.expanded.scroll-result.contentOutline.before)<=1);assert.equal(result.contentOutline.expanded.slots,1);assert.equal(result.contentOutline.expanded.relations,0);assert.ok(result.contentOutline.expanded.groups>0);assert.ok(result.contentOutline.expanded.overflow<=1);
+ await scrollToggle.click();result.contentOutline.collapsed=await page.locator('#navigatorContent').evaluate(root=>root.scrollTop);assert.ok(Math.abs(result.contentOutline.collapsed-result.contentOutline.before)<=1);
  assert.deepEqual(errors,[]);result.errors=errors;await writeFile('qa-output/v51-results.json',JSON.stringify(result,null,2));console.log(JSON.stringify({...result,manual:result.manual.slice(0,180)},null,2));
 }finally{await browser.close()}
 
