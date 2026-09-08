@@ -4,18 +4,115 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#f8f7f2">
-  <title>LMN Knowledge System V5.1.1</title>
+  <title>LMN Knowledge System V5.1.2</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232f7658'/%3E%3Ctext x='32' y='42' text-anchor='middle' font-size='30' fill='white' font-family='Georgia'%3EL%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="vendor/katex/katex.min.css">
   <link rel="stylesheet" href="styles.css">
   <link rel="manifest" href="manifest.webmanifest">
 <link rel="stylesheet" href="../../packages/ui/web-next.css">
 <link rel="stylesheet" href="../../packages/ui/web-refinement.css">
+<link rel="stylesheet" href="../../packages/ui/node-refinement.css">
+<!-- modulepreload:start -->
+<link rel="modulepreload" href="./db.js">
+<link rel="modulepreload" href="../../packages/app-metadata.js">
+<link rel="modulepreload" href="../../packages/cognitive-runtime/activation.js">
+<link rel="modulepreload" href="../../packages/cognitive-runtime/cognitive-plan.js">
+<link rel="modulepreload" href="../../packages/cognitive-runtime/compiler.js">
+<link rel="modulepreload" href="../../packages/cognitive-runtime/derived-projection.js">
+<link rel="modulepreload" href="../../packages/cognitive-runtime/domain-profiles.js">
+<link rel="modulepreload" href="../../packages/cognitive-runtime/role-inference.js">
+<link rel="modulepreload" href="../../packages/cognitive-runtime/semantic-index.js">
+<link rel="modulepreload" href="../../packages/cognitive-runtime/task-context.js">
+<link rel="modulepreload" href="../../packages/cognitive-runtime/task-schemas.js">
+<link rel="modulepreload" href="../../packages/cognitive-runtime/topology.js">
+<link rel="modulepreload" href="../../packages/cognitive-runtime/validation.js">
+<link rel="modulepreload" href="../../packages/domain/core.js">
+<link rel="modulepreload" href="../../packages/domain/identity.js">
+<link rel="modulepreload" href="../../packages/domain/naming-policy.js">
+<link rel="modulepreload" href="../../packages/domain/object-management.js">
+<link rel="modulepreload" href="../../packages/domain/object-profile.js">
+<link rel="modulepreload" href="../../packages/domain/semantic-container.js">
+<link rel="modulepreload" href="../../packages/domain/variable-registry.js">
+<link rel="modulepreload" href="../../packages/geometry/animation-coordinator.js">
+<link rel="modulepreload" href="../../packages/geometry/geometric-measurements.js">
+<link rel="modulepreload" href="../../packages/geometry/geometry-operands.js">
+<link rel="modulepreload" href="../../packages/geometry/geometry-primitives.js">
+<link rel="modulepreload" href="../../packages/geometry/node-measurement.js">
+<link rel="modulepreload" href="../../packages/geometry/relation-routing.js">
+<link rel="modulepreload" href="../../packages/geometry/scene-geometry.js">
+<link rel="modulepreload" href="../../packages/lkl/index.js">
+<link rel="modulepreload" href="../../packages/lkl/lexer.js">
+<link rel="modulepreload" href="../../packages/lkl/parser.js">
+<link rel="modulepreload" href="../../packages/lkl/semantic.js">
+<link rel="modulepreload" href="../../packages/lkl/serializer.js">
+<link rel="modulepreload" href="../../packages/lkl2/ast.js">
+<link rel="modulepreload" href="../../packages/lkl2/exporter.js">
+<link rel="modulepreload" href="../../packages/lkl2/importer.js">
+<link rel="modulepreload" href="../../packages/lkl2/index.js">
+<link rel="modulepreload" href="../../packages/lkl2/lexer.js">
+<link rel="modulepreload" href="../../packages/lkl2/parser.js">
+<link rel="modulepreload" href="../../packages/lkl2/schema.js">
+<link rel="modulepreload" href="../../packages/lkl2/serializer.js">
+<link rel="modulepreload" href="../../packages/lkl2/structure-source.js">
+<link rel="modulepreload" href="../../packages/lkl2/validator.js">
+<link rel="modulepreload" href="../../packages/lkl2/variable-scheme-codec.js">
+<link rel="modulepreload" href="../../packages/lkl3/manual.js">
+<link rel="modulepreload" href="../../packages/lkl3/package.js">
+<link rel="modulepreload" href="../../packages/lkl3/schema.js">
+<link rel="modulepreload" href="../../packages/math/linear-algebra.js">
+<link rel="modulepreload" href="../../packages/navigation/content-operations.js">
+<link rel="modulepreload" href="../../packages/navigation/document-id.js">
+<link rel="modulepreload" href="../../packages/navigation/location-index.js">
+<link rel="modulepreload" href="../../packages/navigation/navigator-model.js">
+<link rel="modulepreload" href="../../packages/navigation/path.js">
+<link rel="modulepreload" href="../../packages/navigation/tab-session.js">
+<link rel="modulepreload" href="../../packages/search-engine/query-engine.js">
+<link rel="modulepreload" href="../../packages/search-engine/search.js">
+<link rel="modulepreload" href="../../packages/structure-engine/board.js">
+<link rel="modulepreload" href="../../packages/structure-engine/boolean-algebra.js">
+<link rel="modulepreload" href="../../packages/structure-engine/bundle.js">
+<link rel="modulepreload" href="../../packages/structure-engine/coordinate-operations.js">
+<link rel="modulepreload" href="../../packages/structure-engine/cyclic-group.js">
+<link rel="modulepreload" href="../../packages/structure-engine/evaluator.js">
+<link rel="modulepreload" href="../../packages/structure-engine/formula.js">
+<link rel="modulepreload" href="../../packages/structure-engine/interaction-adapters.js">
+<link rel="modulepreload" href="../../packages/structure-engine/knowledge-workflow.js">
+<link rel="modulepreload" href="../../packages/structure-engine/migration.js">
+<link rel="modulepreload" href="../../packages/structure-engine/model.js">
+<link rel="modulepreload" href="../../packages/structure-engine/plotting.js">
+<link rel="modulepreload" href="../../packages/structure-engine/poset.js">
+<link rel="modulepreload" href="../../packages/structure-engine/presentation-adapters.js">
+<link rel="modulepreload" href="../../packages/structure-engine/relation-library.js">
+<link rel="modulepreload" href="../../packages/structure-engine/relation-style-resolver.js">
+<link rel="modulepreload" href="../../packages/structure-engine/semantic-templates.js">
+<link rel="modulepreload" href="../../packages/structure-engine/structure-families.js">
+<link rel="modulepreload" href="../../packages/structure-engine/structure-view.js">
+<link rel="modulepreload" href="../../packages/structure-engine/templates.js">
+<link rel="modulepreload" href="../../packages/structure-engine/variable-result-normalizer.js">
+<link rel="modulepreload" href="../../packages/structure-engine/variable-schemes.js">
+<link rel="modulepreload" href="../../packages/ui/command-registry.js">
+<link rel="modulepreload" href="../../packages/ui/content-library-actions.js">
+<link rel="modulepreload" href="../../packages/ui/content-preview.js">
+<link rel="modulepreload" href="../../packages/ui/document-editor.js">
+<link rel="modulepreload" href="../../packages/ui/knowledge-navigator.js">
+<link rel="modulepreload" href="../../packages/ui/library-model.js">
+<link rel="modulepreload" href="../../packages/ui/localization.js">
+<link rel="modulepreload" href="../../packages/ui/math-markup.js">
+<link rel="modulepreload" href="../../packages/ui/math-workbench.js">
+<link rel="modulepreload" href="../../packages/ui/object-interaction-contract.js">
+<link rel="modulepreload" href="../../packages/ui/portable-media.js">
+<link rel="modulepreload" href="../../packages/ui/structure-library-actions.js">
+<link rel="modulepreload" href="../../packages/ui/structure-renderer.js">
+<link rel="modulepreload" href="../../packages/ui/template-preview.js">
+<link rel="modulepreload" href="../../packages/ui/transient-overlay-manager.js">
+<link rel="modulepreload" href="../../packages/ui/ui-catalog.js">
+<link rel="modulepreload" href="../../packages/ui/workspace-controller.js">
+<!-- modulepreload:end -->
 </head>
 <body>
 <div id="appShell">
   <header class="topbar">
-    <div class="brand"><button id="toggleNavigator" class="icon-button" aria-label="切换内容库" data-i18n-aria-label="切换内容库">☰</button><b>LMN</b><span data-i18n="Knowledge System">知识系统</span><em>V5.1.1</em></div>
+    <div class="brand"><button id="toggleNavigator" class="icon-button" aria-label="切换内容库" data-i18n-aria-label="切换内容库">☰</button><b>LMN</b><span data-i18n="Knowledge System">知识系统</span><em>V5.1.2</em></div>
     <nav id="breadcrumbs" aria-label="递归知识路径" data-i18n-aria-label="递归知识路径"></nav>
     <button id="globalSearch" class="command-trigger"><span data-i18n="命令行">命令行</span><kbd>Ctrl K</kbd></button>
     <button id="insertStructure" class="primary hidden" aria-hidden="true" tabindex="-1" data-i18n="＋ 新建">＋ 新建</button>
@@ -139,7 +236,7 @@
 
 <dialog id="advancedBuilderDialog" class="sheet advanced-builder"><header><div><span class="eyebrow" data-i18n="ADVANCED BUILDER · LKL 1">高级结构编辑器 · LKL 1</span><h2 data-i18n="LKL 1 高级结构语言工作台">LKL 1 高级结构语言工作台</h2></div><button class="dialog-close">×</button></header><div class="advanced-layout"><aside><h3 data-i18n="结构起点">结构起点</h3><button data-starter="graph" data-i18n="＋ 图 Graph">＋ 图</button><button data-starter="tree" data-i18n="＋ 树 Tree">＋ 树</button><button data-starter="algebra" data-i18n="＋ 代数 Algebra">＋ 代数</button><button data-starter="matrix" data-i18n="＋ 矩阵 Matrix">＋ 矩阵</button><p data-i18n="可直接粘贴由 AI 按 LKL 1 规则生成的任意结构代码；系统会实时验证并生成可视预览，保存后成为可复用模板。">粘贴符合 LKL 1 规则的结构代码，验证并预览后可保存为复用模板。</p></aside><section><textarea id="advancedLkl" spellcheck="false" aria-label="LKL 1 结构代码" data-i18n-aria-label="LKL 1 结构代码"></textarea><div id="advancedValidation" class="validation-state"></div></section><aside id="advancedPreview"><h3 data-i18n="语义预览">语义预览</h3><div id="advancedSummary"></div></aside></div><footer><button id="validateAdvanced" data-i18n="验证 LKL 1">验证 LKL 1</button><button id="saveAdvanced" class="primary" data-i18n="保存并插入">保存并插入</button></footer></dialog>
 
-<dialog id="importDialog" class="sheet import-sheet"><header><div><span class="eyebrow" data-i18n="IMPORT PREVIEW · TRANSACTIONAL">导入预览 · 事务保存</span><h2 data-i18n="导入、校验、解决身份">导入、校验、解决身份</h2></div><button class="dialog-close">×</button></header><div class="import-tabs"><button data-import-type="auto" class="active" data-i18n="自动识别">自动识别</button><button data-import-type="lkl3" data-i18n="LKL 3 完整档案">LKL 3 完整档案</button><button data-import-type="lkl2" data-i18n="LKL 2 Package">LKL 2 知识包</button><button data-import-type="lkl1" data-i18n="LKL 1 Template">LKL 1 结构模板</button><button data-import-type="json" data-i18n="JSON Bundle">JSON 数据包</button></div><textarea id="importSource" placeholder="粘贴 LKL 3、旧 LKL 1/2 或 JSON 内容" data-i18n-placeholder="粘贴 LKL 3、旧 LKL 1/2 或 JSON 内容"></textarea><div class="import-strategy"><label><span data-i18n="冲突策略">冲突策略</span><select id="importStrategy"><option value="merge" data-i18n="合并 Merge">合并</option><option value="replace" data-i18n="覆盖 Replace">覆盖</option><option value="copy" data-i18n="创建副本 Copy">创建副本</option></select></label><span data-i18n="整个包将作为一次事务提交">整个包将作为一次事务提交</span></div><div id="importPreview"></div><footer><button id="chooseImportFile" data-i18n="选择文件">选择文件</button><button id="validateImport" data-i18n="验证预览">验证预览</button><button id="confirmImport" class="primary" disabled data-i18n="确认导入">确认导入</button></footer></dialog>
+<dialog id="importDialog" class="sheet import-sheet"><header><div><span class="eyebrow" data-i18n="IMPORT PREVIEW · TRANSACTIONAL">导入预览 · 事务保存</span><h2 data-i18n="导入、校验、解决身份">导入、校验、解决身份</h2></div><button class="dialog-close">×</button></header><details class="import-format-options"><summary data-i18n="自动识别">自动识别</summary><div class="import-tabs"><button data-import-type="auto" class="active" data-i18n="自动识别">自动识别</button><button data-import-type="lkl3" data-i18n="LKL 3 完整档案">LKL 3 完整档案</button><button data-import-type="lkl2" data-i18n="LKL 2 Package">LKL 2 知识包</button><button data-import-type="lkl1" data-i18n="LKL 1 Template">LKL 1 结构模板</button><button data-import-type="json" data-i18n="JSON Bundle">JSON 数据包</button></div></details><textarea id="importSource" placeholder="粘贴 LKL 3、旧 LKL 1/2 或 JSON 内容" data-i18n-placeholder="粘贴 LKL 3、旧 LKL 1/2 或 JSON 内容"></textarea><div class="import-strategy"><label><span data-i18n="冲突策略">冲突策略</span><select id="importStrategy"><option value="merge" data-i18n="合并 Merge">合并</option><option value="replace" data-i18n="覆盖 Replace">覆盖</option><option value="copy" data-i18n="创建副本 Copy">创建副本</option></select></label><span data-i18n="整个包将作为一次事务提交">整个包将作为一次事务提交</span></div><div id="importPreview"></div><footer><button id="chooseImportFile" data-i18n="选择文件">选择文件</button><button id="validateImport" data-i18n="验证预览">验证预览</button><button id="confirmImport" class="primary" disabled data-i18n="确认导入">确认导入</button></footer></dialog>
 
 <dialog id="exportDialog" class="export-dialog"><header><h2 data-i18n="导出 / 备份">导出 / 备份</h2><button class="dialog-close">×</button></header><div id="exportPreview" class="export-preview"></div><button data-export="lkl3"><b data-i18n="完整知识档案 · LKL 3">完整知识档案 · LKL 3</b><small data-i18n="工作区全部知识、结构与嵌套对象信息；保留图片、几何、视图与扩展字段">工作区全部知识、结构与嵌套对象信息；保留图片、几何、视图与扩展字段</small></button><button data-export="lkl"><b data-i18n="结构模板 · LKL 1">结构模板 · LKL 1</b><small data-i18n="仅当前结构模板">仅当前结构模板</small></button><button data-export="knowledge-package"><b data-i18n="知识包 · LKL 2">知识包 · LKL 2</b><small data-i18n="递归导出知识、正文、结构、位置、变量与视图">递归导出知识、正文、结构、位置、变量与视图</small></button><button data-export="knowledge"><b data-i18n="当前知识 · LKL 2">当前知识 · LKL 2</b><small data-i18n="以当前知识为包根入口">以当前知识为包根入口</small></button><button data-export="json"><b data-i18n="完整工作区 · JSON">完整工作区 · JSON</b><small data-i18n="完整工作区备份">完整工作区备份</small></button><button data-export="markdown"><b data-i18n="当前知识 · Markdown">当前知识 · Markdown</b><small data-i18n="标题与笔记">标题与笔记</small></button></dialog>
 <input id="fileInput" type="file" accept=".lkl,.json,.md" hidden>

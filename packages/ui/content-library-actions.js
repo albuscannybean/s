@@ -43,7 +43,8 @@ export function installContentLibrary(Controller){
    return all.filter(e=>keys.has(e.key)).map(e=>e.target);
   },
   renderNavigator(){
-   this._contentRenderEntries=listContentEntries(this.state,{language:this.preferences.language});this._contentRenderByKey=new Map(this._contentRenderEntries.map(e=>[e.key,e]));prior.renderNavigator.call(this);if(this.navigatorMode!=='outline'){this._contentRenderEntries=null;this._contentRenderByKey=null;return;}
+   if(this.navigatorMode!=='outline'&&this.navigatorMode!=='knowledge')return prior.renderNavigator.call(this);
+   this._renderingNavigator=true;this._contentRenderEntries=listContentEntries(this.state,{language:this.preferences.language,index:this.navigationIndex()});this._contentRenderByKey=new Map(this._contentRenderEntries.map(e=>[e.key,e]));prior.renderNavigator.call(this);if(this.navigatorMode!=='outline'){this._contentRenderEntries=null;this._contentRenderByKey=null;this._renderingNavigator=false;if(!this._renderingAll)this._renderIndex=null;return;}
    const root=$('#navigatorContent'),entries=this.contentEntries(),byKey=new Map(entries.map(e=>[e.key,e]));
    this.contentSelection??=new Set();for(const key of this.contentSelection)if(!byKey.has(key))this.contentSelection.delete(key);
    const bar=element('div','content-library-tools');
@@ -66,7 +67,7 @@ export function installContentLibrary(Controller){
      event.preventDefault();event.stopImmediatePropagation();this.contentSelection.has(entry.key)?this.contentSelection.delete(entry.key):this.contentSelection.add(entry.key);this.contentSelectionMode=true;this.renderNavigator();
     },true);
    }
-   this._contentRenderEntries=null;this._contentRenderByKey=null;
+   this._contentRenderEntries=null;this._contentRenderByKey=null;this._renderingNavigator=false;if(!this._renderingAll)this._renderIndex=null;
   },
   openNavigatorMenu(event){
    const r=event.currentTarget.getBoundingClientRect();this.showContextMenu(r.right-240,r.bottom+5,[

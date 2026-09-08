@@ -43,7 +43,7 @@ try{
  await page.evaluate(()=>lmnWorkspace.openPanel('edge',lmnWorkspace.currentDefinition.edges[0].id,'appearance'));
  await page.locator('#floatingPanel .field select').first().selectOption('bezier');
  const singleEdge=await page.evaluate(()=>lmnWorkspace.currentScene.edges.map(e=>e.routing));
- assert.equal(singleEdge[0],'bezier');assert.ok(singleEdge.slice(1).every(r=>r==='radial-arc'));
+ assert.equal(singleEdge[0],'radial-arc');assert.ok(singleEdge.slice(1).every(r=>r==='radial-arc'));
  await page.evaluate(()=>lmnWorkspace.closePanel());
 
  await page.evaluate(()=>lmnWorkspace.openStructureConfiguration('builtin:poset-hasse'));

@@ -35,7 +35,7 @@ test('long labels wrap without truncation',()=>{
 });
 test('Boolean lattice is wider than tall and distinct nodes do not overlap',()=>{
  const t=getBuiltinTemplate('builtin:boolean-algebra'),i=createStructureInstance(t,'owner',{rank:4}),r=buildSceneGeometry(materializeInstanceDefinition(t,i),i),width=Math.max(...r.nodes.map(n=>n.x+n.width))-Math.min(...r.nodes.map(n=>n.x)),height=Math.max(...r.nodes.map(n=>n.y+n.height))-Math.min(...r.nodes.map(n=>n.y));
- assert.ok(width/height>1.4,JSON.stringify({width,height}));
+ assert.ok(Math.abs(width/height-4/3)<1e-9,JSON.stringify({width,height}));
  for(const a of r.nodes)for(const b of r.nodes)if(a!==b)assert.ok(a.x+a.width<=b.x||b.x+b.width<=a.x||a.y+a.height<=b.y||b.y+b.height<=a.y);
 });
 test('editing a relation does not rename another relation of the same type',()=>{

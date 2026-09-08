@@ -47,5 +47,5 @@ test('explicit start/end semantics are stable and collision fallback is manual-o
 
 test('SVG text, background cutout, cache build key and product version preserve the hotfix contract',async()=>{
   const [renderer,styles,worker,manifest]=await Promise.all([readFile(new URL('../packages/ui/structure-renderer.js',import.meta.url),'utf8'),readFile(new URL('../apps/web/styles.css',import.meta.url),'utf8'),readFile(new URL('../apps/web/sw.js',import.meta.url),'utf8'),readFile(new URL('../package.json',import.meta.url),'utf8')]);
-  assert.match(renderer,/setAttribute\('dominant-baseline','middle'\)/);assert.match(renderer,/setAttribute\('y',placement\.y\)/);assert.doesNotMatch(renderer,/setAttribute\('y',placement\.y\+4\)/);assert.match(styles,/\.edge-label-background\{fill:var\(--canvas\);stroke:var\(--canvas\)/);assert.match(worker,/lmn-v5\.1\.1-web-[a-f0-9]{12}/);assert.equal(JSON.parse(manifest).version,'5.1.1');
+  assert.match(renderer,/setAttribute\('dominant-baseline','middle'\)/);assert.match(renderer,/setAttribute\('y',placement\.y\)/);assert.doesNotMatch(renderer,/setAttribute\('y',placement\.y\+4\)/);assert.match(styles,/\.edge-label-background\{fill:var\(--canvas\);stroke:var\(--canvas\)/);assert.match(worker,/lmn-v5\.1\.2-web-[a-f0-9]{12}/);assert.equal(JSON.parse(manifest).version,'5.1.2');
 });

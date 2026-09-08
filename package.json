@@ -1,16 +1,15 @@
 {
   "name": "lmn-knowledge-system",
-  "version": "5.1.1",
+  "version": "5.1.2",
   "private": true,
   "type": "module",
   "scripts": {
     "test": "node --test tests/*.test.js",
     "qa:browser": "node tests/qa-vnext-web.mjs",
     "web": "npx serve .",
-    "desktop": "powershell -ExecutionPolicy Bypass -File apps/desktop/build.ps1",
-    "build:windows": "powershell -ExecutionPolicy Bypass -File apps/desktop/build.ps1",
     "build:web": "node tools/generate-contract.mjs && node tools/generate-web-assets.mjs",
-    "qa:regression": "node tests/qa-v51-web.mjs"
+    "qa:regression": "node tests/qa-v51-web.mjs",
+    "qa:release": "node tests/qa-v512-web.mjs"
   },
   "engines": {
     "node": ">=18"

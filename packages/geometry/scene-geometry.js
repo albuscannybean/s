@@ -62,19 +62,22 @@ export function anchorPoint(node,toward){
   const dx=toward.x-center.x,dy=toward.y-center.y;
   if(!dx&&!dy)return center;
   if(node.shape==='circle'){
-    const radius=Math.min(node.width,node.height)/2,length=Math.hypot(dx,dy)||1;
-    return{x:center.x+dx/length*radius,y:center.y+dy/length*radius};
+    const scale=1/Math.hypot(dx/(node.width/2),dy/(node.height/2));
+    return{x:center.x+dx*scale,y:center.y+dy*scale};
   }
   const halfW=node.width/2,halfH=node.height/2,scale=1/Math.max(Math.abs(dx)/halfW,Math.abs(dy)/halfH);
   const raw={x:center.x+dx*scale,y:center.y+dy*scale};
-  if(node.shape!=='roundedRect')return raw;
-  const radius=clamp(node.radius??12,0,Math.min(halfW,halfH));
+  if(!['roundedRect','pill'].includes(node.shape))return raw;
+  const radius=clamp(node.radius??11,0,Math.min(halfW,halfH));
   const local={x:raw.x-center.x,y:raw.y-center.y};
   const cornerX=halfW-radius,cornerY=halfH-radius;
   if(Math.abs(local.x)<=cornerX||Math.abs(local.y)<=cornerY)return raw;
   const corner={x:Math.sign(local.x)*cornerX,y:Math.sign(local.y)*cornerY};
-  const vx=local.x-corner.x,vy=local.y-corner.y,length=Math.hypot(vx,vy)||1;
-  return{x:center.x+corner.x+vx/length*radius,y:center.y+corner.y+vy/length*radius};
+  // Intersect the original ray with the rounded corner; projecting the rectangle
+  // endpoint onto its corner circle bends otherwise collinear symmetric edges.
+  const a=dx*dx+dy*dy,b=dx*corner.x+dy*corner.y,c=corner.x*corner.x+corner.y*corner.y-radius*radius;
+  const t=(b+Math.sqrt(Math.max(0,b*b-a*c)))/a;
+  return{x:center.x+dx*t,y:center.y+dy*t};
 }
 
 export function routeEdge(source,target,style='straight',options={}){
@@ -135,9 +138,23 @@ function radialLayout(definition,instance){
   return definition.slots.map((slot,index)=>{const modularIndex=slot.semanticCoordinate?.modularIndex??index,degrees=isModular?modularAngle(modularIndex,count,view):(slot.semanticCoordinate?.angle??index*360/count)-90,angle=degrees*Math.PI/180;return{...slot,x:center.x+radius*Math.cos(angle)-size.width/2,y:center.y+radius*Math.sin(angle)-size.height/2,width:size.width,height:size.height,...nodeGrammar(definition,slot,chart?'roundedRect':'circle'),visualKind:chart?'modular-chart-cell':nodeGrammar(definition,slot,'circle').visualKind,displayMode:view.displayMode,angleDegrees:degrees};});
 }
 
+function booleanLatticeLayout(definition,groups,sizes){
+  const rows=[...groups.keys()].sort((a,b)=>b-a).map(rank=>groups.get(rank).sort((a,b)=>Number(a.semanticCoordinate?.value??0)-Number(b.semanticCoordinate?.value??0)));
+  if(!rows.length)return[];
+  // Equal boxes and mirrored value order preserve the complement involution:
+  // A and its complement are a half-turn apart, including each cover's ports.
+  const count=Math.max(...rows.map(row=>row.length)),height=Math.max(...definition.slots.map(slot=>measured(sizes,slot).height));
+  let width=Math.max(...definition.slots.map(slot=>measured(sizes,slot).width));
+  const diagramWidth=Math.max(count*width+(count-1)*32,(rows.length*height+(rows.length-1)*40)*4/3),diagramHeight=diagramWidth*3/4;
+  if(count===1)width=diagramWidth;
+  const stepX=count>1?(diagramWidth-width)/(count-1):0,stepY=rows.length>1?(diagramHeight-height)/(rows.length-1):0;
+  return rows.flatMap((row,index)=>row.map((slot,column)=>({...slot,...measured(sizes,slot),width,height,x:520+(column-(row.length-1)/2)*stepX-width/2,y:112+index*stepY,...nodeGrammar(definition,slot)})));
+}
+
 function layeredLayout(definition,{horizontal=false,compact=false,sizes=null,layoutDesign={}}={}){
   const groups=new Map();
   for(const slot of definition.slots){const layer=Number(slot.semanticCoordinate?.rank??slot.semanticCoordinate?.layer??0);if(!groups.has(layer))groups.set(layer,[]);groups.get(layer).push(slot)}
+  if(String(definition.id).includes('boolean-algebra')&&layoutDesign.autoSpacing!==false)return booleanLatticeLayout(definition,groups,sizes);
   const layers=[...groups.keys()].sort((a,b)=>b-a),maxCount=Math.max(1,...[...groups.values()].map(items=>items.length)),isBoolean=String(definition.id).includes('boolean-algebra'),fallback={width:isBoolean?(maxCount>16?54:68):compact?(maxCount>10?108:132):(maxCount>10?176:188),height:isBoolean?42:compact?(maxCount>10?58:66):(maxCount>10?86:92)},automatic=layoutDesign.autoSpacing!==false,gapX=automatic?(isBoolean?(maxCount>16?20:42):(maxCount>10?18:30)):Number(layoutDesign.nodeGap??30),baseGapY=automatic?(isBoolean?36:compact?74:94):Number(layoutDesign.layerGap??94),maxLabelWidth=Math.max(0,...(definition.edges??[]).map(edge=>estimateRelationLabelWidth(edge.displayLabel??edge.label??edge.relationType))),rows=layers.map(layer=>groups.get(layer).sort((a,b)=>(a.semanticCoordinate?.order??0)-(b.semanticCoordinate?.order??0))),rowHeights=rows.map(items=>Math.max(...items.map(slot=>measured(sizes,slot,fallback).height))),maxNodeWidth=Math.max(...definition.slots.map(slot=>measured(sizes,slot,fallback).width)),minRowHeight=Math.min(...rowHeights),gapY=automatic&&isBoolean?baseGapY:automatic?horizontal?Math.max(baseGapY,maxNodeWidth-minRowHeight+maxLabelWidth+36):Math.max(baseGapY,maxLabelWidth+30):baseGapY,yAt=row=>112+rowHeights.slice(0,row).reduce((sum,value)=>sum+value+gapY,0);
   return rows.flatMap((items,row)=>{const widths=items.map(slot=>measured(sizes,slot,fallback).width),rowGaps=automatic?computeRowGaps(items,definition.edges,sizes,{baseGap:gapX,fallback}):Array(Math.max(0,items.length-1)).fill(gapX),total=widths.reduce((sum,value)=>sum+value,0)+rowGaps.reduce((sum,value)=>sum+value,0),start=Math.max(70,(1040-total)/2);let cursor=start;return items.map((slot,index)=>{const size=measured(sizes,slot,fallback),node={...slot,x:cursor,y:yAt(row)+(rowHeights[row]-size.height)/2,...size,...nodeGrammar(definition,slot)};cursor+=size.width+(rowGaps[index]??0);return node})});
 }
@@ -260,6 +277,10 @@ export function buildSceneGeometry(definition,instance={},options={}){
   else if(layout==='venn')nodes=vennLayout(definition);
   else nodes=gridLayout(definition,{columns:layout==='timeline'?definition.slots.length:undefined,gapX:instance.designStyles?.layout?.autoSpacing===false?Number(instance.designStyles.layout.nodeGap??30):undefined,gapY:instance.designStyles?.layout?.autoSpacing===false?Number(instance.designStyles.layout.layerGap??32):undefined},sizes);
   if(baseAxis&&arrangement){const desiredVertical=arrangement.startsWith('vertical'),baseVertical=baseAxis.startsWith('vertical'),reverse=arrangement.endsWith('reverse');nodes=nodes.map(node=>{const centerX=node.x+node.width/2,centerY=node.y+node.height/2,u=baseVertical?-(centerY-370):centerX-520,v=baseVertical?centerX-520:centerY-370,axis=reverse?-u:u,nextCenterX=desiredVertical?520+v:520+axis,nextCenterY=desiredVertical?370+axis:370+v,width=node.width,height=node.height;return{...node,x:nextCenterX-width/2,y:nextCenterY-height/2,width,height}})}nodes=applyOffsets(nodes,instance).filter(node=>instance.objectVisibility?.[`slot:${node.id}`]!==false);const byId=new Map(nodes.map(node=>[node.id,node]));
+  // Carry the same corner radius into geometry and DOM rendering.
+  const nodeRadius=instance.designStyles?.nodeDefault?.radius;
+  nodes=nodes.map(node=>({...node,shape:nodeRadius!=null&&node.shape==='circle'?'roundedRect':node.shape,radius:Number(nodeRadius??node.radius??11)}));
+  byId.clear();for(const node of nodes)byId.set(node.id,node);
   const center=layout==='radial'?{x:500,y:390}:undefined;
   let edges=definition.edges.flatMap(edge=>{if(instance.objectVisibility?.[`edge:${edge.id}`]===false)return[];const source=byId.get(edge.sourceSlotId),target=byId.get(edge.targetSlotId);if(!source||!target)return[];const visual=resolveRelationStyle(edge,instance,{structureDefault:definition.relationStyle??definition.visual?.relationStyle??{routing:definition.visual?.edgeRouting}}),routing=visual.routing??(layout==='radial'?'radial-arc':'straight'),coordinateEndpoints=layout==='coordinate'?{start:{x:source.x+source.width/2,y:source.y+source.height/2},end:{x:target.x+target.width/2,y:target.y+target.height/2}}:null,routed=coordinateEndpoints?{...coordinateEndpoints,points:[coordinateEndpoints.start,coordinateEndpoints.end],path:`M ${coordinateEndpoints.start.x} ${coordinateEndpoints.start.y} L ${coordinateEndpoints.end.x} ${coordinateEndpoints.end.y}`} : routeEdge(source,target,routing,{center});return[{...edge,routing,visual,...routed}]});
   if(layout!=='coordinate')edges=routeIndependentRelations(edges,nodes,{route:routeEdge,anchor:anchorPoint,labelWidth:estimateRelationLabelWidth});
