@@ -2,14 +2,14 @@ import {flattenNavigator} from '../navigation/location-index.js';
 
 const glyph={knowledge:'◇',structure:'⬡',slot:'▣',content:'✎',note:'✎',variable:'ƒ',relation:'↝',geometry:'⌖',board:'▦',group:'≡'};
 const messages={
- 'zh-CN':{empty:'知识库为空。新建知识或导入知识包后，所有位置会显示在这里。',none:'没有匹配内容。',expand:'展开',collapse:'折叠',menu:'操作',reference:'引用 · 跳转原位置',result:'个结果',items:'个位置',recovered:'已保留的原位置'},
+ 'zh-CN':{empty:'内容库为空。新建知识或导入知识包后，所有位置会显示在这里。',none:'没有匹配内容。',expand:'展开',collapse:'折叠',menu:'操作',reference:'引用 · 跳转原位置',result:'个结果',items:'个位置',recovered:'已保留的原位置'},
  en:{empty:'Create knowledge or import a package to browse all locations here.',none:'No matching content.',expand:'Expand',collapse:'Collapse',menu:'Actions',reference:'Reference · Open original location',result:'results',items:'locations',recovered:'Retained original location'}
 };
 export function renderKnowledgeNavigator(root,options={}){
  const {index,expanded=new Set(),activeTarget,query='',language='zh-CN',onOpen,onToggle,onMenu,onDrag,onDrop}=options;
  const strings=messages[language]??messages['zh-CN'],scroll=root.scrollTop,focused=root.ownerDocument.activeElement?.closest('[data-nav-key]')?.dataset.navKey;
  const rows=flattenNavigator(index,{expanded,query}),active=index.find(activeTarget??{})?.key,doc=root.ownerDocument;
- root.replaceChildren();root.classList.add('knowledge-location-tree');root.setAttribute('role','tree');root.setAttribute('aria-label',language==='en'?'Knowledge library':'知识库');
+ root.replaceChildren();root.classList.add('knowledge-location-tree');root.setAttribute('role','tree');root.setAttribute('aria-label',language==='en'?'Content library':'内容库');
  if(!rows.length){const empty=doc.createElement('p');empty.className='nav-empty';empty.textContent=query?strings.none:strings.empty;root.append(empty);return}
  const count=doc.createElement('p');count.className='nav-location-count';count.textContent=`${query?rows.length:index.objects.size} ${query?strings.result:strings.items}`;root.append(count);
  rows.forEach((entry,position)=>{
@@ -25,7 +25,7 @@ export function renderKnowledgeNavigator(root,options={}){
   if(entry.reference||entry.searchResult||entry.recovered){const meta=doc.createElement('small');meta.textContent=entry.reference?strings.reference:entry.recovered?strings.recovered:entry.meta;open.append(meta)}
   open.onclick=()=>{if(entry.synthetic){row.focus();onToggle?.(entry.key)}else onOpen?.(entry)};row.append(toggle,open);
   if(entry.expandable){const badge=doc.createElement('small');badge.className='nav-location-badge';badge.textContent=entry.childCount;row.append(badge)}
-  if(onMenu&&!entry.synthetic&&['knowledge','structure','slot','content','relation'].includes(entry.kind)){const menu=doc.createElement('button');menu.className='nav-location-menu';menu.tabIndex=-1;menu.textContent='⋯';menu.title=strings.menu;menu.onclick=e=>onMenu(entry,e);row.append(menu)}
+  if(onMenu&&!entry.synthetic&&entry.kind!=='group'){const menu=doc.createElement('button');menu.className='nav-location-menu';menu.tabIndex=-1;menu.textContent='⋯';menu.title=strings.menu;menu.onclick=e=>onMenu(entry,e);row.append(menu)}
   if(!entry.reference){onDrag?.(row,entry);onDrop?.(row,entry)}
   row.onkeydown=event=>{
    const elements=[...root.querySelectorAll('[role=treeitem]')],at=elements.indexOf(row),focus=next=>{if(next){elements.forEach(e=>e.tabIndex=-1);next.tabIndex=0;next.focus()}};

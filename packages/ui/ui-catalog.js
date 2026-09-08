@@ -3999,5 +3999,57 @@ export const UI_CATALOG = Object.freeze({
   "自动与手动布局": {
     "zh-CN": "自动与手动布局",
     "en": "Automatic and manual layout"
+  },
+  "CONTENT LIBRARY": {
+    "zh-CN": "内容库",
+    "en": "CONTENT LIBRARY"
+  },
+  "切换内容库": {
+    "zh-CN": "切换内容库",
+    "en": "Toggle content library"
+  },
+  "内容库": {
+    "zh-CN": "内容库",
+    "en": "Content library"
+  },
+  "内容库选项": {
+    "zh-CN": "内容库选项",
+    "en": "Content library options"
+  },
+  "调整内容库宽度": {
+    "zh-CN": "调整内容库宽度",
+    "en": "Resize content library"
+  },
+  "仅存在于当前运行会话，尚未写入内容库": {
+    "zh-CN": "仅存在于当前运行会话，尚未写入内容库",
+    "en": "Only in this session; not yet saved to the library"
+  },
+  "批量管理内容": {
+    "zh-CN": "批量管理内容",
+    "en": "Manage content"
+  },
+  "筛选内容名称或位置": {
+    "zh-CN": "筛选内容名称或位置",
+    "en": "Filter content name or location"
+  },
+  "可按类型选择知识、结构和正文，删除前统一预览影响。": {
+    "zh-CN": "可按类型选择知识、结构和正文，删除前统一预览影响。",
+    "en": "Select knowledge, structures and content by type, then review deletion impact."
+  },
+  "尚未选择内容": {
+    "zh-CN": "尚未选择内容",
+    "en": "No content selected"
+  },
+  "保存默认设置": {
+    "zh-CN": "保存默认设置",
+    "en": "Save defaults"
+  },
+  "结构默认设置 · LKL 2": {
+    "zh-CN": "结构默认设置 · LKL 2",
+    "en": "Structure defaults · LKL 2"
+  },
+  "结构预览": {
+    "zh-CN": "结构预览",
+    "en": "Structure preview"
   }
 });

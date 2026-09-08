@@ -1,11 +1,11 @@
 {
   "contract": "LMN LKL AI Authoring Contract",
   "schemaVersion": "2.1",
-  "kitVersion": "5.1.0",
+  "kitVersion": "5.1.1",
   "target": {
     "application": "LMN Knowledge System",
-    "release": "V5.1.0",
-    "version": "5.1.0",
+    "release": "V5.1.1",
+    "version": "5.1.1",
     "lkl1": "1",
     "lkl2": "2.1",
     "lkl3": "3.0"
@@ -426,7 +426,7 @@
           "id": "starter",
           "label": "初始模型",
           "type": "enum",
-          "defaultValue": "blank",
+          "defaultValue": "diamond",
           "options": [
             {
               "value": "blank",
@@ -4302,7 +4302,12 @@
         "B",
         "C"
       ],
-      "builtin:poset-hasse": [],
+      "builtin:poset-hasse": [
+        "bottom",
+        "a",
+        "b",
+        "top"
+      ],
       "builtin:tree": [
         "root",
         "left",
@@ -4770,7 +4775,7 @@
             "en": "Initial model"
           },
           "type": "enum",
-          "defaultValue": "blank",
+          "defaultValue": "diamond",
           "min": null,
           "max": null,
           "options": [
@@ -6440,7 +6445,7 @@
             "en": "Initial model"
           },
           "type": "enum",
-          "defaultValue": "blank",
+          "defaultValue": "diamond",
           "min": null,
           "max": null,
           "options": [
@@ -6508,8 +6513,114 @@
           "options": null
         }
       ],
-      "defaultSlots": [],
-      "defaultEdges": [],
+      "defaultSlots": [
+        {
+          "id": "bottom",
+          "label": "⊥",
+          "role": "poset-element",
+          "cardinality": "many",
+          "accepts": [
+            "knowledge",
+            "structure",
+            "value",
+            "variable"
+          ],
+          "semanticCoordinate": {
+            "preferredRank": 0,
+            "rank": 0,
+            "order": 0
+          }
+        },
+        {
+          "id": "a",
+          "label": "a",
+          "role": "poset-element",
+          "cardinality": "many",
+          "accepts": [
+            "knowledge",
+            "structure",
+            "value",
+            "variable"
+          ],
+          "semanticCoordinate": {
+            "preferredRank": 1,
+            "rank": 1,
+            "order": 0
+          }
+        },
+        {
+          "id": "b",
+          "label": "b",
+          "role": "poset-element",
+          "cardinality": "many",
+          "accepts": [
+            "knowledge",
+            "structure",
+            "value",
+            "variable"
+          ],
+          "semanticCoordinate": {
+            "preferredRank": 1,
+            "rank": 1,
+            "order": 1
+          }
+        },
+        {
+          "id": "top",
+          "label": "⊤",
+          "role": "poset-element",
+          "cardinality": "many",
+          "accepts": [
+            "knowledge",
+            "structure",
+            "value",
+            "variable"
+          ],
+          "semanticCoordinate": {
+            "preferredRank": 2,
+            "rank": 2,
+            "order": 0
+          }
+        }
+      ],
+      "defaultEdges": [
+        {
+          "id": "cover-bottom-a",
+          "from": "bottom",
+          "to": "a",
+          "direction": "directed",
+          "type": "covers",
+          "label": "≺",
+          "routing": "straight"
+        },
+        {
+          "id": "cover-bottom-b",
+          "from": "bottom",
+          "to": "b",
+          "direction": "directed",
+          "type": "covers",
+          "label": "≺",
+          "routing": "straight"
+        },
+        {
+          "id": "cover-a-top",
+          "from": "a",
+          "to": "top",
+          "direction": "directed",
+          "type": "covers",
+          "label": "≺",
+          "routing": "straight"
+        },
+        {
+          "id": "cover-b-top",
+          "from": "b",
+          "to": "top",
+          "direction": "directed",
+          "type": "covers",
+          "label": "≺",
+          "routing": "straight"
+        }
+      ],
       "layout": {
         "type": "hasse"
       },

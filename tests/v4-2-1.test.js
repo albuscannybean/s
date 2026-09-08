@@ -65,7 +65,7 @@ test('V4.2.1 source removes global Edit Mode and includes Code, tab, hover, and 
   assert.doesNotMatch(html,/editModeButton/);
   assert.doesNotMatch(css,/edit-mode-button|\.editing/);
   assert.match(controller,/openTabMenu|openStructureSource|renderRelationStyleWorkbench|structureSourceKeys|renderSourceSyntax/);
-  assert.match(html,/sourceWorkbench|sourceSyntaxHighlight|V5\.1\.0/);
+  assert.match(html,/sourceWorkbench|sourceSyntaxHighlight|V5\.1\.1/);
   assert.match(css,/node-hover-tooltip.*max-height|source-workbench-split|variable-table-head/);
-  assert.match(manifest,/V5\.1\.0/)
+  assert.match(manifest,/V5\.1\.1/)
 });
