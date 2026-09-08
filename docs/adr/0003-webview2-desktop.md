@@ -1,6 +1,6 @@
 # ADR 0003: WebView2 desktop host
 
-Status: accepted
+Status: Retired in 5.1.2. The current product deploys only the web application; this record preserves the earlier packaging decision.
 
 ## Decision
 

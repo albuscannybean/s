@@ -1,0 +1,22 @@
+/* Canvas controls have geometry of their own; generic form sizing must not stretch them. */
+.scene-node .node-connector {
+  box-sizing: border-box;
+  width: 10px;
+  height: 10px;
+  min-width: 10px;
+  min-height: 10px;
+  max-width: 10px;
+  max-height: 10px;
+  flex: 0 0 10px;
+  padding: 0;
+  border-radius: 50%;
+  aspect-ratio: 1;
+  right: -5px;
+  transform: translateY(-50%);
+}
+.scene-node .node-connector:active { transform: translateY(-50%); }
+.scene-node .node-object-menu { min-height: 24px; }
+.scene-node .node-semantic-title { line-height: 1.35; font-size: 11px; }
+.scene-node .node-content-indicators { flex: 0 0 auto; }
+.scene-node.visual-boolean-node { padding: 5px 8px; }
+.scene-node .node-label { line-height: 1.4; }

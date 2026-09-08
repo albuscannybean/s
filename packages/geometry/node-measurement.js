@@ -13,5 +13,5 @@ export function measureNodePresentation(slot={},options={}){
 }
 
 export function measureDefinitionNodes(definition,instance={},minimum={width:188,height:92}){
-  const configured=instance.designStyles?.nodeDefault??{},specialized=String(definition.id??'').includes('boolean-algebra'),design={...configured,autoSize:configured.autoSize??!specialized};return new Map((definition.slots??[]).map(slot=>{const size=measureNodePresentation(slot,{design,minimum});if(specialized&&!slot.containerState?.badges?.total){size.width=Math.max(68,Math.min(120,String(slot.displayLabel??slot.label??'').length*8+20));size.height=42}return[slot.id,size]}));
+  const configured=instance.designStyles?.nodeDefault??{},specialized=String(definition.id??'').includes('boolean-algebra'),design={...configured,autoSize:configured.autoSize??!specialized};return new Map((definition.slots??[]).map(slot=>{const size=measureNodePresentation(slot,{design,minimum});if(specialized&&!slot.containerState?.badges?.total&&!['minWidth','maxWidth','minHeight','autoSize'].some(key=>configured[key]!=null)){size.width=Math.max(68,Math.min(120,String(slot.displayLabel??slot.label??'').length*8+20));size.height=42}return[slot.id,size]}));
 }

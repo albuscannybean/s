@@ -12,8 +12,13 @@ export function segmentIntersectsNode(a,b,n,padding=6){
 const pathText=points=>'M '+points.map((p,i)=>(i?'L ':'')+p.x+' '+p.y).join(' ');
 function port(node,vector,normal,offset){
  const c=center(node),origin={x:c.x+normal.x*offset,y:c.y+normal.y*offset};
- const inside=p=>node.shape==='circle'?Math.hypot(p.x-c.x,p.y-c.y)<=Math.min(node.width,node.height)/2:
-  Math.abs(p.x-c.x)<=node.width/2&&Math.abs(p.y-c.y)<=node.height/2;
+ const inside=p=>{
+  const x=Math.abs(p.x-c.x),y=Math.abs(p.y-c.y),w=node.width/2,h=node.height/2;
+  if(node.shape==='circle')return(x/w)**2+(y/h)**2<=1;
+  if(x>w||y>h)return false;
+  const radius=['roundedRect','pill'].includes(node.shape)?Math.max(0,Math.min(node.radius??11,w,h)):0;
+  return!radius||x<=w-radius||y<=h-radius||(x-w+radius)**2+(y-h+radius)**2<=radius**2;
+ };
  let low=0,high=Math.hypot(node.width,node.height)*2;
  for(let step=0;step<40;step++){const t=(low+high)/2,p={x:origin.x+vector.x*t,y:origin.y+vector.y*t};if(inside(p))low=t;else high=t;}
  return{x:origin.x+vector.x*low,y:origin.y+vector.y*low};

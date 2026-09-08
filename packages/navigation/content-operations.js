@@ -31,7 +31,7 @@ function capabilitiesFor(state,entry) {
 
 /** A shared inventory for context menus, address selection and multi-type deletion. */
 export function listContentEntries(state,options={}) {
-  const index=buildNavigatorIndex(state,options);
+  const index=options.index??buildNavigatorIndex(state,options);
   return [...index.objects.values()].filter(entry=>!entry.synthetic).map(entry=>{
     const capabilities=capabilitiesFor(state,entry);
     const live=entry.kind==='content'&&entry.instanceId?instanceOf(state,entry.instanceId)?.containers?.[entry.slotId]?.children?.find(item=>item.id===entry.id):entry.record;

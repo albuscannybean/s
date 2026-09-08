@@ -12,7 +12,7 @@ export function ensureRelationStyleState(instance){
 
 export function resolveRelationStyle(edge,instance,{globalTheme=GLOBAL_RELATION_STYLE,structureDefault={}}={}){
   const state=ensureRelationStyleState(instance??{}),type=String(edge?.relationType??'related');
-  return{...GLOBAL_RELATION_STYLE,...clean(globalTheme),...clean(structureDefault),...clean(edge?.visual),routing:edge?.routing??structureDefault?.routing??globalTheme?.routing??GLOBAL_RELATION_STYLE.routing,...clean(state.structureDefault),...clean(state.typeOverrides[type]),...clean(state.edgeOverrides[edge?.id])};
+  return{...GLOBAL_RELATION_STYLE,...clean(globalTheme),...clean(structureDefault),...clean(edge?.visual),routing:edge?.routing??structureDefault?.routing??globalTheme?.routing??GLOBAL_RELATION_STYLE.routing,...clean(state.typeOverrides[type]),...clean(state.edgeOverrides[edge?.id]),...clean(state.structureDefault)};
 }
 
 export function setRelationStyle(instance,{scope='edge',edgeIds=[],relationType=null}={},patch={}){

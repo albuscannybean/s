@@ -40,7 +40,7 @@ test('Variable Scheme repository enforces built-in and custom lifecycle without 
 });
 
 test('Relation Style cascade respects edge, type, structure, and global priority with reset',()=>{
-  const template=getBuiltinTemplate('builtin:directed-graph'),instance=createStructureInstance(template),edge=materializeInstanceDefinition(template,instance).edges[0];setRelationStyle(instance,{scope:'structure'},{color:'#111111',width:2});setRelationStyle(instance,{scope:'type',relationType:edge.relationType},{color:'#222222'});setRelationStyle(instance,{scope:'edge',edgeIds:[edge.id]},{color:'#333333',lineStyle:'dashed'});let style=resolveRelationStyle(edge,instance,{globalTheme:{color:'#000000',opacity:.5}});assert.equal(style.color,'#333333');assert.equal(style.width,2);assert.equal(style.opacity,.5);resetRelationStyle(instance,{scope:'edge',edgeIds:[edge.id]});style=resolveRelationStyle(edge,instance);assert.equal(style.color,'#222222')
+  const template=getBuiltinTemplate('builtin:directed-graph'),instance=createStructureInstance(template),edge=materializeInstanceDefinition(template,instance).edges[0];setRelationStyle(instance,{scope:'structure'},{color:'#111111',width:2});setRelationStyle(instance,{scope:'type',relationType:edge.relationType},{color:'#222222'});setRelationStyle(instance,{scope:'edge',edgeIds:[edge.id]},{color:'#333333',lineStyle:'dashed'});let style=resolveRelationStyle(edge,instance,{globalTheme:{color:'#000000',opacity:.5}});assert.equal(style.color,'#111111');assert.equal(style.width,2);assert.equal(style.opacity,.5);resetRelationStyle(instance,{scope:'edge',edgeIds:[edge.id]});style=resolveRelationStyle(edge,instance);assert.equal(style.color,'#111111');resetRelationStyle(instance,{scope:'structure'});assert.equal(resolveRelationStyle(edge,instance).color,'#222222')
 });
 
 test('Structure interaction adapters expose domain-specific add actions and never offer fake residues',()=>{
@@ -65,7 +65,7 @@ test('V4.2.1 source removes global Edit Mode and includes Code, tab, hover, and 
   assert.doesNotMatch(html,/editModeButton/);
   assert.doesNotMatch(css,/edit-mode-button|\.editing/);
   assert.match(controller,/openTabMenu|openStructureSource|renderRelationStyleWorkbench|structureSourceKeys|renderSourceSyntax/);
-  assert.match(html,/sourceWorkbench|sourceSyntaxHighlight|V5\.1\.1/);
+  assert.match(html,/sourceWorkbench|sourceSyntaxHighlight|V5\.1\.2/);
   assert.match(css,/node-hover-tooltip.*max-height|source-workbench-split|variable-table-head/);
-  assert.match(manifest,/V5\.1\.1/)
+  assert.match(manifest,/V5\.1\.2/)
 });

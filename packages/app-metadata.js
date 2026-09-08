@@ -1,6 +1,6 @@
-export const APP_VERSION='5.1.1';
-export const APP_RELEASE='V5.1.1';
-export const APP_HOTFIX='V5.1.1';
+export const APP_VERSION='5.1.2';
+export const APP_RELEASE='V5.1.2';
+export const APP_HOTFIX='V5.1.2';
 export const BUNDLE_FORMAT_VERSION='5.0.0';
 export const LKL_SCHEMA_VERSION='2.1';
 export const DEFAULT_RELATION_ROUTING='straight';

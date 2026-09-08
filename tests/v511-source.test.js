@@ -19,8 +19,8 @@ test('explicit relation edits survive old topology patches and structure-wide de
  updateInstanceEdge(i,first.id,{displayLabel:'old',routing:'orthogonal'});
  setRelationStyle(i,{scope:'all'},{routing:'straight',color:'#223344'});
  const source=serializeStructureInstance(t,i).replace('label "old"','label "new"').replace('routing "straight"','routing "bezier"'),draft=parse(t,i,source),definition=materializeInstanceDefinition(t,draft),scene=buildSceneGeometry(definition,draft);
- assert.equal(definition.edges[0].displayLabel,'new');assert.equal(scene.edges[0].routing,'bezier');assert.ok(scene.edges.slice(1).every(e=>e.routing==='straight'));
- const restored=parse(t,draft,serializeStructureInstance(t,draft));assert.equal(buildSceneGeometry(materializeInstanceDefinition(t,restored),restored).edges[0].routing,'bezier');
+ assert.equal(definition.edges[0].displayLabel,'new');assert.equal(scene.edges[0].routing,'straight');assert.equal(draft.relationStyles.edgeOverrides[first.id].routing,'bezier');assert.ok(scene.edges.slice(1).every(e=>e.routing==='straight'));
+ const restored=parse(t,draft,serializeStructureInstance(t,draft));assert.equal(buildSceneGeometry(materializeInstanceDefinition(t,restored),restored).edges[0].routing,'straight');
 });
 test('editing the aggregate style retains its scope instead of freezing unchanged relation blocks',()=>{
  const t=getBuiltinTemplate('builtin:mod-n'),i=createStructureInstance(t);
