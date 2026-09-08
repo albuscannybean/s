@@ -1,6 +1,8 @@
-# LMN Knowledge System V5.0.0 · M System Web
+# LMN Knowledge System V5.1.1 · M System Web
 
 网页：[打开 M System](https://albuscannybean.github.io/s/apps/web/)
+
+V5.1.1 修复结构线条、参数配置和源码编辑，并将「知识库」升级为可移动、复制、剪切粘贴和批量管理的「内容库」。详见 [更新与操作说明](docs/M-System-Web-5.1.1.md)。
 
 M System 负责稳定知识、正文、真实关系和结构的保存、呈现与操作。L System 解析需求并通过 LKL 交付认知产品；N 是用户的理解、学习与实践。任务激活、推断角色和临时投影继续与知识事实分离。
 

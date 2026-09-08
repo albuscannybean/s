@@ -131,7 +131,7 @@ function lmnSemanticLayout(definition,sizes){
 }
 
 function radialLayout(definition,instance){
-  const count=Math.max(1,definition.slots.length),center={x:500,y:390},view=ensureStructureView(instance),isModular=definition.slots.some(slot=>slot.semanticCoordinate?.modularIndex!=null),chart=isModular&&view.displayMode==='chart',radius=Number(instance.parameters?.radius??(chart?286:count>16?270:225)),size=chart?{width:132,height:92}:{width:count>18?60:count>12?70:82,height:count>18?60:count>12?70:82};
+  const count=Math.max(1,definition.slots.length),center={x:500,y:390},view=ensureStructureView(instance),isModular=definition.slots.some(slot=>slot.semanticCoordinate?.modularIndex!=null),chart=isModular&&view.displayMode==='chart',size=chart?{width:132,height:92}:{width:count>18?60:count>12?70:82,height:count>18?60:count>12?70:82},corridor=Math.max(28,...(definition.edges??[]).map(e=>requiredRelationCorridor(e))),spacingRadius=(Math.max(size.width,size.height)+corridor)/(2*Math.sin(Math.PI/Math.max(3,count))),radius=Number(instance.parameters?.radius??Math.max(chart?286:count>16?270:225,spacingRadius));
   return definition.slots.map((slot,index)=>{const modularIndex=slot.semanticCoordinate?.modularIndex??index,degrees=isModular?modularAngle(modularIndex,count,view):(slot.semanticCoordinate?.angle??index*360/count)-90,angle=degrees*Math.PI/180;return{...slot,x:center.x+radius*Math.cos(angle)-size.width/2,y:center.y+radius*Math.sin(angle)-size.height/2,width:size.width,height:size.height,...nodeGrammar(definition,slot,chart?'roundedRect':'circle'),visualKind:chart?'modular-chart-cell':nodeGrammar(definition,slot,'circle').visualKind,displayMode:view.displayMode,angleDegrees:degrees};});
 }
 

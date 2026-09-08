@@ -4,7 +4,7 @@ import {getBuiltinTemplate} from '../packages/structure-engine/templates.js';
 import {createStructureInstance,materializeInstanceDefinition,addInstanceEdge,updateInstanceEdge} from '../packages/structure-engine/model.js';
 import {buildSceneGeometry} from '../packages/geometry/scene-geometry.js';
 import {segmentIntersectsNode} from '../packages/geometry/relation-routing.js';
-import {relationPathPoints,relationLabelLines,semanticRelationLabelPlacement} from '../packages/ui/structure-renderer.js';
+import {relationPathPoints,relationLabelLines,semanticRelationLabelPlacement,chooseRelationLabelPlacement,boundsIntersect} from '../packages/ui/structure-renderer.js';
 const fixture=(edges,positions={a:{x:100,y:150},b:{x:900,y:150}})=>({id:'custom:route-test',version:1,name:'Routing',parameters:[],slots:Object.keys(positions).map(id=>({id,label:id,role:'node',accepts:['knowledge'],cardinality:'many',semanticCoordinate:{}})),edges,layout:{type:'manual',positions},visual:{}});
 const edge=(id,from,to,label=id)=>({id,sourceSlotId:from,targetSlotId:to,direction:'directed',relationType:'related',label,routing:'straight'});
 const scene=t=>{const instance=createStructureInstance(t,'owner');return buildSceneGeometry(materializeInstanceDefinition(t,instance),instance)};
@@ -15,10 +15,13 @@ test('parallel and reverse relations keep independent routes, labels and IDs',()
  const centers=result.edges.map(e=>semanticRelationLabelPlacement(e,e.label));
  for(let i=0;i<centers.length;i++)for(let j=i+1;j<centers.length;j++)assert.ok(Math.hypot(centers[i].x-centers[j].x,centers[i].y-centers[j].y)>25);
 });
-test('long relations route around intervening cards, retaining their text',()=>{
+test('label avoidance preserves the requested straight route and complete text',()=>{
  const result=scene(fixture([edge('e','a','b','条件关系：只在给定的定义域与假设成立时推出结论')],{a:{x:80,y:200},c:{x:450,y:200},b:{x:950,y:200}}));
  const link=result.edges[0],obstacle=result.nodes.find(n=>n.id==='c'),points=relationPathPoints(link);
- assert.ok(points.slice(1).every((p,i)=>!segmentIntersectsNode(points[i],p,obstacle)));
+ assert.equal(link.routing,'straight');
+ assert.equal(points.length,2);
+ const placement=chooseRelationLabelPlacement(link,result.nodes,link.label);
+ assert.ok(!boundsIntersect(placement.bounds,obstacle));
  assert.equal(link.label,'条件关系：只在给定的定义域与假设成立时推出结论');
 });
 test('parallel self-relations get separate loops within scene bounds',()=>{

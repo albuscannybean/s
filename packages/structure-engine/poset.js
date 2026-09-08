@@ -51,4 +51,15 @@ function toAdjacency(edges){const ids=new Set(edges.flatMap(item=>[item.sourceSl
 function computeClosure(adjacency){const closure=new Map();for(const id of adjacency.keys()){const reached=new Set(),queue=[...(adjacency.get(id)??[])];while(queue.length){const next=queue.shift();if(reached.has(next))continue;reached.add(next);queue.push(...(adjacency.get(next)??[]))}closure.set(id,reached)}return closure}
 function reachable(adjacency,source,target){const seen=new Set(),queue=[...(adjacency.get(source)??[])];while(queue.length){const value=queue.shift();if(value===target)return true;if(seen.has(value))continue;seen.add(value);queue.push(...(adjacency.get(value)??[]))}return false}
 function findCycle(adjacency){const visiting=new Set(),visited=new Set(),path=[];function visit(id){if(visiting.has(id)){const index=path.indexOf(id);return[...path.slice(index),id]}if(visited.has(id))return null;visiting.add(id);path.push(id);for(const target of adjacency.get(id)??[]){const cycle=visit(target);if(cycle)return cycle}path.pop();visiting.delete(id);visited.add(id);return null}for(const id of adjacency.keys()){const cycle=visit(id);if(cycle)return cycle}return null}
-function automaticRanks(ids,adjacency,incoming){const ranks={},queue=[...ids].filter(id=>incoming.get(id)===0);for(const id of queue)ranks[id]=0;while(queue.length){const id=queue.shift();for(const target of adjacency.get(id)??[]){ranks[target]=Math.max(ranks[target]??0,(ranks[id]??0)+1);queue.push(target)}}return ranks}
+function automaticRanks(ids,adjacency,incoming){
+ const remaining=new Map(incoming),ranks={},queue=[...ids].filter(id=>remaining.get(id)===0);
+ for(const id of queue)ranks[id]=0;
+ for(let index=0;index<queue.length;index++){
+  const id=queue[index];
+  for(const target of adjacency.get(id)??[]){
+   ranks[target]=Math.max(ranks[target]??0,(ranks[id]??0)+1);
+   remaining.set(target,remaining.get(target)-1);if(remaining.get(target)===0)queue.push(target);
+  }
+ }
+ return ranks;
+}

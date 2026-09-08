@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#f8f7f2">
-  <title>LMN Knowledge System V5.1.0</title>
+  <title>LMN Knowledge System V5.1.1</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232f7658'/%3E%3Ctext x='32' y='42' text-anchor='middle' font-size='30' fill='white' font-family='Georgia'%3EL%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="vendor/katex/katex.min.css">
   <link rel="stylesheet" href="styles.css">
@@ -15,7 +15,7 @@
 <body>
 <div id="appShell">
   <header class="topbar">
-    <div class="brand"><button id="toggleNavigator" class="icon-button" aria-label="切换知识库" data-i18n-aria-label="切换知识库">☰</button><b>LMN</b><span data-i18n="Knowledge System">知识系统</span><em>V5.1.0</em></div>
+    <div class="brand"><button id="toggleNavigator" class="icon-button" aria-label="切换内容库" data-i18n-aria-label="切换内容库">☰</button><b>LMN</b><span data-i18n="Knowledge System">知识系统</span><em>V5.1.1</em></div>
     <nav id="breadcrumbs" aria-label="递归知识路径" data-i18n-aria-label="递归知识路径"></nav>
     <button id="globalSearch" class="command-trigger"><span data-i18n="命令行">命令行</span><kbd>Ctrl K</kbd></button>
     <button id="insertStructure" class="primary hidden" aria-hidden="true" tabindex="-1" data-i18n="＋ 新建">＋ 新建</button>
@@ -24,14 +24,14 @@
 
   <aside id="navigator" class="navigator">
     <div class="navigator-modes" role="tablist">
-      <button data-navigator="outline" class="active" title="知识库" data-i18n-title="知识库"><span>☷</span><small data-i18n="知识库">知识库</small></button>
+      <button data-navigator="outline" class="active" title="内容库" data-i18n-title="内容库"><span>☷</span><small data-i18n="内容库">内容库</small></button>
       <button data-navigator="library" title="结构库" data-i18n-title="结构库"><span>⬡</span><small data-i18n="结构库">结构库</small></button>
       <button data-navigator="search" title="搜索" data-i18n-title="搜索"><span>⌕</span><small data-i18n="搜索">搜索</small></button>
     </div>
-    <div class="navigator-head"><div><span id="navigatorEyebrow" class="eyebrow">知识库</span><h2 id="navigatorTitle">知识库</h2></div><div><button id="navigatorMenu" class="icon-button" title="知识库选项" data-i18n-title="知识库选项">•••</button></div></div>
+    <div class="navigator-head"><div><span id="navigatorEyebrow" class="eyebrow">内容库</span><h2 id="navigatorTitle">内容库</h2></div><div><button id="navigatorMenu" class="icon-button" title="内容库选项" data-i18n-title="内容库选项">•••</button></div></div>
     <div class="navigator-filter"><input id="navigatorFilter" placeholder="筛选当前列表" data-i18n-placeholder="筛选当前列表"></div>
     <div id="navigatorContent" class="navigator-content"></div>
-    <div id="navigatorResizer" class="navigator-resizer" role="separator" aria-orientation="vertical" aria-label="调整知识库宽度" tabindex="0" data-i18n-aria-label="调整知识库宽度"></div>
+    <div id="navigatorResizer" class="navigator-resizer" role="separator" aria-orientation="vertical" aria-label="调整内容库宽度" tabindex="0" data-i18n-aria-label="调整内容库宽度"></div>
   </aside>
 
   <main id="workspace" class="workspace">
@@ -85,7 +85,7 @@
     </section>
     <section id="lklManualPage" class="document-page lkl-manual-page hidden" aria-label="LKL 使用手册" data-i18n-aria-label="LKL 使用手册"><header><div><span class="eyebrow" data-i18n="SCHEMA GENERATED">语言手册</span><h1 data-i18n="LKL 使用手册">LKL 使用手册</h1><p data-i18n="从第一个知识包开始：正文、结构、图片、绘图与完整信息档案。">从第一个知识包开始：正文、结构、图片、绘图与完整信息档案。</p></div><div><input id="lklManualSearch" placeholder="搜索对象、字段或示例" data-i18n-placeholder="搜索对象、字段或示例"><button id="copyLklManual" data-i18n="复制手册">复制手册</button></div></header><article id="lklManualContent" class="lkl-manual-content"></article></section>
     <section id="canvasViewport" class="canvas-viewport hidden" aria-label="结构画布" data-i18n-aria-label="结构画布">
-      <div id="derivedProjectionBar" class="derived-projection-bar hidden"><span><b data-i18n="派生投影">派生投影</b><small data-i18n="仅存在于当前运行会话，尚未写入知识库">仅存在于当前运行会话，尚未写入知识库</small></span><button id="discardDerivedProjection" data-i18n="放弃">放弃</button><button id="saveDerivedProjection" class="primary" data-i18n="保存为结构">保存为结构</button></div>
+      <div id="derivedProjectionBar" class="derived-projection-bar hidden"><span><b data-i18n="派生投影">派生投影</b><small data-i18n="仅存在于当前运行会话，尚未写入内容库">仅存在于当前运行会话，尚未写入内容库</small></span><button id="discardDerivedProjection" data-i18n="放弃">放弃</button><button id="saveDerivedProjection" class="primary" data-i18n="保存为结构">保存为结构</button></div>
       <div id="sceneRoot" class="scene-root"><svg id="backgroundLayer" aria-hidden="true"></svg><svg id="geometryLayer" aria-label="几何构造层" data-i18n-aria-label="几何构造层"></svg><svg id="edgeLayer"></svg><div id="nodeLayer" class="node-layer"></div><div id="tokenLayer" class="token-layer"></div><div id="nestedLayer"></div></div>
       <div id="minimap" class="minimap" hidden></div>
       <aside id="modularVariableList" class="modular-variable-list hidden" aria-label="全部变量" data-i18n-aria-label="全部变量"></aside>
@@ -129,7 +129,7 @@
 
 <dialog id="dangerDialog" class="danger-dialog"><header><div><span class="eyebrow" data-i18n="影响预览">影响预览</span><h2 id="dangerTitle">确认删除</h2></div><button class="dialog-close">×</button></header><div id="dangerBody" class="danger-body"></div><footer><button class="dialog-close" data-i18n="取消">取消</button><button id="dangerConfirm" class="danger">删除</button></footer></dialog>
 
-<dialog id="batchDeleteDialog" class="batch-delete-dialog"><header><div><span class="eyebrow" data-i18n="KNOWLEDGE LIBRARY">知识库</span><h2 data-i18n="批量删除知识">批量删除知识</h2><p data-i18n="勾选知识后统一预览影响；父知识的完整构造子树只计算一次。">勾选知识后预览删除影响；父知识的构造子树只计算一次。</p></div><button class="dialog-close">×</button></header><div class="batch-delete-tools"><input id="batchDeleteSearch" placeholder="筛选知识名称或位置" data-i18n-placeholder="筛选知识名称或位置"><button id="batchDeleteSelectVisible" data-i18n="全选当前结果">全选当前结果</button><button id="batchDeleteClear" data-i18n="清空选择">清空选择</button></div><div id="batchDeleteSummary" class="batch-delete-summary">尚未选择知识</div><div id="batchDeleteList" class="batch-delete-list"></div><footer><button class="dialog-close" data-i18n="取消">取消</button><button id="batchDeletePreview" class="danger" disabled data-i18n="预览并删除">预览并删除</button></footer></dialog>
+<dialog id="batchDeleteDialog" class="batch-delete-dialog"><header><div><span class="eyebrow" data-i18n="CONTENT LIBRARY">内容库</span><h2 data-i18n="批量管理内容">批量管理内容</h2><p data-i18n="可按类型选择知识、结构和正文，删除前统一预览影响。">可按类型选择知识、结构和正文，删除前统一预览影响。</p></div><button class="dialog-close">×</button></header><div class="batch-delete-tools"><input id="batchDeleteSearch" placeholder="筛选内容名称或位置" data-i18n-placeholder="筛选内容名称或位置"><button id="batchDeleteSelectVisible" data-i18n="全选当前结果">全选当前结果</button><button id="batchDeleteClear" data-i18n="清空选择">清空选择</button></div><div id="batchDeleteSummary" class="batch-delete-summary">尚未选择内容</div><div id="batchDeleteList" class="batch-delete-list"></div><footer><button class="dialog-close" data-i18n="取消">取消</button><button id="batchDeletePreview" class="danger" disabled data-i18n="预览并删除">预览并删除</button></footer></dialog>
 
 <dialog id="textPromptDialog" class="text-prompt-dialog"><form method="dialog"><header><div><span class="eyebrow" data-i18n="INLINE EDIT">编辑</span><h2 id="textPromptTitle">重命名</h2></div><button value="cancel" aria-label="取消" data-i18n-aria-label="取消">×</button></header><label id="textPromptLabel"><span data-i18n="名称">名称</span><input id="textPromptInput" autocomplete="off"></label><p id="textPromptHint"></p><footer><button value="cancel" data-i18n="取消">取消</button><button id="textPromptConfirm" value="default" class="primary">确定</button></footer></form></dialog>
 

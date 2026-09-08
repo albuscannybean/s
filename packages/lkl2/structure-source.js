@@ -1,6 +1,9 @@
 import {parseLkl2} from './parser.js';
 import {parseFormula} from '../structure-engine/formula.js';
 import {materializeInstanceDefinition,normalizeInstance} from '../structure-engine/model.js';
+import {containerCapabilities,edgeCapabilities,getStructureInteractionAdapter} from '../structure-engine/interaction-adapters.js';
+import {resolveRelationStyle,setRelationStyle} from '../structure-engine/relation-style-resolver.js';
+import {validateGraphFamily} from '../structure-engine/structure-families.js';
 import {LKL_ENUMS,LKL_STRUCTURE_SOURCE_SCHEMA} from './schema.js';
 
 const clone=value=>structuredClone(value);
@@ -15,7 +18,7 @@ export function serializeStructureInstance(template,instance){
   for(const slot of definition.slots){const container=instance.containers?.[slot.id];lines.push(`  container ${slot.id} {`);if(container?.localDisplayTitle)lines.push(field('local-title',container.localDisplayTitle,'    '));if(container?.content?.title&&container.content.title!==slot.label)lines.push(field('title',container.content.title,'    '));lines.push('  }')}
   for(const variable of instance.variables??[]){lines.push(`  variable ${variable.id} {`,field('label',variable.label??variable.id,'    '),field('display-name',variable.displayName??variable.label??variable.id,'    '),field('kind',variable.kind??'input','    '),field('type',variable.type??'number','    '));if(variable.value!=null)lines.push(field('value',variable.value,'    '));if(variable.formula)lines.push(field('expression',variable.formula,'    '));if(variable.displayFormula)lines.push(field('display-formula',variable.displayFormula,'    '));lines.push(field('show',variable.showOnCanvas!==false,'    '));if(variable.resultSpace)lines.push(`    result-space ${json(variable.resultSpace)}`);lines.push('  }')}
   for(const geometry of instance.geometryPrimitives??[]){lines.push(`  geometry ${geometry.id} {`,field('type',geometry.kind,'    '));const operandSyntax=geometry.operandRefs?.length,refs=operandSyntax?geometry.operandRefs:geometry.pointRefs??[];for(const ref of refs)lines.push(`    ${operandSyntax?'operand':'point'} ${ref.type} ${ref.id}`);lines.push(field('visible',geometry.visible!==false,'    '));if(geometry.style?.color)lines.push(field('stroke',geometry.style.color,'    '));if(geometry.style?.width!=null)lines.push(field('width',geometry.style.width,'    '));if(geometry.style?.fill)lines.push(field('fill',geometry.style.fill,'    '));lines.push('  }')}
-  const addedIds=new Set(instance.overrides?.addedEdges?.map(item=>item.id));for(const edge of definition.edges){lines.push(`  relation ${edge.id} {`,field('from',edge.sourceSlotId,'    '),field('to',edge.targetSlotId,'    '),field('direction',edge.direction??'directed','    '),field('type',edge.relationType??'related','    '));if(edge.displayLabel??edge.label)lines.push(field('label',edge.displayLabel??edge.label,'    '));if(edge.routing)lines.push(field('routing',edge.routing,'    '));if(edge.visual&&Object.keys(edge.visual).length)lines.push(`    style ${json(edge.visual)}`);lines.push(field('canonical',!addedIds.has(edge.id),'    '),'  }')}
+  const addedIds=new Set(instance.overrides?.addedEdges?.map(item=>item.id));for(const edge of definition.edges){const {routing,...visual}=resolveRelationStyle(edge,instance,{structureDefault:definition.visual?.relationStyle});lines.push(`  relation ${edge.id} {`,field('from',edge.sourceSlotId,'    '),field('to',edge.targetSlotId,'    '),field('direction',edge.direction??'directed','    '),field('type',edge.relationType??'related','    '));if(edge.displayLabel??edge.label)lines.push(field('label',edge.displayLabel??edge.label,'    '));lines.push(field('routing',routing,'    '));lines.push(`    style ${json(visual)}`);lines.push(field('canonical',!addedIds.has(edge.id),'    '),'  }')}
   lines.push(`  layout-state ${json(instance.layoutState)}`,`  view-state ${json(instance.structureView)}`,`  design-styles ${json(instance.designStyles)}`,`  relation-styles ${json(instance.relationStyles)}`,`  object-visibility ${json(instance.objectVisibility)}`,`  plot-expressions ${json(instance.plotExpressions)}`,`  motion-points ${json(instance.motionPoints)}`,`  topology-overrides ${json(instance.overrides)}`,'}','');return lines.join('\n')
 }
 
@@ -39,16 +42,72 @@ export function parseStructureTemplateDefaultsSource(source,{template}={}){
 export function parseStructureInstanceSource(source,{template,instance}={}){
   try{
     const ast=parseLkl2(source),block=ast.declarations.find(item=>item.kind==='structure-instance');if(!block||ast.declarations.length!==1)throw diagnosticError('Structure source requires exactly one structure-instance block',{line:1,column:1},'structure-instance');assertStructureSourceBlock(block);
-    const draft=clone(instance);normalizeInstance(draft);const statements=groupStatements(block.statements),using=first(statements,'using');if(using&&String(using)!==String(template.id))throw diagnosticError('Changing the template reference is not supported in this workbench',statementLoc(statements,'using'),'template');
-    const resultSpace=parseJsonField(statements,'result-space',draft.resultSpace??null);if(resultSpace!==undefined)draft.resultSpace=resultSpace;
-    for(const statement of statements.get('parameter')??[]){const[key,value]=statement.values;if(key==null||value===undefined)throw diagnosticError('parameter requires a name and value',statement.loc,'parameter');draft.parameters[String(key)]=value}
+    if(String(block.id)!==String(instance.id))throw diagnosticError('Changing the instance identity is not supported',block.loc,'structure-instance');
+    const original=clone(instance);normalizeInstance(original);
+    const originalDefinition=materializeInstanceDefinition(template,original),originalEdges=new Map(originalDefinition.edges.map(edge=>[edge.id,edge]));
+    const draft=clone(original),statements=groupStatements(block.statements),using=first(statements,'using');
+    if(using&&String(using)!==String(template.id))throw diagnosticError('Changing the template reference is not supported in this workbench',statementLoc(statements,'using'),'template');
+    const title=first(statements,'title');if(title!==undefined)draft.objectContent.title=String(title);
+    for(const statement of statements.get('parameter')??[]){
+      const[key,value]=statement.values;if(key==null||value===undefined)throw diagnosticError('parameter requires a name and value',statement.loc,'parameter');
+      const parameter=template.parameters?.find(item=>item.id===String(key));if(!parameter)throw diagnosticError('Unknown parameter '+key,statement.loc,'parameter');
+      if(parameter.type==='number'&&(!Number.isFinite(Number(value))||parameter.min!=null&&Number(value)<parameter.min||parameter.max!=null&&Number(value)>parameter.max))throw diagnosticError('Parameter outside its valid range: '+key,statement.loc,'parameter');
+      if(parameter.options?.length&&!parameter.options.some(option=>String(option.value??option)===String(value)))throw diagnosticError('Unsupported parameter option: '+key,statement.loc,'parameter');
+      draft.parameters[String(key)]=value;
+    }
+    // Read aggregate state first. Explicit edits below must not be overwritten by an old snapshot.
+    const baseline=clone(draft),fieldMap={'result-space':'resultSpace','layout-state':'layoutState','view-state':'structureView','design-styles':'designStyles','relation-styles':'relationStyles','object-visibility':'objectVisibility','plot-expressions':'plotExpressions','motion-points':'motionPoints','topology-overrides':'overrides'};
+    for(const[sourceKey,stateKey]of Object.entries(fieldMap)){const value=parseJsonField(statements,sourceKey,draft[stateKey]);if(value!==undefined)draft[stateKey]=value}
+    normalizeInstance(draft);
     for(const child of block.children.filter(item=>item.kind==='container')){draft.containers[child.id]??={id:child.id,children:[]};const fields=groupStatements(child.statements),localTitle=first(fields,'local-title'),title=first(fields,'title');if(localTitle!==undefined){if(String(localTitle).trim())draft.containers[child.id].localDisplayTitle=String(localTitle).trim();else delete draft.containers[child.id].localDisplayTitle}if(title!==undefined){draft.containers[child.id].content??={};draft.containers[child.id].content.title=String(title)}}
     draft.variables=block.children.filter(item=>item.kind==='variable').map(child=>parseVariable(child,draft.resultSpace));
-    const sourcePlots=parseJsonField(statements,'plot-expressions',draft.plotExpressions);if(sourcePlots!==undefined)draft.plotExpressions=sourcePlots;const sourceMotions=parseJsonField(statements,'motion-points',draft.motionPoints);if(sourceMotions!==undefined)draft.motionPoints=sourceMotions;const geometryBlocks=block.children.filter(item=>item.kind==='geometry'),slotIds=new Set(materializeInstanceDefinition(template,draft).slots.map(item=>item.id)),motionIds=new Set((draft.motionPoints??[]).map(item=>item.id)),geometryIds=new Set(geometryBlocks.map(item=>item.id)),plotIds=new Set((draft.plotExpressions??[]).map(item=>item.id));draft.geometryPrimitives=geometryBlocks.map(child=>parseGeometry(child,{slotIds,motionIds,geometryIds,plotIds}));
-    const definition=materializeInstanceDefinition(template,draft),definitionEdges=new Map(definition.edges.map(edge=>[edge.id,edge])),addedIds=new Set(draft.overrides.addedEdges.map(edge=>edge.id));for(const child of block.children.filter(item=>item.kind==='relation')){const fields=groupStatements(child.statements),edge=definitionEdges.get(child.id);if(!edge)throw diagnosticError(`Unknown relation ${child.id}`,child.loc,'relation');const patch={sourceSlotId:String(first(fields,'from')??edge.sourceSlotId),targetSlotId:String(first(fields,'to')??edge.targetSlotId),direction:String(first(fields,'direction')??edge.direction),relationType:String(first(fields,'type')??edge.relationType),displayLabel:String(first(fields,'label')??edge.displayLabel??edge.label??''),routing:String(first(fields,'routing')??edge.routing??'straight')},style=parseJsonField(fields,'style',edge.visual??{});if(style!==undefined)patch.visual=style;const canonical=template.builtin&&!addedIds.has(child.id);if(canonical&&(patch.sourceSlotId!==edge.sourceSlotId||patch.targetSlotId!==edge.targetSlotId||patch.direction!==edge.direction||patch.relationType!==edge.relationType))throw diagnosticError(`Canonical relation ${child.id} topology is protected; use relation-styles arrow to control its displayed arrow direction`,child.loc,'relation');draft.overrides.edgePatches[child.id]={...(draft.overrides.edgePatches[child.id]??{}),...patch}}
-    const layout=parseJsonField(statements,'layout-state',draft.layoutState),view=parseJsonField(statements,'view-state',draft.structureView),design=parseJsonField(statements,'design-styles',draft.designStyles),styles=parseJsonField(statements,'relation-styles',draft.relationStyles),visibility=parseJsonField(statements,'object-visibility',draft.objectVisibility),plots=parseJsonField(statements,'plot-expressions',draft.plotExpressions),motions=parseJsonField(statements,'motion-points',draft.motionPoints),overrides=parseJsonField(statements,'topology-overrides',draft.overrides);if(layout!==undefined)draft.layoutState=layout;if(view!==undefined)draft.structureView=view;if(design!==undefined)draft.designStyles=design;if(styles!==undefined)draft.relationStyles=styles;if(visibility!==undefined)draft.objectVisibility=visibility;if(plots!==undefined)draft.plotExpressions=plots;if(motions!==undefined)draft.motionPoints=motions;if(overrides!==undefined){if(template.builtin&&((overrides.addedSlots?.length??0)||(overrides.removedSlotIds?.length??0)||(overrides.removedEdgeIds?.length??0)))throw diagnosticError('Built-in canonical topology is protected; duplicate it as a custom template first',statementLoc(statements,'topology-overrides'),'topology-overrides');draft.overrides={...draft.overrides,...overrides}}
+    const definition=materializeInstanceDefinition(template,draft),definitionEdges=new Map(definition.edges.map(edge=>[edge.id,edge])),relationIds=new Set();
+    const topologyFields={from:'sourceSlotId',to:'targetSlotId',direction:'direction',type:'relationType',label:'displayLabel'};
+    for(const child of block.children.filter(item=>item.kind==='relation')){
+      if(relationIds.has(child.id))throw diagnosticError('Duplicate relation '+child.id,child.loc,'relation');relationIds.add(child.id);
+      const fields=groupStatements(child.statements),edge=definitionEdges.get(child.id),previous=originalEdges.get(child.id);
+      // A parameter change can legitimately remove generated relations from the old source.
+      if(!edge){if(previous&&JSON.stringify(original.parameters)!==JSON.stringify(draft.parameters))continue;throw diagnosticError('Unknown relation '+child.id,child.loc,'relation')}
+      const reference=previous??edge,patch={};
+      for(const[sourceKey,edgeKey]of Object.entries(topologyFields)){
+        const value=first(fields,sourceKey),oldValue=edgeKey==='displayLabel'?reference.displayLabel??reference.label??'':reference[edgeKey];
+        if(value!==undefined&&String(value)!==String(oldValue??''))patch[edgeKey]=String(value);
+      }
+      draft.overrides.edgePatches[child.id]={...(draft.overrides.edgePatches[child.id]??{}),...patch};
+      const originalStyle=resolveRelationStyle(reference,original,{structureDefault:originalDefinition.visual?.relationStyle}),routing=first(fields,'routing'),style=parseJsonField(fields,'style',{}),stylePatch={};
+      if(routing!==undefined&&routing!==originalStyle.routing)stylePatch.routing=String(routing);
+      for(const[key,value]of Object.entries(style??{}))if(value!==originalStyle[key])stylePatch[key]=value;
+      if(stylePatch.routing&&!['straight','bezier','orthogonal','radial-arc'].includes(stylePatch.routing))throw diagnosticError('Unsupported relation routing '+stylePatch.routing,child.loc,'routing');
+      if(Object.keys(stylePatch).length)setRelationStyle(draft,{scope:'edge',edgeIds:[child.id]},stylePatch);
+    }
+    validateSourceTopology(template,baseline,draft,statementLoc(statements,'topology-overrides'));
+    const geometryBlocks=block.children.filter(item=>item.kind==='geometry'),slotIds=new Set(materializeInstanceDefinition(template,draft).slots.map(item=>item.id)),motionIds=new Set((draft.motionPoints??[]).map(item=>item.id)),geometryIds=new Set(geometryBlocks.map(item=>item.id)),plotIds=new Set((draft.plotExpressions??[]).map(item=>item.id));
+    draft.geometryPrimitives=geometryBlocks.map(child=>parseGeometry(child,{slotIds,motionIds,geometryIds,plotIds}));
     normalizeInstance(draft);return{valid:true,draft,diagnostics:[],ast};
   }catch(error){return{valid:false,draft:null,diagnostics:[{severity:'error',message:error.message,line:Number(error.line??1),column:Number(error.column??1),field:error.field??null}],error}}
+}
+
+function validateSourceTopology(template,baseline,draft,loc){
+  const before=materializeInstanceDefinition(template,baseline),after=materializeInstanceDefinition(template,draft),adapter=getStructureInteractionAdapter(template);
+  const oldSlots=new Map(before.slots.map(item=>[item.id,item])),oldEdges=new Map(before.edges.map(item=>[item.id,item])),slots=new Set(after.slots.map(item=>item.id)),edges=new Set(after.edges.map(item=>item.id));
+  const actions=adapter.getCreateActions(template,draft).filter(action=>action.kind==='topology');
+  const canAddNode=actions.some(action=>!/relation/.test(action.id)),canAddEdge=actions.some(action=>/relation/.test(action.id));
+  const fail=message=>{throw diagnosticError(message,loc,'topology-overrides')};
+  if(slots.size!==after.slots.length||edges.size!==after.edges.length)fail('Duplicate topology identity');
+  for(const slot of after.slots)if(!oldSlots.has(slot.id)&&!canAddNode)fail('Canonical topology is protected; this structure generates its own nodes');
+  for(const slot of before.slots)if(!slots.has(slot.id)&&!containerCapabilities(template,slot,baseline).canDeleteCanonicalObject)fail('Canonical node '+slot.id+' topology is protected');
+  for(const edge of before.edges)if(!edges.has(edge.id)&&slots.has(edge.sourceSlotId)&&slots.has(edge.targetSlotId)&&!edgeCapabilities(template,edge,baseline).canDeleteCanonicalObject)fail('Canonical relation '+edge.id+' topology is protected');
+  for(const edge of after.edges){
+    if(!slots.has(edge.sourceSlotId)||!slots.has(edge.targetSlotId))fail('Relation '+edge.id+' has an unknown endpoint');
+    if(!['undirected','directed','bidirectional','cyclic','conditional','derived'].includes(edge.direction))fail('Unsupported relation direction '+edge.direction);
+    const previous=oldEdges.get(edge.id);if(!previous){if(!canAddEdge)fail('Canonical topology is protected; this structure generates its own relations');continue}
+    const capabilities=edgeCapabilities(template,previous,baseline);
+    if((edge.sourceSlotId!==previous.sourceSlotId||edge.targetSlotId!==previous.targetSlotId)&&!capabilities.canChangeEndpoints||edge.direction!==previous.direction&&!capabilities.canChangeDirection||edge.relationType!==previous.relationType&&!capabilities.canChangeRelationType)fail('Canonical relation '+edge.id+' topology is protected; use relation-styles arrow to control its displayed arrow direction');
+  }
+  // Materialization filters removed-node relations; catch new dangling declarations before they disappear.
+  for(const edge of draft.overrides.addedEdges)if(!draft.overrides.removedEdgeIds.includes(edge.id)&&(!slots.has(edge.sourceSlotId)||!slots.has(edge.targetSlotId))&&!baseline.overrides.addedEdges.some(old=>old.id===edge.id&&JSON.stringify(old)===JSON.stringify(edge)))fail('Relation '+edge.id+' has an unknown endpoint');
+  const prepared=adapter.prepareDefinition(after,draft),validation=adapter.validateStructure(prepared,draft),family=validateGraphFamily(after);
+  if(!validation.valid)fail(validation.errors.join('; '));if(family.length)fail(family.join('; '));
 }
 
 export function applyStructureInstanceDraft(instance,draft){for(const key of['parameters','variables','resultSpace','containers','overrides','layoutState','structureView','designStyles','relationStyles','objectVisibility','plotExpressions','motionPoints','geometryPrimitives','objectContent'])if(key in draft)instance[key]=clone(draft[key]);instance.updatedAt=new Date().toISOString();normalizeInstance(instance);return instance}

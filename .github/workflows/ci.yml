@@ -24,6 +24,8 @@ jobs:
       - run: node tests/local-server.mjs 4174 > /tmp/lmn-server.log 2>&1 &
       - run: node tests/qa-vnext-web.mjs
       - run: node tests/qa-v51-web.mjs
+      - run: node tests/qa-v511-structures.mjs
+      - run: node tests/qa-v511-content.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with: { name: web-browser-validation, path: qa-output }
