@@ -1,0 +1,22 @@
+/* Semantic palettes, preserved from the existing product. */
+:root{
+  --canvas:#f8f7f2;--paper:#fffefa;--surface:#fdfcf8;--elevated:#fff;--sidebar:#f2f3ee;
+  --ink:#17231f;--muted:#6d7973;--faint:#97a19c;--line:#dde3dd;--line-strong:#bcc8c0;
+  --green:#2f7658;--green-soft:#eaf3ed;--gold:#bd8527;--gold-soft:#faf2e2;--violet:#7357a4;--violet-soft:#f1edf8;
+  --blue:#4f7788;--danger:#b74943;--danger-soft:#fbefed;
+  
+  
+  font:var(--ui-font-size,14px)/1.48 Inter,"Segoe UI","Microsoft YaHei UI","Noto Sans SC",sans-serif;color:var(--ink)
+}
+html[data-theme="paper"]{--canvas:#f1f6f8;--surface:#f7fbfc;--sidebar:#e8f1f5;--paper:#fbfdff;--elevated:#fff;--ink:#16262d;--muted:#58717d;--faint:#8499a2;--line:#d2e1e7;--line-strong:#a8c0ca;--green:#326f91;--green-soft:#e1f0f7;--blue:#326f91}
+html[data-theme="violet"]{--canvas:#f6f3fa;--surface:#fbf9fd;--sidebar:#eee8f5;--paper:#fff;--ink:#271f2f;--muted:#6e6278;--faint:#9b8fa5;--line:#e3d9eb;--line-strong:#c5b4d3;--green:#7453a6;--green-soft:#eee6f7;--violet:#7453a6;--violet-soft:#eee6f7}
+html[data-theme="slate"]{--canvas:#eef1f1;--surface:#f6f8f7;--sidebar:#e4e9e7;--paper:#fbfcfc;--elevated:#fff;--ink:#182321;--muted:#596864;--faint:#84908d;--line:#d2d9d6;--line-strong:#aab8b3;--green:#4e6e67;--green-soft:#e1ebe8}
+html[data-theme="dark"]{--canvas:#151a19;--surface:#1d2422;--sidebar:#181f1d;--paper:#222a27;--elevated:#28312e;--ink:#edf3f0;--muted:#a5b4ae;--faint:#74857e;--line:#34413c;--line-strong:#53645d;--green:#66b993;--green-soft:#243e33;--gold:#d8a651;--gold-soft:#403522;--violet:#ad8bd8;--violet-soft:#352d43;--danger:#e47972;--danger-soft:#432b29;}
+html[data-canvas="paper"]{--canvas:#f6f5ef}
+html[data-canvas="white"]{--canvas:#fff}
+html[data-accent="blue"]{--green:#426f86;--green-soft:#eaf2f6}
+html[data-accent="violet"]{--green:#6b55a0;--green-soft:#f0edf8}
+
+html[data-theme='dark'][data-accent='blue']{--green:#82bbd6;--green-soft:#243b47}
+html[data-theme='dark'][data-accent='violet']{--green:#bea5ea;--green-soft:#383046}
+html[data-theme='dark'][data-canvas='paper'],html[data-theme='dark'][data-canvas='white']{--canvas:#1d2422}

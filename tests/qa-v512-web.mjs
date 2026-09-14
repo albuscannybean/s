@@ -62,7 +62,9 @@ try{
  await page.locator('#undoDeleteAction').click();
  assert.ok(await page.evaluate(f=>lmnWorkspace.state.structureTemplates.some(t=>t.id===f.template&&!t.hidden)&&lmnWorkspace.state.variableSchemes.some(s=>s.id===f.scheme&&!s.deleted),fixtures));
  await page.evaluate(()=>{lmnWorkspace.navigatorMode='outline';lmnWorkspace.renderNavigator()});
- const shadow=await page.locator('.nav-location-row').first().evaluate(e=>getComputedStyle(e).boxShadow);assert.notEqual(shadow,'none');
+ // Navigation is a flat list; selection may use an inset indicator, never a raised card.
+ const decoration=await page.locator('.nav-location-row:not(.active)').first().evaluate(e=>{const s=getComputedStyle(e);return{shadow:s.boxShadow,backgroundImage:s.backgroundImage}});
+ assert.equal(decoration.shadow,'none');assert.equal(decoration.backgroundImage,'none');
  await page.evaluate(()=>lmnWorkspace.openImport());assert.equal(await page.locator('.import-format-options').getAttribute('open'),null);
  await page.locator('.import-format-options summary').click();assert.ok(await page.locator('[data-import-type=lkl2]').isVisible());
  await page.evaluate(()=>document.querySelector('#importDialog').close());
