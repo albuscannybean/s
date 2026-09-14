@@ -37,7 +37,7 @@ export function renderKnowledgeNavigator(root,options={}){
   };
   const branch=doc.createElement('div');branch.className='nav-location-branch';branch.dataset.depth=String(entry.depth);branch.append(row);(groups[entry.depth]??root).append(branch);groups.length=entry.depth+1;
   if(entry.expandable&&entry.expanded){
-   branch.classList.add('nav-branch-expanded');const children=doc.createElement('div');children.className='nav-location-children';children.id=`nav-children-${position}`;children.setAttribute('role','group');children.setAttribute('aria-label',entry.label);children.style.setProperty('--branch-inset',entry.depth<3?'10px':'0px');row.setAttribute('aria-owns',children.id);branch.append(children);groups[entry.depth+1]=children;
+   branch.classList.add('nav-branch-expanded');const children=doc.createElement('div');children.className='nav-location-children';children.id=`nav-children-${position}`;children.setAttribute('role','group');children.setAttribute('aria-label',entry.label);children.style.setProperty('--branch-inset',entry.depth<3?'12px':'0px');row.setAttribute('aria-owns',children.id);branch.append(children);groups[entry.depth+1]=children;
   }
  });
  root.scrollTop=scroll;if(focused){const target=[...root.querySelectorAll('[data-nav-key]')].find(e=>e.dataset.navKey===focused);target?.focus({preventScroll:true})}

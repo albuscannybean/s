@@ -1,5 +1,9 @@
 // Explicit system UI copy only. User data is never translated by this catalog.
 export const UI_CATALOG = Object.freeze({
+  "跳到工作区": {"zh-CN":"跳到工作区","en":"Skip to workspace"},
+  "知识工作区": {"zh-CN":"知识工作区","en":"Knowledge workspace"},
+  "关闭属性面板": {"zh-CN":"关闭属性面板","en":"Close inspector"},
+  "搜索结构库": {"zh-CN":"搜索结构库","en":"Search structure library"},
   "播放": {"zh-CN":"播放","en":"Play"},
   "暂停": {"zh-CN":"暂停","en":"Pause"},
   "VARIABLE REGISTRY": {"zh-CN":"变量注册表","en":"VARIABLE REGISTRY"},

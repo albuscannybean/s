@@ -7,11 +7,13 @@
   <title>LMN Knowledge System V5.1.3</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232f7658'/%3E%3Ctext x='32' y='42' text-anchor='middle' font-size='30' fill='white' font-family='Georgia'%3EL%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="vendor/katex/katex.min.css">
+  <link rel="stylesheet" href="../../packages/ui/design-tokens.css">
   <link rel="stylesheet" href="styles.css">
   <link rel="manifest" href="manifest.webmanifest">
 <link rel="stylesheet" href="../../packages/ui/web-next.css">
 <link rel="stylesheet" href="../../packages/ui/web-refinement.css">
 <link rel="stylesheet" href="../../packages/ui/node-refinement.css">
+<link rel="stylesheet" href="../../packages/ui/design-system.css">
 <!-- modulepreload:start -->
 <link rel="modulepreload" href="./db.js">
 <link rel="modulepreload" href="../../packages/app-metadata.js">
@@ -106,13 +108,15 @@
 <link rel="modulepreload" href="../../packages/ui/template-preview.js">
 <link rel="modulepreload" href="../../packages/ui/transient-overlay-manager.js">
 <link rel="modulepreload" href="../../packages/ui/ui-catalog.js">
+<link rel="modulepreload" href="../../packages/ui/workspace-chrome.js">
 <link rel="modulepreload" href="../../packages/ui/workspace-controller.js">
 <!-- modulepreload:end -->
 </head>
 <body>
+<a class="skip-link" href="#workspace" data-i18n="跳到工作区">跳到工作区</a>
 <div id="appShell">
   <header class="topbar">
-    <div class="brand"><button id="toggleNavigator" class="icon-button" aria-label="切换内容库" data-i18n-aria-label="切换内容库">☰</button><b>LMN</b><span data-i18n="Knowledge System">知识系统</span><em>V5.1.3</em></div>
+    <div class="brand"><button id="toggleNavigator" aria-controls="navigator" aria-expanded="true" class="icon-button" aria-label="切换内容库" data-i18n-aria-label="切换内容库">☰</button><b>LMN</b><span data-i18n="Knowledge System">知识系统</span><em>V5.1.3</em></div>
     <nav id="breadcrumbs" aria-label="递归知识路径" data-i18n-aria-label="递归知识路径"></nav>
     <button id="globalSearch" class="command-trigger"><span data-i18n="命令行">命令行</span><kbd>Ctrl K</kbd></button>
     <button id="insertStructure" class="primary hidden" aria-hidden="true" tabindex="-1" data-i18n="＋ 新建">＋ 新建</button>
@@ -120,18 +124,18 @@
   </header>
 
   <aside id="navigator" class="navigator">
-    <div class="navigator-modes" role="tablist">
+    <div class="navigator-modes" role="tablist" aria-label="导航视图">
       <button data-navigator="outline" class="active" title="内容库" data-i18n-title="内容库"><span>☷</span><small data-i18n="内容库">内容库</small></button>
       <button data-navigator="library" title="结构库" data-i18n-title="结构库"><span>⬡</span><small data-i18n="结构库">结构库</small></button>
       <button data-navigator="search" title="搜索" data-i18n-title="搜索"><span>⌕</span><small data-i18n="搜索">搜索</small></button>
     </div>
     <div class="navigator-head"><div><span id="navigatorEyebrow" class="eyebrow">内容库</span><h2 id="navigatorTitle">内容库</h2></div><div><button id="navigatorMenu" class="icon-button" title="内容库选项" data-i18n-title="内容库选项">•••</button></div></div>
-    <div class="navigator-filter"><input id="navigatorFilter" placeholder="筛选当前列表" data-i18n-placeholder="筛选当前列表"></div>
-    <div id="navigatorContent" class="navigator-content"></div>
-    <div id="navigatorResizer" class="navigator-resizer" role="separator" aria-orientation="vertical" aria-label="调整内容库宽度" tabindex="0" data-i18n-aria-label="调整内容库宽度"></div>
+    <div class="navigator-filter"><input id="navigatorFilter" aria-label="筛选当前列表" data-i18n-aria-label="筛选当前列表" placeholder="筛选当前列表" data-i18n-placeholder="筛选当前列表"></div>
+    <div id="navigatorPanel" class="navigator-panel" role="tabpanel" tabindex="0" aria-labelledby="navigator-tab-outline"><div id="navigatorContent" class="navigator-content"></div></div>
+    <div id="navigatorResizer" aria-controls="navigator" aria-valuemin="220" aria-valuemax="620" aria-valuenow="300" class="navigator-resizer" role="separator" aria-orientation="vertical" aria-label="调整内容库宽度" tabindex="0" data-i18n-aria-label="调整内容库宽度"></div>
   </aside>
 
-  <main id="workspace" class="workspace">
+  <main id="workspace" tabindex="-1" aria-label="知识工作区" class="workspace">
     <div class="document-bar">
       <div class="document-navigation" aria-label="文档导航" data-i18n-aria-label="文档导航"><button id="homeBtn" title="主页" data-i18n-title="主页">⌂</button><button id="backBtn" title="返回 (Alt+←)" data-i18n-title="返回 (Alt+←)">‹</button><button id="forwardBtn" title="前进 (Alt+→)" data-i18n-title="前进 (Alt+→)">›</button><button id="upBtn" title="返回上层" data-i18n-title="返回上层">↑</button></div>
       <div class="document-tab-shell"><div id="documentTabs" class="document-tabs"></div><button id="openDocumentsButton" class="open-documents" title="打开的文档" data-i18n-title="打开的文档">▾</button></div>
@@ -140,7 +144,7 @@
     <section id="welcome" class="welcome">
       <div class="welcome-mark"><span>L</span><span>M</span><span>N</span></div>
       <p class="eyebrow" data-i18n="LOCAL-FIRST · RECURSIVE · FORMAL">本地优先 · 递归组织 · 形式表达</p>
-      <h1 data-i18n="把知识放进可探索、可计算的结构">把知识放进可探索、可计算的结构</h1>
+      <h1 data-i18n="知识工作区">知识工作区</h1>
       <p data-i18n="从一个 Knowledge 开始。它的笔记、LMN 骨架、数学结构和关系在同一工作空间中自然展开。">从一个知识对象开始。笔记、知识骨架、数学结构和关系在同一工作空间中展开。</p>
       <div class="welcome-actions"><button data-welcome="knowledge" class="primary" data-i18n="新建 Knowledge">新建知识</button><button data-welcome="library" data-i18n="浏览结构库">浏览结构库</button><button data-welcome="import" data-i18n="导入 LKL / JSON">导入 LKL / JSON</button></div>
       <div class="welcome-suggestions"><button data-template="builtin:lmn-432"><i>4·3·2</i><b>LMN</b><small data-i18n="递归知识骨架">递归知识骨架</small></button><button data-template="builtin:boolean-algebra"><i>B₄</i><b data-i18n="布尔代数">布尔代数</b><small data-i18n="16 个格元素">16 个格元素</small></button><button data-template="builtin:mod-n"><i>ℤ/nℤ</i><b data-i18n="模结构">模结构</b><small data-i18n="参数与变量方案">参数与变量方案</small></button><button data-template="builtin:regular-polygon"><i>⬡</i><b data-i18n="正 n 边形">正 n 边形</b><small data-i18n="可参数化几何">可参数化几何</small></button></div>
@@ -211,16 +215,16 @@
     </section>
   </main>
 
-  <aside id="floatingPanel" class="floating-panel hidden" aria-label="属性面板" data-i18n-aria-label="属性面板"><header><div><span id="panelEyebrow" class="eyebrow">属性</span><h2 id="panelTitle">属性</h2></div><button id="closePanel" class="icon-button">×</button></header><div id="panelTabs" class="panel-tabs"></div><div id="panelContent" class="panel-content"></div></aside>
+  <aside id="floatingPanel" class="floating-panel hidden" aria-label="属性面板" data-i18n-aria-label="属性面板"><header><div><span id="panelEyebrow" class="eyebrow">属性</span><h2 id="panelTitle">属性</h2></div><button id="closePanel" aria-label="关闭属性面板" data-i18n-aria-label="关闭属性面板" class="icon-button">×</button></header><div id="panelTabs" class="panel-tabs"></div><div id="panelContent" class="panel-content"></div></aside>
   <div id="contextMenu" class="context-menu hidden" role="menu"></div>
   <div id="quickCreate" class="quick-create hidden" role="dialog" aria-label="快速新建知识" data-i18n-aria-label="快速新建知识"><span>◇</span><input id="quickCreateInput" placeholder="Knowledge 名称" data-i18n-placeholder="Knowledge 名称"><div class="quick-create-mode" aria-label="Knowledge 类型" data-i18n-aria-label="Knowledge 类型"><button data-create-mode="blank" class="active" data-i18n="空白">空白</button><button data-create-mode="lmn" data-i18n="含 LMN">含 LMN</button></div><button id="cancelQuickCreate" class="quick-create-cancel" data-i18n="取消">取消</button><kbd>Enter</kbd></div>
   <div id="undoBanner" class="undo-banner hidden" role="status"><span id="undoBannerText">已删除</span><button id="undoDeleteAction" data-i18n="撤回">撤回</button><kbd>Ctrl Z</kbd><button id="dismissUndoBanner" aria-label="关闭" data-i18n-aria-label="关闭">×</button></div>
-  <footer class="statusbar"><span id="pathStatus">工作区</span><span id="selectionStatus">未选择</span><span id="runtimeStatus">场景就绪</span><span id="saveStatus">● 已保存</span></footer>
+  <footer class="statusbar"><span id="pathStatus">工作区</span><span id="selectionStatus">未选择</span><span id="runtimeStatus">场景就绪</span><span id="saveStatus" role="status" aria-live="polite">● 已保存</span></footer>
 </div>
 
-<dialog id="commandDialog" class="command-dialog"><header><span>⌘</span><input id="commandInput" placeholder="搜索或执行命令" data-i18n-placeholder="搜索或执行命令"><kbd>Esc</kbd></header><div id="commandResults" class="command-results"></div><footer><span data-i18n="↑↓ 选择 · Enter 执行 ·">↑↓ 选择 · Enter 执行 ·</span><kbd>/</kbd><span data-i18n="命令">命令</span></footer></dialog>
+<dialog id="commandDialog" class="command-dialog"><header><span>⌘</span><input id="commandInput" aria-label="搜索或执行命令" data-i18n-aria-label="搜索或执行命令" placeholder="搜索或执行命令" data-i18n-placeholder="搜索或执行命令"><kbd>Esc</kbd></header><div id="commandResults" class="command-results"></div><footer><span data-i18n="↑↓ 选择 · Enter 执行 ·">↑↓ 选择 · Enter 执行 ·</span><kbd>/</kbd><span data-i18n="命令">命令</span></footer></dialog>
 
-<dialog id="structureLibrary" class="sheet library-sheet"><header><div><span class="eyebrow" data-i18n="结构库 STRUCTURE LIBRARY">结构库</span><h2 data-i18n="选择一种观察与推理结构">选择一种观察与推理结构</h2></div><button class="dialog-close">×</button></header><div class="library-tools"><input id="librarySearch" placeholder="搜索 LMN、布尔代数、几何、证明树…" data-i18n-placeholder="搜索 LMN、布尔代数、几何、证明树…"><div id="libraryFilters" class="library-filter-chips" aria-label="结构库筛选" data-i18n-aria-label="结构库筛选"><button data-library-filter="" class="active" data-i18n="全部">全部</button><button data-library-filter="lmn">LMN</button><button data-library-filter="graph" data-i18n="图">图</button><button data-library-filter="algebra" data-i18n="代数">代数</button><button data-library-filter="geometry" data-i18n="几何">几何</button><button data-library-filter="modular" data-i18n="模结构">模结构</button><button data-library-filter="poset" data-i18n="偏序">偏序</button><button data-library-filter="logic" data-i18n="逻辑">逻辑</button><button data-library-filter="set" data-i18n="集合">集合</button><button data-library-filter="coordinate" data-i18n="坐标">坐标</button><button data-library-filter="analysis" data-i18n="分析">分析</button><button data-library-filter="parameterized" data-i18n="可参数化">可参数化</button><button data-library-filter="ready" data-i18n="可用">可用</button><button data-library-filter="experimental" data-i18n="实验性">实验性</button><button data-library-filter="my" data-i18n="我的模板">我的模板</button><button data-library-filter="variables" data-i18n="变量方案">变量方案</button></div><select id="libraryCategory" class="hidden" aria-hidden="true"><option value=""></option></select><button id="quickBuilder" data-i18n="快速构建">快速构建</button><button id="advancedBuilder" data-i18n="高级构建">高级构建</button></div><div id="templateGrid" class="template-grid"></div></dialog>
+<dialog id="structureLibrary" class="sheet library-sheet"><header><div><span class="eyebrow" data-i18n="结构库 STRUCTURE LIBRARY">结构库</span><h2 data-i18n="选择一种观察与推理结构">选择一种观察与推理结构</h2></div><button class="dialog-close">×</button></header><div class="library-tools"><input id="librarySearch" aria-label="搜索结构库" data-i18n-aria-label="搜索结构库" placeholder="搜索 LMN、布尔代数、几何、证明树…" data-i18n-placeholder="搜索 LMN、布尔代数、几何、证明树…"><div id="libraryFilters" class="library-filter-chips" aria-label="结构库筛选" data-i18n-aria-label="结构库筛选"><button data-library-filter="" class="active" data-i18n="全部">全部</button><button data-library-filter="lmn">LMN</button><button data-library-filter="graph" data-i18n="图">图</button><button data-library-filter="algebra" data-i18n="代数">代数</button><button data-library-filter="geometry" data-i18n="几何">几何</button><button data-library-filter="modular" data-i18n="模结构">模结构</button><button data-library-filter="poset" data-i18n="偏序">偏序</button><button data-library-filter="logic" data-i18n="逻辑">逻辑</button><button data-library-filter="set" data-i18n="集合">集合</button><button data-library-filter="coordinate" data-i18n="坐标">坐标</button><button data-library-filter="analysis" data-i18n="分析">分析</button><button data-library-filter="parameterized" data-i18n="可参数化">可参数化</button><button data-library-filter="ready" data-i18n="可用">可用</button><button data-library-filter="experimental" data-i18n="实验性">实验性</button><button data-library-filter="my" data-i18n="我的模板">我的模板</button><button data-library-filter="variables" data-i18n="变量方案">变量方案</button></div><select id="libraryCategory" class="hidden" aria-hidden="true"><option value=""></option></select><button id="quickBuilder" data-i18n="快速构建">快速构建</button><button id="advancedBuilder" data-i18n="高级构建">高级构建</button></div><div id="templateGrid" class="template-grid"></div></dialog>
 
 <dialog id="structureConfigDialog" class="structure-config-dialog"><header><div><span id="configEyebrow" class="eyebrow">预览与配置</span><h2 id="configTitle">结构</h2></div><button class="dialog-close">×</button></header><div class="structure-config-layout"><div id="configPreview" class="config-preview"></div><div><p id="configDescription"></p><div id="configParameters" class="config-parameters"></div><div id="configMathFacts"></div></div></div><footer><button class="dialog-close" data-i18n="取消">取消</button><button id="confirmStructureInsert" class="primary" data-i18n="插入结构">插入结构</button></footer></dialog>
 
