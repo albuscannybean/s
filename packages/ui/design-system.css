@@ -189,3 +189,27 @@ html[data-theme="dark"] #appShell[data-high-clarity="true"] :is(.topbar,.documen
 @media(forced-colors:active) {
   .nav-location-row.active, .document-tab.active, .navigator-modes button.active { outline:2px solid Highlight; }
 }
+
+/* Structure map: local navigation, using workspace surfaces and native dialog. */
+.structure-map-dialog { width:min(960px,calc(100vw - 32px)); max-height:calc(100dvh - 32px); overflow:auto; padding:var(--space-4); color:var(--ink); background:var(--ui-overlay); }
+.structure-map-header { display:flex; align-items:center; justify-content:space-between; gap:var(--space-3); }
+.structure-map-header h2 { margin:0; }
+.structure-map-controls { display:flex; flex-wrap:wrap; gap:var(--space-4); margin-top:var(--space-4); }
+.structure-map-controls label { display:grid; gap:var(--space-2); flex:1; min-width:0; }
+.structure-map-controls select { width:100%; min-width:0; }
+.structure-map-status,.structure-map-legend { color:var(--muted); line-height:1.5; }
+.structure-map-next { display:flex; flex-wrap:wrap; align-items:center; gap:var(--space-2); }
+.structure-map-next button { border-color:var(--green); background:var(--ui-selected); }
+.structure-map-figure { margin-top:var(--space-4); border:1px solid var(--line); border-radius:6px; background:var(--ui-workspace); overflow:auto; }
+.structure-map-figure svg { display:block; width:100%; min-width:860px; }
+.map-edge { fill:none; stroke:var(--muted); stroke-width:1.5; }
+#structure-map-arrow path { fill:var(--muted); }
+.map-node { cursor:pointer; }
+.map-node rect { fill:var(--ui-workspace); stroke:var(--line-strong); }
+.map-node text { fill:var(--ink); font-size:14px; pointer-events:none; }
+.map-node:hover rect { fill:var(--ui-hover); }
+.map-node.is-next rect { fill:var(--ui-selected); stroke:var(--green); stroke-width:3; filter:drop-shadow(0 0 4px var(--ui-focus)); }
+.map-node.is-current rect { fill:var(--green); stroke:var(--green); stroke-width:3; }
+.map-node.is-current text { fill:var(--paper); }
+.map-node:focus-visible { outline:2px solid var(--ui-focus); outline-offset:4px; }
+@media(max-width:620px) { .structure-map-controls { flex-direction:column; } }
