@@ -43,11 +43,17 @@ try{
  await page.locator('#structureMapButton').click();await page.keyboard.press('Escape');
  assert.equal(await page.locator(':focus').getAttribute('id'),'structureMapButton');
  await page.evaluate(id=>lmnWorkspace.openInstance(id),ids[0]);
- const node=page.locator('#nodeLayer [data-slot-id=A]');await node.waitFor({state:'visible'});const box=await node.boundingBox();
+ await page.waitForFunction(()=>!lmnWorkspace.scheduler.frame&&!lmnWorkspace.transition.frame);
+ const node=page.locator('#nodeLayer [data-slot-id=A]');await node.waitFor({state:'visible'});const box=await node.evaluate(e=>e.getBoundingClientRect().toJSON());
  await page.mouse.move(box.x+40,box.y+40);await page.mouse.down();await page.mouse.move(box.x+100,box.y+90,{steps:10});await page.mouse.up();
  assert((await page.evaluate(()=>lmnWorkspace.document)).startsWith('structure:'));
- await node.focus();await page.keyboard.press('Enter');await page.waitForFunction(()=>lmnWorkspace.document.startsWith('content:'));
+ await node.focus();
+ // A pending drag frame must not detach keyboard focus from the rebuilt node.
+ await page.evaluate(()=>lmnWorkspace.renderScene());
+ assert.equal(await page.locator(':focus').getAttribute('data-slot-id'),'A');
+ await page.keyboard.press('Enter');await page.waitForFunction(()=>lmnWorkspace.document.startsWith('content:'));
  await page.locator('#structureMapButton').click();await page.setViewportSize({width:390,height:844});
+ await page.waitForFunction(()=>document.querySelector('#structureMapDialog').getBoundingClientRect().width<=innerWidth);
  assert(await page.locator('#structureMapDialog').evaluate(e=>e.getBoundingClientRect().width<=innerWidth));
  assert.deepEqual(errors,[]);console.log('PASS: structure notes, persistence, click/drag, map branches, keyboard, focus, narrow screen');
 }finally{await browser.close()}
