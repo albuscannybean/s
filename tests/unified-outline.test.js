@@ -1,0 +1,22 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {buildNavigatorIndex,contentNavigatorKeys,flattenNavigator} from '../packages/navigation/location-index.js';
+import {unifiedOutline} from '../packages/navigation/unified-outline.js';
+import {BUILTIN_TEMPLATES} from '../packages/structure-engine/templates.js';
+import {createStructureInstance,bindTarget} from '../packages/structure-engine/model.js';
+test('unified outline merges owned structure/body appearances without changing records or references',()=>{
+ const template=BUILTIN_TEMPLATES.find(t=>t.id==='builtin:directed-graph');
+ const one=createStructureInstance(template,'k'),two=createStructureInstance(template,'k'),external=createStructureInstance(template);
+ one.objectContent.body='structure one';two.objectContent.body='structure two';one.containers.A.content.body='A body';two.containers.B.content.body='B body';
+ bindTarget(external,template,'A','structure',one.id,{placementMode:'reference'});
+ const state={knowledge:[{id:'k',title:'K',content:'Knowledge body'}],structureInstances:[one,two,external],structureTemplates:[template]},index=buildNavigatorIndex(state),snapshot=JSON.stringify(state),projected=unifiedOutline(index);
+ const rows=flattenNavigator(projected,{expanded:new Set(index.objects.keys()),visibleKeys:contentNavigatorKeys(projected)});
+ assert.equal(rows.filter(e=>e.kind==='knowledge').length,1);
+ assert.equal(rows.filter(e=>e.kind==='structure'&&!e.reference).length,1);
+ assert(rows.some(e=>e.kind==='structure'&&e.id===one.id&&e.reference));
+ assert(rows.some(e=>e.kind==='slot'&&e.instanceId===one.id&&e.id==='A'));
+ assert(rows.some(e=>e.kind==='slot'&&e.instanceId===two.id&&e.id==='B'));
+ assert(!rows.some(e=>e.kind==='note'&&['knowledge','structure'].includes(e.contentScope)));
+ assert.equal(JSON.stringify(state),snapshot);
+ assert(index.find({kind:'note',id:'structure-body',instanceId:one.id,contentScope:'structure'}));
+});

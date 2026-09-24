@@ -1,3 +1,4 @@
+import {unifiedOutline} from '../navigation/unified-outline.js';
 import {contentNavigatorKeys,flattenNavigator} from '../navigation/location-index.js';
 
 const glyph={knowledge:'◇',structure:'⬡',slot:'▣',content:'✎',note:'✎',variable:'ƒ',relation:'↝',geometry:'⌖',board:'▦',group:'≡'};
@@ -6,12 +7,13 @@ const messages={
  en:{empty:'Create knowledge or import a package to browse all locations here.',none:'No matching content.',expand:'Expand',collapse:'Collapse',menu:'Actions',reference:'Reference · Open original location',result:'results',items:'locations',recovered:'Retained original location'}
 };
 export function renderKnowledgeNavigator(root,options={}){
- const {index,expanded=new Set(),activeTarget,query='',language='zh-CN',onOpen,onToggle,onMenu,onDrag,onDrop}=options;
+ const {index:canonicalIndex,expanded=new Set(),activeTarget,query='',language='zh-CN',onOpen,onToggle,onMenu,onDrag,onDrop}=options;
+ const index=unifiedOutline(canonicalIndex);
  const strings=messages[language]??messages['zh-CN'],scroll=root.scrollTop,focused=root.ownerDocument.activeElement?.closest('[data-nav-key]')?.dataset.navKey;
- const visibleKeys=contentNavigatorKeys(index),rows=flattenNavigator(index,{expanded,query,visibleKeys}),active=index.find(activeTarget??{})?.key,doc=root.ownerDocument,groups=[root];
+ const visibleKeys=contentNavigatorKeys(index),rawRows=flattenNavigator(index,{expanded,query,visibleKeys}),rows=query?[...new Map(rawRows.map(entry=>{const key=index.outlineKey(entry.key);return[key,key===entry.key?entry:{...entry,...index.objects.get(key),depth:0,indent:0,expandable:false,searchResult:true,meta:entry.label}]})).values()]:rawRows,active=index.outlineKey(index.find(activeTarget??{})?.key),doc=root.ownerDocument,groups=[root];
  root.replaceChildren();root.classList.add('knowledge-location-tree');root.setAttribute('role','tree');root.setAttribute('aria-label',language==='en'?'Content library':'内容库');
  if(!rows.length){const empty=doc.createElement('p');empty.className='nav-empty';empty.textContent=query?strings.none:strings.empty;root.append(empty);return}
- const count=doc.createElement('p');count.className='nav-location-count';count.textContent=`${query?rows.length:visibleKeys.size} ${query?strings.result:strings.items}`;root.append(count);
+ const count=doc.createElement('p');count.className='nav-location-count';count.textContent=`${rows.length} ${query?strings.result:strings.items}`;root.append(count);
  rows.forEach((entry,position)=>{
   const row=doc.createElement('div');row.className='nav-location-row';row.dataset.navKey=entry.rowKey??entry.key;row.dataset.objectKey=entry.key;row.dataset.kind=entry.kind;row.style.setProperty('--indent',String(entry.indent));
   row.setAttribute('role','treeitem');row.setAttribute('aria-level',String(entry.depth+1));if(entry.expandable)row.setAttribute('aria-expanded',String(entry.expanded));
@@ -42,4 +44,3 @@ export function renderKnowledgeNavigator(root,options={}){
  });
  root.scrollTop=scroll;if(focused){const target=[...root.querySelectorAll('[data-nav-key]')].find(e=>e.dataset.navKey===focused);target?.focus({preventScroll:true})}
 }
-

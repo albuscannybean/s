@@ -151,11 +151,10 @@ html[data-theme="dark"] #appShell[data-high-clarity="true"] { --muted:#c1cfc8; -
 html[data-theme="dark"] #appShell[data-high-clarity="true"] :is(.topbar,.document-bar,.floating-panel,.context-menu,.scene-node) { background:var(--paper); }
 @media(min-width:1200px) {
   #appShell:has(.floating-panel:not(.hidden)) .workspace { margin-right:var(--inspector-width); }
-  #appShell:has(.floating-panel.coordinate-panel:not(.hidden)), #appShell:has(.floating-panel:not(.hidden) .variable-table) { --inspector-width:560px; }
   #appShell .floating-panel { width:var(--inspector-width); }
 }
 @media(max-width:1199px) {
-  .floating-panel, .floating-panel.coordinate-panel { width:min(560px,calc(100vw - 16px)); max-width:calc(100vw - 16px); box-shadow:var(--shadow-2); }
+  .floating-panel, .floating-panel.coordinate-panel { width:min(var(--inspector-width),calc(100vw - 16px)); max-width:calc(100vw - 16px); box-shadow:var(--shadow-2); }
 }
 @media(max-width:900px) {
   #appShell { grid-template-columns:0 minmax(0,1fr); }
@@ -213,3 +212,50 @@ html[data-theme="dark"] #appShell[data-high-clarity="true"] :is(.topbar,.documen
 .map-node.is-current text { fill:var(--paper); }
 .map-node:focus-visible { outline:2px solid var(--ui-focus); outline-offset:4px; }
 @media(max-width:620px) { .structure-map-controls { flex-direction:column; } }
+
+/* Knowledge canvas and its notes share one document, with independent scrolling. */
+.knowledge-view-controls { display:flex; align-items:center; gap:var(--space-2); }
+.knowledge-view-controls[hidden] { display:none; }
+.knowledge-view-controls select { max-width:180px; min-width:0; }
+.structure-stage { position:absolute; inset:var(--toolbar-height) 0 0; overflow:hidden; }
+.structure-panes { display:grid; grid-template-columns:minmax(0,1fr); width:100%; height:100%; }
+.structure-panes>.canvas-viewport { position:relative; inset:auto; min-width:0; min-height:0; }
+.structure-stage.reading-open { overflow:auto; }
+.reading-open .structure-panes { grid-template-columns:minmax(300px,1fr) minmax(320px,1fr); min-width:640px; }
+.knowledge-reader { display:flex; flex-direction:column; min-width:0; min-height:0; border-left:1px solid var(--line); background:var(--paper); }
+.knowledge-reader-header { display:flex; flex:none; align-items:center; gap:var(--space-2); padding:var(--space-2); border-bottom:1px solid var(--line); }
+.knowledge-reader-header select { flex:1; min-width:0; }
+.knowledge-reader-header button { flex:none; }
+.knowledge-reader-content { flex:1; min-height:0; min-width:0; overflow:auto; padding:var(--space-3); overscroll-behavior:contain; }
+.knowledge-reader .document-editor-page { margin:0; width:100%; padding:0; min-width:0; }
+.knowledge-reader .document-editor-top { flex-wrap:wrap; gap:var(--space-1); }
+.knowledge-reader .document-context-label { flex:1 1 100%; white-space:normal; overflow-wrap:anywhere; }
+.knowledge-reader .document-editor-shell { min-width:0; }
+.knowledge-reader .document-editor-shell.mode-split { grid-template-columns:minmax(0,1fr); }
+.knowledge-reader .document-editor-preview { padding:var(--space-3); min-width:0; overflow:auto; }
+.knowledge-reader .document-editor-source { min-width:0; }
+.knowledge-reader .document-title-input { font:600 var(--text-section)/1.5 var(--font-ui); padding:var(--space-2); }
+.knowledge-reader .document-format-toolbar { flex-wrap:wrap; }
+.knowledge-reader .document-body-editor { width:100%; min-width:0; }
+.knowledge-reader .document-properties-grid { grid-template-columns:minmax(0,1fr); }
+
+/* Panel dimensions are independent of the active tab or its child widgets. */
+#appShell .floating-panel { width:min(var(--inspector-width),calc(100vw - 16px)); max-width:calc(100vw - 16px); top:104px; bottom:28px; height:auto; min-height:0; overflow:hidden; }
+#appShell .floating-panel>header,#appShell .floating-panel .panel-tabs { flex-shrink:0; position:static; }
+#appShell .floating-panel .panel-content { min-width:0; min-height:0; max-width:100%; overflow:auto; scrollbar-gutter:stable; }
+#floatingPanel .panel-content>* { min-width:0; max-width:100%; }
+#floatingPanel .coordinate-variable-manager,#floatingPanel .coordinate-operation-workbench { min-width:0; max-width:100%; overflow:visible; }
+#floatingPanel .coordinate-create-grid { grid-template-columns:minmax(0,1fr); }
+#floatingPanel .coordinate-variable-editor { grid-template-columns:repeat(2,minmax(0,1fr)); padding:var(--space-2); }
+#floatingPanel .coordinate-variable-editor>* { min-width:0; max-width:100%; }
+#floatingPanel .coordinate-variable-row { grid-template-columns:32px minmax(0,1fr) auto; }
+#floatingPanel .coordinate-variable-row>.visibility-toggle,#floatingPanel .coordinate-variable-row>.motion-inline-toggle { grid-column:2; }
+#floatingPanel .coordinate-variable-row>button:last-child { grid-column:3; }
+#floatingPanel .visibility-toggle,#floatingPanel .motion-inline-toggle { white-space:nowrap; justify-content:flex-start; }
+#floatingPanel .visibility-toggle input[type=checkbox],#floatingPanel .motion-inline-toggle input[type=checkbox] { width:auto; flex:none; }
+#floatingPanel .coordinate-variable-manager>header,#floatingPanel .variable-table-toolbar { flex-wrap:wrap; }
+#floatingPanel .coordinate-variable-manager>header>button,#floatingPanel .variable-table-toolbar>button { flex:none; white-space:nowrap; }
+#floatingPanel .variable-table-toolbar>div { flex:1 1 100%; }
+#floatingPanel .coordinate-operation-section,#floatingPanel .geometry-operation-workbench { min-width:0; overflow-wrap:anywhere; }
+#floatingPanel .variable-table { min-width:0; max-width:100%; overflow:auto; }
+#floatingPanel :is(.plot-range,.geometry-point-editor,.geometry-measurement-grid) { min-width:0; max-width:100%; flex-wrap:wrap; }
