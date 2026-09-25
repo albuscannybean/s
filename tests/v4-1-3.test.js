@@ -25,14 +25,14 @@ test('content cards share a plain three-line-ready preview and preserve a real f
 });
 
 test('canonical LMN topology is protected while labels, content, and appearance stay editable',()=>{
-  const template=getBuiltinTemplate('builtin:lmn-432'),instance=createStructureInstance(template),definition=materializeInstanceDefinition(template,instance),slot=definition.slots.find(item=>item.id==='L2'),edge=definition.edges[0],slotCaps=containerCapabilities(template,slot,instance),edgeCaps=edgeCapabilities(template,edge,instance);
+  const template=getBuiltinTemplate('builtin:lmn-444'),instance=createStructureInstance(template),definition=materializeInstanceDefinition(template,instance),slot=definition.slots.find(item=>item.id==='L2'),edge=definition.edges[0],slotCaps=containerCapabilities(template,slot,instance),edgeCaps=edgeCapabilities(template,edge,instance);
   for(const key of Object.keys(DEFAULT_OBJECT_CAPABILITIES))assert.equal(typeof slotCaps[key],'boolean',`missing ${key}`);
   assert.equal(slotCaps.canMoveVisualPosition,false);assert.equal(slotCaps.canMoveSemanticPosition,false);assert.equal(slotCaps.canDeleteCanonicalObject,false);assert.equal(slotCaps.canRenameDisplayLabel,true);assert.equal(slotCaps.canEditContent,true);assert.equal(slotCaps.canEditAppearance,true);
   assert.equal(edgeCaps.canChangeEndpoints,false);assert.equal(edgeCaps.canChangeDirection,false);assert.equal(edgeCaps.canChangeRelationType,false);assert.equal(edgeCaps.canDeleteCanonicalObject,false);assert.equal(edgeCaps.canRenameDisplayLabel,true);assert.equal(edgeCaps.canEditContent,true);assert.equal(edgeCaps.canEditAppearance,true);
 });
 
 test('custom LMN variants regain topology editing without changing the canonical adapter',()=>{
-  const canonical=getBuiltinTemplate('builtin:lmn-432'),custom={...structuredClone(canonical),id:'custom:lmn-editable',builtin:false},canonicalAdapter=getStructureInteractionAdapter(canonical),customAdapter=getStructureInteractionAdapter(custom);
+  const canonical=getBuiltinTemplate('builtin:lmn-444'),custom={...structuredClone(canonical),id:'custom:lmn-editable',builtin:false},canonicalAdapter=getStructureInteractionAdapter(canonical),customAdapter=getStructureInteractionAdapter(custom);
   assert.equal(canonicalAdapter.id,'lmn');assert.equal(customAdapter.id,'graph');assert.equal(customAdapter.getContainerCapabilities({id:'L2'},null,custom).canDeleteCanonicalObject,true);
 });
 

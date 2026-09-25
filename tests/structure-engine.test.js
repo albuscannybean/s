@@ -23,13 +23,13 @@ test('cyclic group and Cayley operation table preserve algebraic semantics',()=>
 });
 
 test('Knowledge creation has no Structure side effect and binding is explicit',()=>{
-  const knowledge=createKnowledge('Independent'),template=getBuiltinTemplate('builtin:lmn-432'),instance=createStructureInstance(template,knowledge.id);
+  const knowledge=createKnowledge('Independent'),template=getBuiltinTemplate('builtin:lmn-444'),instance=createStructureInstance(template,knowledge.id);
   assert.equal(instance.bindings.length,0);bindTarget(instance,template,'L1','knowledge',knowledge.id);assert.equal(instance.bindings[0].targetId,knowledge.id);assert.equal(validateInstance(instance,BUILTIN_TEMPLATES,[instance],[knowledge]).valid,true);
 });
 
 test('nested heterogeneous Structures reject recursive cycles',()=>{
-  const a=createStructureInstance(getBuiltinTemplate('builtin:lmn-432')),b=createStructureInstance(getBuiltinTemplate('builtin:tree'));
-  bindTarget(a,getBuiltinTemplate('builtin:lmn-432'),'L1','structure',b.id);assert.equal(nestedStructureCycle([a,b],b.id,a.id),true);assert.equal(nestedStructureCycle([a,b],a.id,b.id),false);
+  const a=createStructureInstance(getBuiltinTemplate('builtin:lmn-444')),b=createStructureInstance(getBuiltinTemplate('builtin:tree'));
+  bindTarget(a,getBuiltinTemplate('builtin:lmn-444'),'L1','structure',b.id);assert.equal(nestedStructureCycle([a,b],b.id,a.id),true);assert.equal(nestedStructureCycle([a,b],a.id,b.id),false);
 });
 
 test('safe evaluator supports dependency ordering and blocks illegal operations',()=>{
@@ -50,8 +50,8 @@ test('Hasse structural rule computes a transitive reduction without expression e
 });
 
 test('structure and pattern search use real slot/edge semantics',()=>{
-  const lmn=createStructureInstance(getBuiltinTemplate('builtin:lmn-432')),mod=createStructureInstance(getBuiltinTemplate('builtin:mod-12')),state={knowledge:[],relations:[],structureTemplates:BUILTIN_TEMPLATES,structureInstances:[lmn,mod]};
-  assert.deepEqual(structureSearch({role:'existence'},state).map(hit=>hit.id),[lmn.id]);assert.deepEqual(structureSearch({modularIndex:4},state).map(hit=>hit.id),[mod.id]);assert.equal(patternSearch({relationType:'mediates',sourceRole:'essence',targetRole:'definition'},state)[0].instanceId,lmn.id);
+  const lmn=createStructureInstance(getBuiltinTemplate('builtin:lmn-444')),mod=createStructureInstance(getBuiltinTemplate('builtin:mod-12')),state={knowledge:[],relations:[],structureTemplates:BUILTIN_TEMPLATES,structureInstances:[lmn,mod]};
+  assert.deepEqual(structureSearch({role:'representation'},state).map(hit=>hit.id),[lmn.id]);assert.deepEqual(structureSearch({modularIndex:4},state).map(hit=>hit.id),[mod.id]);assert.equal(patternSearch({relationType:'mediates',sourceRole:'representation',targetRole:'definition'},state)[0].instanceId,lmn.id);
 });
 
 test('Scenario F matches Sartre Existence precedes Essence but not a different relation',()=>{

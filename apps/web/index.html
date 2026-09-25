@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#f8f7f2">
-  <title>LMN Knowledge System V5.1.3</title>
+  <title>LMN Knowledge System V5.1.4</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232f7658'/%3E%3Ctext x='32' y='42' text-anchor='middle' font-size='30' fill='white' font-family='Georgia'%3EL%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="vendor/katex/katex.min.css">
   <link rel="stylesheet" href="../../packages/ui/design-tokens.css">
@@ -120,7 +120,7 @@
 <a class="skip-link" href="#workspace" data-i18n="跳到工作区">跳到工作区</a>
 <div id="appShell">
   <header class="topbar">
-    <div class="brand"><button id="toggleNavigator" aria-controls="navigator" aria-expanded="true" class="icon-button" aria-label="切换内容库" data-i18n-aria-label="切换内容库">☰</button><b>LMN</b><span data-i18n="Knowledge System">知识系统</span><em>V5.1.3</em></div>
+    <div class="brand"><button id="toggleNavigator" aria-controls="navigator" aria-expanded="true" class="icon-button" aria-label="切换内容库" data-i18n-aria-label="切换内容库">☰</button><b>LMN</b><span data-i18n="Knowledge System">知识系统</span><em>V5.1.4</em></div>
     <nav id="breadcrumbs" aria-label="递归知识路径" data-i18n-aria-label="递归知识路径"></nav>
     <button id="globalSearch" class="command-trigger"><span data-i18n="命令行">命令行</span><kbd>Ctrl K</kbd></button>
     <button id="insertStructure" class="primary hidden" aria-hidden="true" tabindex="-1" data-i18n="＋ 新建">＋ 新建</button>
@@ -151,14 +151,14 @@
       <h1 data-i18n="知识工作区">知识工作区</h1>
       <p data-i18n="从一个 Knowledge 开始。它的笔记、LMN 骨架、数学结构和关系在同一工作空间中自然展开。">从一个知识对象开始。笔记、知识骨架、数学结构和关系在同一工作空间中展开。</p>
       <div class="welcome-actions"><button data-welcome="knowledge" class="primary" data-i18n="新建 Knowledge">新建知识</button><button data-welcome="library" data-i18n="浏览结构库">浏览结构库</button><button data-welcome="import" data-i18n="导入 LKL / JSON">导入 LKL / JSON</button></div>
-      <div class="welcome-suggestions"><button data-template="builtin:lmn-432"><i>4·3·2</i><b>LMN</b><small data-i18n="递归知识骨架">递归知识骨架</small></button><button data-template="builtin:boolean-algebra"><i>B₄</i><b data-i18n="布尔代数">布尔代数</b><small data-i18n="16 个格元素">16 个格元素</small></button><button data-template="builtin:mod-n"><i>ℤ/nℤ</i><b data-i18n="模结构">模结构</b><small data-i18n="参数与变量方案">参数与变量方案</small></button><button data-template="builtin:regular-polygon"><i>⬡</i><b data-i18n="正 n 边形">正 n 边形</b><small data-i18n="可参数化几何">可参数化几何</small></button></div>
+      <div class="welcome-suggestions"><button data-template="builtin:lmn-444"><i>4·4·4</i><b>LMN</b><small data-i18n="递归知识骨架">递归知识骨架</small></button><button data-template="builtin:boolean-algebra"><i>B₄</i><b data-i18n="布尔代数">布尔代数</b><small data-i18n="16 个格元素">16 个格元素</small></button><button data-template="builtin:mod-n"><i>ℤ/nℤ</i><b data-i18n="模结构">模结构</b><small data-i18n="参数与变量方案">参数与变量方案</small></button><button data-template="builtin:regular-polygon"><i>⬡</i><b data-i18n="正 n 边形">正 n 边形</b><small data-i18n="可参数化几何">可参数化几何</small></button></div>
     </section>
     <section id="newTabPage" class="new-tab-page hidden" aria-label="新标签页" data-i18n-aria-label="新标签页">
       <div class="new-tab-content">
         <span class="new-tab-mark">＋</span><p class="eyebrow" data-i18n="NEW TAB">新标签页</p><h1 data-i18n="从这里继续知识工作">从这里继续知识工作</h1><p data-i18n="新建、插入与导入统一从标签页开始；每一个入口都会立即给出可见结果。">在这里新建知识、插入结构、导入资料或查找内容。</p>
         <div class="new-tab-actions">
           <button data-new-tab-action="knowledge"><i>◇</i><b data-i18n="新建 Knowledge">新建知识</b><small data-i18n="创建空白知识并直接书写">创建空白知识并直接书写</small></button>
-          <button data-new-tab-action="lmn"><i>4·3·2</i><b data-i18n="新建 LMN Knowledge">新建 LMN 知识</b><small data-i18n="创建带完整 LMN 骨架的知识">创建带完整 LMN 骨架的知识</small></button>
+          <button data-new-tab-action="lmn"><i>4·4·4</i><b data-i18n="新建 LMN Knowledge">新建 LMN 知识</b><small data-i18n="创建带完整 LMN 骨架的知识">创建带完整 LMN 骨架的知识</small></button>
           <button data-new-tab-action="structure"><i>⬡</i><b data-i18n="插入 Structure">插入结构</b><small data-i18n="打开结构库与数学模板">打开结构库与数学模板</small></button>
           <button data-new-tab-action="notes"><i>✎</i><b data-i18n="打开 Notes">打开笔记</b><small data-i18n="回到当前知识的统一编辑器">回到当前知识的编辑器</small></button>
           <button data-new-tab-action="import"><i>⇧</i><b data-i18n="导入">导入</b><small data-i18n="预览 LKL、JSON 或知识包">预览 LKL、JSON 或知识包</small></button>
@@ -202,7 +202,7 @@
         <span class="knowledge-empty-mark">◇</span><p class="eyebrow" data-i18n="BLANK KNOWLEDGE">空白知识</p><h1 id="blankKnowledgeTitle">知识</h1>
         <p data-i18n="这个 Knowledge 目前还没有 Structure。你可以先写定义、定理或证明，也可以直接插入一种数学结构。">这个知识还没有结构。可以先写定义、定理或证明，也可以直接插入数学结构。</p>
         <div class="knowledge-empty-actions"><button id="startNotes" class="primary" data-i18n="写 Notes">写笔记</button><button id="emptyInsertStructure" data-i18n="＋ 插入 Structure">＋ 插入结构</button></div>
-        <div class="knowledge-empty-templates"><span data-i18n="常用结构">常用结构</span><button data-empty-template="builtin:lmn-432">LMN</button><button data-empty-template="builtin:directed-graph" data-i18n="Graph">有向图</button><button data-empty-template="builtin:boolean-algebra" data-i18n="Boolean Algebra">布尔代数</button><button data-empty-template="builtin:mod-n" data-i18n="Mod-N">模结构</button></div>
+        <div class="knowledge-empty-templates"><span data-i18n="常用结构">常用结构</span><button data-empty-template="builtin:lmn-444">LMN</button><button data-empty-template="builtin:directed-graph" data-i18n="Graph">有向图</button><button data-empty-template="builtin:boolean-algebra" data-i18n="Boolean Algebra">布尔代数</button><button data-empty-template="builtin:mod-n" data-i18n="Mod-N">模结构</button></div>
       </div>
       <div id="notesEditorHost" class="unified-document-host"></div>
     </section>

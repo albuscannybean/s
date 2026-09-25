@@ -57,7 +57,7 @@ test('Venn region cards reserve enough room for semantic title and Knowledge pre
 });
 
 test('binding metadata distinguishes a structural construction from a jump reference',()=>{
-  const template=getBuiltinTemplate('builtin:lmn-432'),instance=createStructureInstance(template,'root');
+  const template=getBuiltinTemplate('builtin:lmn-444'),instance=createStructureInstance(template,'root');
   const constructed=bindTarget(instance,template,'L1','knowledge','a',{placementMode:'construct'}),reference=bindTarget(instance,template,'L2','knowledge','a',{placementMode:'reference'});
   assert.equal(constructed.metadata.placementMode,'construct');
   assert.equal(reference.metadata.placementMode,'reference');
@@ -66,7 +66,7 @@ test('binding metadata distinguishes a structural construction from a jump refer
 
 test('V4.2.2+ UI converges document editing, creation entry and inline source search',()=>{
   const html=fs.readFileSync(new URL('../apps/web/index.html',import.meta.url),'utf8'),controller=fs.readFileSync(new URL('../packages/ui/workspace-controller.js',import.meta.url),'utf8');
-  assert.match(html,/V5\.1\.3/);
+  assert.match(html,/V5\.1\.4/);
   assert.match(html,/id="notesEditorHost"/);
   assert.doesNotMatch(html,/id="notesEditor"/);
   assert.match(html,/id="newTabPage"/);

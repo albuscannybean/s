@@ -1,11 +1,11 @@
 {
   "contract": "LMN LKL AI Authoring Contract",
   "schemaVersion": "2.1",
-  "kitVersion": "5.1.3",
+  "kitVersion": "5.1.4",
   "target": {
     "application": "LMN Knowledge System",
-    "release": "V5.1.3",
-    "version": "5.1.3",
+    "release": "V5.1.4",
+    "version": "5.1.4",
     "lkl1": "1",
     "lkl2": "2.1",
     "lkl3": "3.0"
@@ -96,9 +96,9 @@
   },
   "structureCapabilities": [
     {
-      "id": "builtin:lmn-432",
-      "version": 2,
-      "name": "LMN 4–3–2",
+      "id": "builtin:lmn-444",
+      "version": 3,
+      "name": "LMN 4–4–4",
       "affordances": [
         "lmn-semantic"
       ],
@@ -4036,15 +4036,18 @@
     "geometry": "kind, arity, namespace resolution, and non-recursive geometry references are validated",
     "modulus": "builtin:mod-n modulus must be an integer from 2 through 64",
     "lmnSlots": [
+      "L0",
       "L1",
       "L2",
       "L3",
-      "L4",
+      "M0",
       "M1",
       "M2",
       "M3",
+      "N0",
       "N1",
-      "N2"
+      "N2",
+      "N3"
     ],
     "viewPreviewPolicy": [
       "off",
@@ -4244,7 +4247,7 @@
   ],
   "builtinCatalog": {
     "templateIds": [
-      "builtin:lmn-432",
+      "builtin:lmn-444",
       "builtin:directed-graph",
       "builtin:undirected-graph",
       "builtin:poset-hasse",
@@ -4281,16 +4284,19 @@
       "builtin:flow-network"
     ],
     "containerSlotIdsByTemplate": {
-      "builtin:lmn-432": [
+      "builtin:lmn-444": [
+        "L0",
         "L1",
         "L2",
         "L3",
-        "L4",
+        "M0",
         "M1",
         "M2",
         "M3",
+        "N0",
         "N1",
-        "N2"
+        "N2",
+        "N3"
       ],
       "builtin:directed-graph": [
         "A",
@@ -4546,7 +4552,7 @@
       ]
     },
     "parametersByTemplate": {
-      "builtin:lmn-432": [],
+      "builtin:lmn-444": [],
       "builtin:directed-graph": [
         {
           "id": "nodeCount",
@@ -5700,14 +5706,14 @@
   },
   "builtins": [
     {
-      "id": "builtin:lmn-432",
-      "name": "LMN 4–3–2",
+      "id": "builtin:lmn-444",
+      "name": "LMN 4–4–4",
       "names": {
-        "zh-CN": "LMN 4–3–2",
-        "en": "LMN 4–3–2"
+        "zh-CN": "LMN 4–4–4",
+        "en": "LMN 4–4–4"
       },
-      "description": "Layer–Mediation–Feedback 理论结构",
-      "version": 2,
+      "description": "表示—关系—函数—组合；定义—构造—生成—抽象；符号—结构—功能—集合的跨尺度递归结构",
+      "version": 3,
       "category": "lmn",
       "maturity": "ready",
       "deprecated": false,
@@ -5721,9 +5727,24 @@
       "parameters": [],
       "defaultSlots": [
         {
+          "id": "L0",
+          "label": "表示 / Representation",
+          "role": "representation",
+          "cardinality": "many",
+          "accepts": [
+            "knowledge",
+            "structure"
+          ],
+          "semanticCoordinate": {
+            "column": "L",
+            "layer": 0,
+            "order": 1
+          }
+        },
+        {
           "id": "L1",
-          "label": "本质 / Essence",
-          "role": "essence",
+          "label": "关系 / Relation",
+          "role": "relation",
           "cardinality": "many",
           "accepts": [
             "knowledge",
@@ -5732,13 +5753,13 @@
           "semanticCoordinate": {
             "column": "L",
             "layer": 1,
-            "order": 1
+            "order": 2
           }
         },
         {
           "id": "L2",
-          "label": "存在 / Existence",
-          "role": "existence",
+          "label": "函数 / Function",
+          "role": "function",
           "cardinality": "many",
           "accepts": [
             "knowledge",
@@ -5747,13 +5768,13 @@
           "semanticCoordinate": {
             "column": "L",
             "layer": 2,
-            "order": 2
+            "order": 3
           }
         },
         {
           "id": "L3",
-          "label": "存在者 / Existential",
-          "role": "existential",
+          "label": "组合 / Composition",
+          "role": "composition",
           "cardinality": "many",
           "accepts": [
             "knowledge",
@@ -5762,27 +5783,12 @@
           "semanticCoordinate": {
             "column": "L",
             "layer": 3,
-            "order": 3
-          }
-        },
-        {
-          "id": "L4",
-          "label": "语言 / Language",
-          "role": "language",
-          "cardinality": "many",
-          "accepts": [
-            "knowledge",
-            "structure"
-          ],
-          "semanticCoordinate": {
-            "column": "L",
-            "layer": 4,
             "order": 4
           }
         },
         {
-          "id": "M1",
-          "label": "定义论 / Definition",
+          "id": "M0",
+          "label": "定义 / Definition",
           "role": "definition",
           "cardinality": "many",
           "accepts": [
@@ -5791,13 +5797,13 @@
           ],
           "semanticCoordinate": {
             "column": "M",
-            "layer": 1,
+            "layer": 0,
             "order": 1
           }
         },
         {
-          "id": "M2",
-          "label": "构造论 / Construction",
+          "id": "M1",
+          "label": "构造 / Construction",
           "role": "construction",
           "cardinality": "many",
           "accepts": [
@@ -5806,14 +5812,29 @@
           ],
           "semanticCoordinate": {
             "column": "M",
-            "layer": 2,
+            "layer": 1,
             "order": 2
           }
         },
         {
+          "id": "M2",
+          "label": "生成 / Generation",
+          "role": "generation",
+          "cardinality": "many",
+          "accepts": [
+            "knowledge",
+            "structure"
+          ],
+          "semanticCoordinate": {
+            "column": "M",
+            "layer": 2,
+            "order": 3
+          }
+        },
+        {
           "id": "M3",
-          "label": "实现论 / Realization",
-          "role": "realization",
+          "label": "抽象 / Abstraction",
+          "role": "abstraction",
           "cardinality": "many",
           "accepts": [
             "knowledge",
@@ -5822,11 +5843,11 @@
           "semanticCoordinate": {
             "column": "M",
             "layer": 3,
-            "order": 3
+            "order": 4
           }
         },
         {
-          "id": "N1",
+          "id": "N0",
           "label": "符号论 / Symbolization",
           "role": "symbolization",
           "cardinality": "many",
@@ -5836,12 +5857,12 @@
           ],
           "semanticCoordinate": {
             "column": "N",
-            "layer": 1,
+            "layer": 0,
             "order": 1
           }
         },
         {
-          "id": "N2",
+          "id": "N1",
           "label": "结构论 / Structuring",
           "role": "structuring",
           "cardinality": "many",
@@ -5851,100 +5872,184 @@
           ],
           "semanticCoordinate": {
             "column": "N",
-            "layer": 2,
+            "layer": 1,
             "order": 2
+          }
+        },
+        {
+          "id": "N2",
+          "label": "功能论 / Functionalization",
+          "role": "functionalization",
+          "cardinality": "many",
+          "accepts": [
+            "knowledge",
+            "structure"
+          ],
+          "semanticCoordinate": {
+            "column": "N",
+            "layer": 2,
+            "order": 3
+          }
+        },
+        {
+          "id": "N3",
+          "label": "集合论 / Collectivization",
+          "role": "collectivization",
+          "cardinality": "many",
+          "accepts": [
+            "knowledge",
+            "structure"
+          ],
+          "semanticCoordinate": {
+            "column": "N",
+            "layer": 3,
+            "order": 4
           }
         }
       ],
       "defaultEdges": [
         {
           "id": "e1",
-          "from": "L1",
-          "to": "M1",
+          "from": "L0",
+          "to": "M0",
           "direction": "directed",
           "type": "mediates",
-          "label": "定义化",
+          "label": "定义",
           "routing": null
         },
         {
           "id": "e2",
-          "from": "M1",
-          "to": "L2",
+          "from": "M0",
+          "to": "L1",
           "direction": "directed",
           "type": "mediates",
-          "label": "到存在",
+          "label": "进入关系",
           "routing": null
         },
         {
           "id": "e3",
-          "from": "L2",
-          "to": "M2",
+          "from": "L1",
+          "to": "M1",
           "direction": "directed",
           "type": "mediates",
-          "label": "构造化",
+          "label": "构造",
           "routing": null
         },
         {
           "id": "e4",
-          "from": "M2",
-          "to": "L3",
+          "from": "M1",
+          "to": "L2",
           "direction": "directed",
           "type": "mediates",
-          "label": "到存在者",
+          "label": "形成函数",
           "routing": null
         },
         {
           "id": "e5",
-          "from": "L3",
-          "to": "M3",
+          "from": "L2",
+          "to": "M2",
           "direction": "directed",
           "type": "mediates",
-          "label": "实现化",
+          "label": "生成",
           "routing": null
         },
         {
           "id": "e6",
-          "from": "M3",
-          "to": "L4",
+          "from": "M2",
+          "to": "L3",
           "direction": "directed",
           "type": "mediates",
-          "label": "到语言",
+          "label": "形成组合",
           "routing": null
         },
         {
           "id": "e7",
-          "from": "N1",
-          "to": "M1",
+          "from": "L3",
+          "to": "M3",
+          "direction": "directed",
+          "type": "mediates",
+          "label": "抽象",
+          "routing": null
+        },
+        {
+          "id": "e8",
+          "from": "M3",
+          "to": "L0",
+          "direction": "directed",
+          "type": "cross-scale-abstraction",
+          "label": "下一尺度 L₀",
+          "routing": null
+        },
+        {
+          "id": "e9",
+          "from": "N0",
+          "to": "M0",
           "direction": "directed",
           "type": "symbolic-feedback",
           "label": "符号化",
           "routing": null
         },
         {
-          "id": "e8",
-          "from": "N1",
-          "to": "M2",
+          "id": "e10",
+          "from": "N0",
+          "to": "M1",
           "direction": "directed",
           "type": "desymbolic-feedback",
           "label": "去符号化",
           "routing": null
         },
         {
-          "id": "e9",
-          "from": "N2",
-          "to": "M2",
+          "id": "e11",
+          "from": "N1",
+          "to": "M1",
           "direction": "directed",
           "type": "structural-feedback",
           "label": "结构化",
           "routing": null
         },
         {
-          "id": "e10",
-          "from": "N2",
-          "to": "M3",
+          "id": "e12",
+          "from": "N1",
+          "to": "M2",
           "direction": "directed",
           "type": "destructural-feedback",
           "label": "去结构化",
+          "routing": null
+        },
+        {
+          "id": "e13",
+          "from": "N2",
+          "to": "M2",
+          "direction": "directed",
+          "type": "functional-feedback",
+          "label": "功能化",
+          "routing": null
+        },
+        {
+          "id": "e14",
+          "from": "N2",
+          "to": "M3",
+          "direction": "directed",
+          "type": "defunctional-feedback",
+          "label": "去功能化",
+          "routing": null
+        },
+        {
+          "id": "e15",
+          "from": "N3",
+          "to": "M3",
+          "direction": "directed",
+          "type": "collective-feedback",
+          "label": "集合化",
+          "routing": null
+        },
+        {
+          "id": "e16",
+          "from": "N3",
+          "to": "M0",
+          "direction": "directed",
+          "type": "decollective-feedback",
+          "label": "去集合化 · 下一尺度 M₀",
           "routing": null
         }
       ],

@@ -36,7 +36,7 @@ export function computeRowGaps(row,edges,sizes,{baseGap=30,fallback=DEFAULT_NODE
 const hash=value=>{let result=2166136261;for(const char of String(value)){result^=char.charCodeAt(0);result=Math.imul(result,16777619)}return result>>>0};
 const nodeGrammar=(definition,slot,shape='roundedRect')=>{
   const layout=definition.layout?.type??'grid',id=definition.id??'';
-  if(id==='builtin:lmn-432')return{shape:'roundedRect',visualKind:`lmn-${String(slot.semanticCoordinate?.column??'L').toLowerCase()}`};
+  if(id==='builtin:lmn-444')return{shape:'roundedRect',visualKind:`lmn-${String(slot.semanticCoordinate?.column??'L').toLowerCase()}`};
   if(layout==='force')return{shape:'pill',visualKind:'graph-node'};
   if(id.includes('boolean-algebra'))return{shape:'pill',visualKind:'boolean-node'};
   if(layout==='coordinate')return{shape:'circle',visualKind:'coordinate-point'};
@@ -125,7 +125,10 @@ function columnsLayout(definition,sizes){
 }
 
 export function lmnSemanticCenters({startY=170,gapY=132}={}){
-  const L=Array.from({length:4},(_,index)=>startY+index*gapY),M=L.slice(0,3).map((value,index)=>(value+L[index+1])/2),N=M.slice(0,2).map((value,index)=>(value+M[index+1])/2);return{L,M,N};
+  const L=Array.from({length:4},(_,index)=>startY+index*gapY);
+  const M=L.map((value,index)=>(value+(L[index+1]??startY+4*gapY))/2);
+  const N=M.map((value,index)=>(value+(M[index+1]??M[0]+4*gapY))/2);
+  return{L,M,N};
 }
 
 function lmnSemanticLayout(definition,sizes){
@@ -234,8 +237,8 @@ function addCoordinateBackground(items,instance,options){
 function sceneBackground(definition,instance,options={}){
   const layout=definition.layout?.type,items=[];
   if(layout==='lmn-semantic'){
-    const arrangement=ensureStructureView(instance).arrangement??'horizontal-forward',vertical=arrangement.startsWith('vertical'),reverse=arrangement.endsWith('reverse'),columns=[['L','Layer · 本体层级',204],['M','Mediation · 中介转换',506],['N','Feedback · 双向反馈',808]];
-    for(const[column,label,position]of columns){const axisPosition=reverse?1012-position:position;if(vertical)items.push({type:'text',className:`lmn-column-title lmn-${column.toLowerCase()}`,x:42,y:axisPosition-110,text:label});else items.push({type:'text',className:`lmn-column-title lmn-${column.toLowerCase()}`,x:axisPosition,y:82,text:label});if(column==='L'&&!vertical)items.push({type:'line',className:'lmn-ontology-spine',x1:axisPosition,y1:132,x2:axisPosition,y2:690})}
+    const arrangement=ensureStructureView(instance).arrangement??'horizontal-forward',vertical=arrangement.startsWith('vertical'),reverse=arrangement.endsWith('reverse'),columns=[['L','Layer · 本体层级',204],['M','Mediation · 中介转换',506],['N','Nexus · 双向纽带',808]];
+    for(const[column,label,position]of columns){const axisPosition=reverse?1012-position:position;if(vertical)items.push({type:'text',className:`lmn-column-title lmn-${column.toLowerCase()}`,x:42,y:axisPosition-110,text:label});else items.push({type:'text',className:`lmn-column-title lmn-${column.toLowerCase()}`,x:axisPosition,y:82,text:label});if(column==='L'&&!vertical)items.push({type:'line',className:'lmn-ontology-spine',x1:axisPosition,y1:132,x2:axisPosition,y2:610})}
   }
   if(layout==='venn'){
     const names=instance.parameters?.setLabels??definition.runtimeMetadata?.setNames??(Number(definition.layout?.sets)===2?['A','B']:['A','B','C']),sets=Number(definition.layout?.sets)===2?[{x:430,y:340,label:names[0]},{x:610,y:340,label:names[1]}]:[{x:420,y:300,label:names[0]},{x:600,y:300,label:names[1]},{x:510,y:450,label:names[2]}];

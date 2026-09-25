@@ -10,16 +10,16 @@ import {setStructureArrangement} from '../packages/structure-engine/structure-vi
 import {parseStructureInstanceSource,serializeStructureInstance} from '../packages/lkl2/index.js';
 import {posetStarterRelationText,serializePosetRelationText} from '../packages/structure-engine/poset.js';
 
-test('V4.3 LMN feedback directions and polygon arrows carry the requested semantics',()=>{
-  const lmn=getBuiltinTemplate('builtin:lmn-432');
-  assert.deepEqual(lmn.edges.filter(edge=>['e8','e10'].includes(edge.id)).map(edge=>[edge.sourceSlotId,edge.targetSlotId]),[['N1','M2'],['N2','M3']]);
+test('fourth LMN feedback and cross-scale links carry the requested semantics',()=>{
+  const lmn=getBuiltinTemplate('builtin:lmn-444');
+  assert.deepEqual(lmn.edges.filter(edge=>['e8','e14','e16'].includes(edge.id)).map(edge=>[edge.sourceSlotId,edge.targetSlotId]),[['M3','L0'],['N2','M3'],['N3','M0']]);
   const polygon=getBuiltinTemplate('builtin:regular-polygon'),instance=createStructureInstance(polygon,'knowledge',{n:5}),definition=materializeInstanceDefinition(polygon,instance);
   assert.equal(definition.edges.length,5);
   assert.ok(definition.edges.every(edge=>edge.direction==='directed'));
 });
 
 test('global Design overrides template and edge visuals, including bidirectional arrows and routing',()=>{
-  const template=getBuiltinTemplate('builtin:lmn-432'),instance=createStructureInstance(template,'knowledge'),edge={...template.edges[0],routing:'orthogonal',visual:{color:'#ff0000',width:7,routing:'straight',arrow:'none'}};
+  const template=getBuiltinTemplate('builtin:lmn-444'),instance=createStructureInstance(template,'knowledge'),edge={...template.edges[0],routing:'orthogonal',visual:{color:'#ff0000',width:7,routing:'straight',arrow:'none'}};
   setRelationStyle(instance,{scope:'all'},{color:'#123456',width:2.5,routing:'bezier',arrow:'both',labelPosition:'center'});
   const style=resolveRelationStyle(edge,instance,{structureDefault:{color:'#999999',width:6,routing:'orthogonal'}});
   assert.deepEqual({color:style.color,width:style.width,routing:style.routing,arrow:style.arrow,labelPosition:style.labelPosition},{color:'#123456',width:2.5,routing:'bezier',arrow:'both',labelPosition:'center'});
@@ -28,7 +28,7 @@ test('global Design overrides template and edge visuals, including bidirectional
 });
 
 test('LMN custom relations are editable and deletable without creating a canonical tombstone',()=>{
-  const template=getBuiltinTemplate('builtin:lmn-432'),instance=createStructureInstance(template,'knowledge'),edge=addInstanceEdge(instance,'L3','M1',{id:'custom-l3-m1',label:'自建关系',visual:{color:'#abcdef'}});
+  const template=getBuiltinTemplate('builtin:lmn-444'),instance=createStructureInstance(template,'knowledge'),edge=addInstanceEdge(instance,'L3','M1',{id:'custom-l3-m1',label:'自建关系',visual:{color:'#abcdef'}});
   const capabilities=edgeCapabilities(template,edge,instance);
   assert.equal(capabilities.canDeleteCanonicalObject,true);
   assert.equal(capabilities.canChangeDirection,true);
@@ -78,7 +78,7 @@ test('LKL persists camera, visibility, plots and global relation direction styli
 
 test('V4.3 UI exposes tracked libraries, three search modes, command-only top bar and unified operations',()=>{
   const controller=fs.readFileSync(new URL('../packages/ui/workspace-controller.js',import.meta.url),'utf8'),html=fs.readFileSync(new URL('../apps/web/index.html',import.meta.url),'utf8'),css=fs.readFileSync(new URL('../apps/web/styles.css',import.meta.url),'utf8');
-  assert.match(html,/V5\.1\.3/);assert.match(html,/id="searchWorkbench"/);assert.match(html,/>命令行</);assert.match(html,/id="insertStructure" class="primary hidden"/);
+  assert.match(html,/V5\.1\.4/);assert.match(html,/id="searchWorkbench"/);assert.match(html,/>命令行</);assert.match(html,/id="insertStructure" class="primary hidden"/);
   for(const label of['结构检索','全文检索','LKL 检索','＋ 新建结构','操作','代数','几何'])assert.match(controller,new RegExp(label));
   assert.match(controller,/renderKnowledgeNavigator/);assert.match(controller,/installContentLibrary/);assert.match(controller,/installStructureLibrary/);assert.match(controller,/objectVisibility/);assert.match(controller,/camera\.projection/);
   assert.match(css,/\.document-tab\.add[^}]*border-radius:50%/);assert.match(css,/\.navigator-modes[^}]*repeat\(3,1fr\)/);assert.match(css,/\.coordinate-variable-manager/);assert.match(css,/\.search-workbench/);

@@ -32,7 +32,7 @@ content derivative_definition {
 }
 
 structure-instance calculus_lmn {
-  using builtin:lmn-432
+  using builtin:lmn-444
   owner calculus
   container M2 {
     knowledge derivative

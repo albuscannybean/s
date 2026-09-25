@@ -3,7 +3,7 @@
 Migration runs once when IndexedDB schema 3 opens and `migrationState/v2-to-v3` does not exist.
 
 1. Existing Knowledge, Relations and Representations are copied without changing UUIDs.
-2. Each V2 Root LMN becomes a `builtin:lmn-432` Structure Instance.
+2. Each V2 Root LMN becomes a `builtin:lmn-444` Structure Instance.
 3. The old LMN UUID becomes the new Instance UUID.
 4. Each populated V2 Position becomes an explicit Knowledge Binding with the same Position ID.
 5. All V3 built-in Templates are installed.

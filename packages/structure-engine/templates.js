@@ -11,19 +11,22 @@ const edge=(id,sourceSlotId,targetSlotId,direction='directed',relationType='rela
 const parameter=(id,label,type,defaultValue,extra={})=>({id,label,type,defaultValue,...extra});
 
 export const LMN_TEMPLATE=Object.freeze({
-  id:'builtin:lmn-432',name:'LMN 4–3–2',description:'Layer–Mediation–Feedback 理论结构',version:2,category:'lmn',maturity:'ready',builtin:true,nestable:true,computable:false,viewCapability:{mode:'arrange',label:'可排列',defaultArrangement:'horizontal-forward',options:['horizontal-forward','horizontal-reverse','vertical-forward','vertical-reverse']},
+  id:'builtin:lmn-444',name:'LMN 4–4–4',description:'表示—关系—函数—组合；定义—构造—生成—抽象；符号—结构—功能—集合的跨尺度递归结构',descriptionEn:'Cross-scale recursive structure: representation, relation, function, composition; definition, construction, generation, abstraction; symbolization, structuring, functionalization, collectivization.',version:3,category:'lmn',maturity:'ready',builtin:true,nestable:true,computable:false,viewCapability:{mode:'arrange',label:'可排列',defaultArrangement:'horizontal-forward',options:['horizontal-forward','horizontal-reverse','vertical-forward','vertical-reverse']},
   slots:[
-    lmnSlot('L1','本质 / Essence','essence',{column:'L',layer:1,order:1}),lmnSlot('L2','存在 / Existence','existence',{column:'L',layer:2,order:2}),lmnSlot('L3','存在者 / Existential','existential',{column:'L',layer:3,order:3}),lmnSlot('L4','语言 / Language','language',{column:'L',layer:4,order:4}),
-    lmnSlot('M1','定义论 / Definition','definition',{column:'M',layer:1,order:1}),lmnSlot('M2','构造论 / Construction','construction',{column:'M',layer:2,order:2}),lmnSlot('M3','实现论 / Realization','realization',{column:'M',layer:3,order:3}),
-    lmnSlot('N1','符号论 / Symbolization','symbolization',{column:'N',layer:1,order:1}),lmnSlot('N2','结构论 / Structuring','structuring',{column:'N',layer:2,order:2})
+    lmnSlot('L0','表示 / Representation','representation',{column:'L',layer:0,order:1}),lmnSlot('L1','关系 / Relation','relation',{column:'L',layer:1,order:2}),lmnSlot('L2','函数 / Function','function',{column:'L',layer:2,order:3}),lmnSlot('L3','组合 / Composition','composition',{column:'L',layer:3,order:4}),
+    lmnSlot('M0','定义 / Definition','definition',{column:'M',layer:0,order:1}),lmnSlot('M1','构造 / Construction','construction',{column:'M',layer:1,order:2}),lmnSlot('M2','生成 / Generation','generation',{column:'M',layer:2,order:3}),lmnSlot('M3','抽象 / Abstraction','abstraction',{column:'M',layer:3,order:4}),
+    lmnSlot('N0','符号论 / Symbolization','symbolization',{column:'N',layer:0,order:1}),lmnSlot('N1','结构论 / Structuring','structuring',{column:'N',layer:1,order:2}),lmnSlot('N2','功能论 / Functionalization','functionalization',{column:'N',layer:2,order:3}),lmnSlot('N3','集合论 / Collectivization','collectivization',{column:'N',layer:3,order:4})
   ],
   edges:[
-    {...edge('e1','L1','M1','directed','mediates','定义化'),semanticAxis:'mediation-1'},{...edge('e2','M1','L2','directed','mediates','到存在'),semanticAxis:'mediation-1'},
-    {...edge('e3','L2','M2','directed','mediates','构造化'),semanticAxis:'mediation-2'},{...edge('e4','M2','L3','directed','mediates','到存在者'),semanticAxis:'mediation-2'},
-    {...edge('e5','L3','M3','directed','mediates','实现化'),semanticAxis:'mediation-3'},{...edge('e6','M3','L4','directed','mediates','到语言'),semanticAxis:'mediation-3'},
-    {...edge('e7','N1','M1','directed','symbolic-feedback','符号化'),semanticAxis:'feedback-symbol'},{...edge('e8','N1','M2','directed','desymbolic-feedback','去符号化'),semanticAxis:'feedback-symbol'},
-    {...edge('e9','N2','M2','directed','structural-feedback','结构化'),semanticAxis:'feedback-structure'},{...edge('e10','N2','M3','directed','destructural-feedback','去结构化'),semanticAxis:'feedback-structure'}
-  ],parameters:[],constraints:[{type:'slot-ids-exact',value:['L1','L2','L3','L4','M1','M2','M3','N1','N2']}],rules:[],layout:{type:'lmn-semantic',columns:['L','M','N'],startY:170,gapY:132},visual:{accentByColumn:{L:'#2F7658',M:'#C8922E',N:'#7657A8'}}
+    {...edge('e1','L0','M0','directed','mediates','定义'),semanticAxis:'mediation-0'},{...edge('e2','M0','L1','directed','mediates','进入关系'),semanticAxis:'mediation-0'},
+    {...edge('e3','L1','M1','directed','mediates','构造'),semanticAxis:'mediation-1'},{...edge('e4','M1','L2','directed','mediates','形成函数'),semanticAxis:'mediation-1'},
+    {...edge('e5','L2','M2','directed','mediates','生成'),semanticAxis:'mediation-2'},{...edge('e6','M2','L3','directed','mediates','形成组合'),semanticAxis:'mediation-2'},
+    {...edge('e7','L3','M3','directed','mediates','抽象'),semanticAxis:'mediation-3'},{...edge('e8','M3','L0','directed','cross-scale-abstraction','下一尺度 L₀'),semanticAxis:'next-scale'},
+    {...edge('e9','N0','M0','directed','symbolic-feedback','符号化'),semanticAxis:'feedback-symbol'},{...edge('e10','N0','M1','directed','desymbolic-feedback','去符号化'),semanticAxis:'feedback-symbol'},
+    {...edge('e11','N1','M1','directed','structural-feedback','结构化'),semanticAxis:'feedback-structure'},{...edge('e12','N1','M2','directed','destructural-feedback','去结构化'),semanticAxis:'feedback-structure'},
+    {...edge('e13','N2','M2','directed','functional-feedback','功能化'),semanticAxis:'feedback-function'},{...edge('e14','N2','M3','directed','defunctional-feedback','去功能化'),semanticAxis:'feedback-function'},
+    {...edge('e15','N3','M3','directed','collective-feedback','集合化'),semanticAxis:'feedback-set'},{...edge('e16','N3','M0','directed','decollective-feedback','去集合化 · 下一尺度 M₀'),semanticAxis:'next-scale'}
+  ],parameters:[],constraints:[{type:'slot-ids-exact',value:['L0','L1','L2','L3','M0','M1','M2','M3','N0','N1','N2','N3']}],rules:[],layout:{type:'lmn-semantic',columns:['L','M','N'],startY:170,gapY:132},visual:{accentByColumn:{L:'#2F7658',M:'#C8922E',N:'#7657A8'}}
 });
 
 const graphTemplate=(directed=true)=>({id:`builtin:${directed?'directed':'undirected'}-graph`,name:directed?'有向图 · Directed Graph':'无向图 · Undirected Graph',description:'稳定力导向布局的可扩展语义图',version:2,category:'graph',maturity:'ready',builtin:true,nestable:true,computable:false,slots:[slot('A','节点 A / Node A','node',{order:1}),slot('B','节点 B / Node B','node',{order:2}),slot('C','节点 C / Node C','node',{order:3})],edges:[edge('ab','A','B',directed?'directed':'undirected','related'),edge('bc','B','C',directed?'directed':'undirected','related')],parameters:[],constraints:[],rules:[],layout:{type:'force'},visual:{accent:'#527C8B'}});

@@ -13,7 +13,7 @@ await page.addInitScript(()=>{
 try{
  await page.goto(process.env.LMN_QA_URL||'http://127.0.0.1:4174/apps/web/',{waitUntil:'networkidle'});
  await page.waitForFunction(()=>!!globalThis.lmnWorkspace);
- assert.equal(await page.locator('.brand em').innerText(),'V5.1.3');
+ assert.equal(await page.locator('.brand em').innerText(),'V5.1.4');
  const startup=await page.evaluate(()=>__dbMetrics);assert.equal(startup.opens,1);
  await page.evaluate(()=>{lmnWorkspace.transition.reducedMotion=()=>true;lmnWorkspace.openLibrary()});
  assert.ok(await page.locator('#templateGrid .template-miniature').count()>=28);
@@ -30,9 +30,9 @@ try{
  const arrows=await page.locator('#edgeLayer marker').evaluateAll(markers=>markers.map(m=>({refX:m.getAttribute('refX'),fill:m.querySelector('path')?.getAttribute('fill')})));
  assert.ok(arrows.length);assert.ok(arrows.every(m=>m.refX==='10'&&m.fill!=='context-stroke'));
  await page.screenshot({path:'qa-output/v512-boolean.png'});
- await page.evaluate(()=>lmnWorkspace.openStructureConfiguration('builtin:lmn-432'));
+ await page.evaluate(()=>lmnWorkspace.openStructureConfiguration('builtin:lmn-444'));
  await page.locator('#confirmStructureInsert').click();
- await page.waitForFunction(()=>lmnWorkspace.currentScene?.templateId==='builtin:lmn-432');
+ await page.waitForFunction(()=>lmnWorkspace.currentScene?.templateId==='builtin:lmn-444');
  assert.equal(await page.locator('#nodeLayer .node-empty-action').count(),0);
  await page.locator('#nodeLayer .scene-node').first().hover();
  const port=await page.locator('#nodeLayer .node-connector').first().evaluate(e=>{const s=getComputedStyle(e);return{width:parseFloat(s.width),height:parseFloat(s.height),radius:s.borderRadius}});
@@ -48,7 +48,7 @@ try{
  await page.evaluate(()=>lmnWorkspace.closePanel());
  const fixtures=await page.evaluate(async()=>{
   const app=lmnWorkspace,{createStructureInstance}=await import(new URL('../../packages/structure-engine/model.js',location.href)),{createVariableScheme}=await import(new URL('../../packages/structure-engine/variable-schemes.js',location.href));
-  const template={...structuredClone(app.state.structureTemplates.find(t=>t.id==='builtin:lmn-432')),id:'custom:qa512',name:'QA512 custom',builtin:false},i=createStructureInstance(template),scheme=createVariableScheme('QA512 scheme',i);
+  const template={...structuredClone(app.state.structureTemplates.find(t=>t.id==='builtin:lmn-444')),id:'custom:qa512',name:'QA512 custom',builtin:false},i=createStructureInstance(template),scheme=createVariableScheme('QA512 scheme',i);
   app.state.structureTemplates.push(template);app.state.structureInstances.push(i);app.state.variableSchemes.push(scheme);app.renderAll();return{template:template.id,instance:i.id,scheme:scheme.id};
  });
  await page.evaluate(()=>lmnWorkspace.openLibraryManager());

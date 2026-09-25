@@ -1,7 +1,7 @@
 import {DEFAULT_OBJECT_CAPABILITIES,normalizeObjectCapabilities} from '../domain/semantic-container.js';
 import {analyzePoset,resolvePosetRanks,validatePoset} from './poset.js';
 
-const fixedGenerated=new Set(['builtin:lmn-432','builtin:mod-n','builtin:mod-12','builtin:boolean-algebra','builtin:cyclic-group','builtin:regular-polygon','builtin:operation-table']);
+const fixedGenerated=new Set(['builtin:lmn-444','builtin:mod-n','builtin:mod-12','builtin:boolean-algebra','builtin:cyclic-group','builtin:regular-polygon','builtin:operation-table']);
 const graphLayouts=new Set(['force','grid','manual','layered','timeline']);
 const mergeCapabilities=patch=>normalizeObjectCapabilities(patch);
 const generatedCapabilities=Object.freeze({canRenameDisplayLabel:true,canDeleteCanonicalObject:false,canMoveVisualPosition:false,canMoveSemanticPosition:false,canEditSemanticRole:false,canChangeEndpoints:false,canChangeDirection:false,canChangeRelationType:false});
@@ -15,7 +15,7 @@ export function getStructureInteractionAdapter(template){
   if(id==='builtin:poset-hasse'||id==='builtin:lattice')return posetAdapter;
   if(id==='builtin:mod-n'||id==='builtin:mod-12')return modularAdapter;
   if(id==='builtin:boolean-algebra')return booleanAdapter;
-  if(id==='builtin:lmn-432')return lmnAdapter;
+  if(id==='builtin:lmn-444')return lmnAdapter;
   if(id==='builtin:tree'||layout==='tree')return treeAdapter;
   if(id==='builtin:coordinate-plane'||layout==='coordinate')return coordinateAdapter;
   if(template?.category==='venn'||layout==='venn')return vennAdapter;

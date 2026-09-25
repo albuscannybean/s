@@ -22,6 +22,18 @@ export function createDerivedProjection({taskContext={},activation,state={},proj
   if(!orderedIds.length)return createNoStructureProjection({taskContext,activation,topology:model,projectionType,recommendation,reason:'Derived projection requires active Knowledge'});
   const supportedIds=new Set(recommendation.supportingRelations??[]),semanticEdges=(model.edges??[]).filter(edge=>!supportedIds.size||supportedIds.has(edge.id));
   if(!semanticEdges.length)return createNoStructureProjection({taskContext,activation,topology:model,projectionType,recommendation});
+  if(projectionType==='lmn'){
+    const instance=createStructureInstance(template,orderedIds[0],parameters),roleBindings=[];
+    for(const slot of template.slots){
+      const knowledgeId=orderedIds.find(id=>(roles.byKnowledgeId?.[id]?.roles??[]).some(role=>role.role===slot.role&&role.confidence>=.5));
+      if(!knowledgeId)return createNoStructureProjection({taskContext,activation,topology:model,projectionType,recommendation,reason:'四阶 LMN 角色缺少可绑定的知识证据'});
+      roleBindings.push({slotId:slot.id,knowledgeId});
+    }
+    instance.id=`projection:${uid()}`;
+    for(const binding of roleBindings)bindTarget(instance,template,binding.slotId,'knowledge',binding.knowledgeId,{placementMode:'reference',cognitiveRole:template.slots.find(slot=>slot.id===binding.slotId).role});
+    instance.runtimeMetadata={cognitiveProjection:{taskContextId:taskContext.id??null,projectionType,persistence:'runtime',generatedAt:now(),supportingRelations:semanticEdges.map(edge=>edge.id),theoryVersion:'2026-09-25'}};
+    return{id:instance.id,kind:'derived-projection',status:'generated',ephemeral:true,persisted:false,projectionType,templateId,taskContextId:taskContext.id??null,activeKnowledgeIds:orderedIds,activeRelationIds:semanticEdges.map(edge=>edge.id),projectionReason:recommendation.reason,confidence:recommendation.score,supportingRoles:recommendation.supportingRoles,supportingRelations:recommendation.supportingRelations,warnings:recommendation.warnings,instance};
+  }
   const familyParameters=template.slotFactory==='directed-node-family'?{nodeCount:1,topology:['dependency','proof'].includes(projectionType)?'dag':'network',layoutMode:['dependency','proof'].includes(projectionType)?'layered':'force'}:{};const ownerKnowledgeId=orderedIds[0],instance=createStructureInstance(template,ownerKnowledgeId,{...familyParameters,...parameters});const initialDefinition=materializeInstanceDefinition(template,instance);instance.id=`projection:${uid()}`;instance.overrides.removedSlotIds=[...(initialDefinition.slots??[]).map(item=>item.id)];instance.overrides.removedEdgeIds=[...(initialDefinition.edges??[]).map(item=>item.id)];instance.objectContent.title=`派生投影 · ${taskContext.goal||projectionType}`;
   const slotByKnowledge=new Map();for(const[index,id]of orderedIds.entries()){
     const knowledge=state.knowledge.find(item=>item.id===id),inferred=roles.byKnowledgeId?.[id],slot=addInstanceSlot(instance,{id:`active-${index+1}`,label:knowledge?.title??id,role:inferred?.primaryRole??(index===0?'focus':'relevant-knowledge'),semanticCoordinate:{order:index,cognitiveRoles:(inferred?.roles??[]).map(item=>item.role)},accepts:['knowledge'],cardinality:'one'});slotByKnowledge.set(id,slot.id);bindTarget(instance,template,slot.id,'knowledge',id,{activationScore:activation.activationScore?.[id]??0,reasons:activation.activationReasons?.[id]??[],cognitiveRole:inferred?.primaryRole??null,roleConfidence:inferred?.confidence??null})

@@ -21,7 +21,7 @@ const ROLE_QUERY_TERMS=Object.freeze({
   'object-a':['object','对象'],'object-b':['object','对象'],'comparison-dimension':['dimension','维度'],similarity:['similarity','相似'],difference:['difference','差异']
 });
 
-const PROJECTION_TYPE_BY_TEMPLATE=Object.freeze({'builtin:proof-tree':'proof','builtin:dependency-dag':'dependency','builtin:decision-tree':'decision','builtin:tree':'hierarchy','builtin:directed-graph':'network','builtin:lmn-432':'lmn'});
+const PROJECTION_TYPE_BY_TEMPLATE=Object.freeze({'builtin:proof-tree':'proof','builtin:dependency-dag':'dependency','builtin:decision-tree':'decision','builtin:tree':'hierarchy','builtin:directed-graph':'network','builtin:lmn-444':'lmn'});
 const PROJECTION_TYPE_BY_HINT=Object.freeze({proof:'proof',dependency:'dependency',decision:'decision',hierarchy:'hierarchy',comparison:'comparison',network:'network','concept-network':'network'});
 
 export function createRetrievalIntents(taskSchema,domainResolution,taskContext={}){

@@ -270,7 +270,7 @@ export const LKL_SCHEMA=Object.freeze({
     templates:'structure-instance using must resolve to a builtin, package, or installed template',
     geometry:'kind, arity, namespace resolution, and non-recursive geometry references are validated',
     modulus:'builtin:mod-n modulus must be an integer from 2 through 64',
-    lmnSlots:['L1','L2','L3','L4','M1','M2','M3','N1','N2'],
+    lmnSlots:['L0','L1','L2','L3','M0','M1','M2','M3','N0','N1','N2','N3'],
     viewPreviewPolicy:LKL_ENUMS.previewPolicies,
     sourceUrl:'javascript: URLs are forbidden',
     attachmentBytes:LKL_LIMITS.maxAttachmentBytes,

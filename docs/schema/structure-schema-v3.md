@@ -54,7 +54,7 @@ Allowed directions: `undirected`, `directed`, `bidirectional`, `cyclic`, `condit
 ```json
 {
   "id": "uuid",
-  "templateId": "builtin:lmn-432",
+  "templateId": "builtin:lmn-444",
   "templateVersion": 1,
   "ownerKnowledgeId": "uuid-or-null",
   "bindings": [{

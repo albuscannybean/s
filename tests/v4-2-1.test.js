@@ -32,7 +32,7 @@ test('chart mode renders readable variable-name pills with bounded stacks and ov
 });
 
 test('all generated mathematical nodes support local display titles without changing canonical identity',()=>{
-  for(const id of['builtin:lmn-432','builtin:mod-n','builtin:boolean-algebra','builtin:venn-2','builtin:poset-hasse','builtin:coordinate-plane']){const template=getBuiltinTemplate(id),instance=createStructureInstance(template),definition=materializeInstanceDefinition(template,instance),slot=definition.slots[0];if(!slot)continue;setLocalDisplayTitle(instance,slot.id,'局部显示名');assert.equal(getEffectiveTitle(slot,{kind:'slot',instance,container:instance.containers[slot.id]}),'局部显示名');assert.equal(materializeInstanceDefinition(template,instance).slots[0].id,slot.id);assert.equal(getStructureInteractionAdapter(template).getContainerCapabilities(slot,instance,template).canRenameDisplayLabel,true)}
+  for(const id of['builtin:lmn-444','builtin:mod-n','builtin:boolean-algebra','builtin:venn-2','builtin:poset-hasse','builtin:coordinate-plane']){const template=getBuiltinTemplate(id),instance=createStructureInstance(template),definition=materializeInstanceDefinition(template,instance),slot=definition.slots[0];if(!slot)continue;setLocalDisplayTitle(instance,slot.id,'局部显示名');assert.equal(getEffectiveTitle(slot,{kind:'slot',instance,container:instance.containers[slot.id]}),'局部显示名');assert.equal(materializeInstanceDefinition(template,instance).slots[0].id,slot.id);assert.equal(getStructureInteractionAdapter(template).getContainerCapabilities(slot,instance,template).canRenameDisplayLabel,true)}
 });
 
 test('Variable Scheme repository enforces built-in and custom lifecycle without touching applied variables',()=>{
@@ -44,7 +44,7 @@ test('Relation Style cascade respects edge, type, structure, and global priority
 });
 
 test('Structure interaction adapters expose domain-specific add actions and never offer fake residues',()=>{
-  const actions=id=>structureCreateActions(getBuiltinTemplate(id)).map(item=>item.id);assert.deepEqual(actions('builtin:lmn-432'),['add-knowledge','add-container-content','add-structure']);assert.ok(actions('builtin:mod-n').includes('change-modulus'));assert.equal(actions('builtin:mod-n').some(id=>/residue/i.test(id)),false);assert.ok(actions('builtin:boolean-algebra').includes('rename-selected'));assert.ok(actions('builtin:poset-hasse').includes('import-poset-relations'));assert.ok(actions('builtin:venn-2').includes('venn-add-set'));assert.deepEqual(actions('builtin:coordinate-plane').slice(0,2),['add-point','add-vector'])
+  const actions=id=>structureCreateActions(getBuiltinTemplate(id)).map(item=>item.id);assert.deepEqual(actions('builtin:lmn-444'),['add-knowledge','add-container-content','add-structure']);assert.ok(actions('builtin:mod-n').includes('change-modulus'));assert.equal(actions('builtin:mod-n').some(id=>/residue/i.test(id)),false);assert.ok(actions('builtin:boolean-algebra').includes('rename-selected'));assert.ok(actions('builtin:poset-hasse').includes('import-poset-relations'));assert.ok(actions('builtin:venn-2').includes('venn-add-set'));assert.deepEqual(actions('builtin:coordinate-plane').slice(0,2),['add-point','add-vector'])
 });
 
 test('Structure source workbench round-trips titles, variables, view, styles, and preserves canonical topology',()=>{
@@ -65,7 +65,7 @@ test('V4.2.1 source removes global Edit Mode and includes Code, tab, hover, and 
   assert.doesNotMatch(html,/editModeButton/);
   assert.doesNotMatch(css,/edit-mode-button|\.editing/);
   assert.match(controller,/openTabMenu|openStructureSource|renderRelationStyleWorkbench|structureSourceKeys|renderSourceSyntax/);
-  assert.match(html,/sourceWorkbench|sourceSyntaxHighlight|V5\.1\.3/);
+  assert.match(html,/sourceWorkbench|sourceSyntaxHighlight|V5\.1\.4/);
   assert.match(css,/node-hover-tooltip.*max-height|source-workbench-split|variable-table-head/);
-  assert.match(manifest,/V5\.1\.3/)
+  assert.match(manifest,/V5\.1\.4/)
 });

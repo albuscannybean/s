@@ -7,11 +7,43 @@ import {ensureBoardState} from './board.js';
 
 const clone=value=>structuredClone(value);
 const mergeById=(a,b)=>[...new Map([...a,...b].map(item=>[item.id,clone(item)])).values()];
+const previousLmnSlot=id=>{const match=/^([LMN])([1-4])$/.exec(String(id));return match&&Number(match[2])<=(match[1]==='L'?4:match[1]==='M'?3:2)?match[1]+(Number(match[2])-1):id};
+const previousLmnEdge=id=>({e1:'e1',e2:'e2',e3:'e3',e4:'e4',e5:'e5',e6:'e6',e7:'e9',e8:'e10',e9:'e11',e10:'e12'})[id]??id;
+const renameKeys=(value,rename)=>Object.fromEntries(Object.entries(value??{}).map(([id,item])=>[rename(id),item]));
+function migrateLmnInstance(instance){
+  if(instance.templateId===LMN_TEMPLATE.id||!String(instance.templateId).startsWith('builtin:lmn-'))return instance;
+  instance.migration={...(instance.migration??{}),theoryVersion:'2026-09-25',requiresSemanticReview:true};
+  instance.templateId=LMN_TEMPLATE.id;instance.templateVersion=LMN_TEMPLATE.version;
+  for(const binding of instance.bindings??[])binding.slotId=previousLmnSlot(binding.slotId);
+  instance.containers=renameKeys(instance.containers,previousLmnSlot);
+  for(const [id,container] of Object.entries(instance.containers)){
+    container.id=id;
+    const slot=LMN_TEMPLATE.slots.find(item=>item.id===id);
+    if(slot){container.label=slot.label;container.role=slot.role;container.semanticCoordinate=clone(slot.semanticCoordinate)}
+  }
+  instance.slotNotes=renameKeys(instance.slotNotes,previousLmnSlot);
+  if(instance.metadata?.slotNotes)instance.metadata.slotNotes=renameKeys(instance.metadata.slotNotes,previousLmnSlot);
+  instance.layoutState.visualOffsets=renameKeys(instance.layoutState.visualOffsets,previousLmnSlot);
+  instance.layoutState.nodePositions=renameKeys(instance.layoutState.nodePositions,previousLmnSlot);
+  instance.layoutState.collapsedSlots=(instance.layoutState.collapsedSlots??[]).map(previousLmnSlot);
+  if(instance.structureView?.manualPositions)instance.structureView.manualPositions=renameKeys(instance.structureView.manualPositions,previousLmnSlot);
+  const overrides=instance.overrides;
+  overrides.addedSlots=(overrides.addedSlots??[]).map(slot=>({...slot,id:previousLmnSlot(slot.id)}));
+  overrides.removedSlotIds=(overrides.removedSlotIds??[]).map(previousLmnSlot);
+  overrides.slotPatches=renameKeys(overrides.slotPatches,previousLmnSlot);
+  overrides.addedEdges=(overrides.addedEdges??[]).map(edge=>({...edge,sourceSlotId:previousLmnSlot(edge.sourceSlotId),targetSlotId:previousLmnSlot(edge.targetSlotId)}));
+  overrides.removedEdgeIds=(overrides.removedEdgeIds??[]).map(previousLmnEdge);
+  overrides.edgePatches=renameKeys(overrides.edgePatches,previousLmnEdge);
+  if(instance.relationStyles?.edgeOverrides)instance.relationStyles.edgeOverrides=renameKeys(instance.relationStyles.edgeOverrides,previousLmnEdge);
+  const notice='旧 LMN 内容已映射到零基四阶位置。原有称谓与新版定义不完全等价，请逐项核对；新增抽象、功能论、集合论位置需要按来源补充。';
+  instance.objectContent.body=[instance.objectContent.body,notice].filter(Boolean).join('\n\n');
+  return instance;
+}
 const currentTemplates=existing=>{const source=existing??[],custom=source.filter(template=>!template.builtin&&!String(template.id).startsWith('builtin:')),savedBuiltins=new Map(source.filter(template=>template.builtin||String(template.id).startsWith('builtin:')).map(template=>[template.id,template])),builtins=BUILTIN_TEMPLATES.map(template=>{const saved=savedBuiltins.get(template.id);if(!saved)return template;const savedParameters=new Map((saved.parameters??[]).map(parameter=>[parameter.id,parameter]));return{...template,visual:{...(template.visual??{}),...(saved.visual??{}),relationStyle:{...(template.visual?.relationStyle??{}),...(saved.visual?.relationStyle??{})}},parameters:(template.parameters??[]).map(parameter=>({...parameter,...(savedParameters.has(parameter.id)?{defaultValue:savedParameters.get(parameter.id).defaultValue}:{}),defaultStyle:savedParameters.get(parameter.id)?.defaultStyle??parameter.defaultStyle}))}});return mergeById(custom,builtins)};
 
 export function migrateV2ToV3(v2){
   if((v2.schemaVersion??v2.schema_version)===3)return clone(v2);const lmns=v2.lmns??[],existingInstances=v2.structureInstances??[];
-  const migrated=lmns.map(lmn=>({id:lmn.id,templateId:LMN_TEMPLATE.id,templateVersion:LMN_TEMPLATE.version,ownerKnowledgeId:lmn.knowledgeId,bindings:Object.values(lmn.positions??{}).filter(position=>position.knowledgeId).map((position,index)=>({id:`migration:${lmn.id}:${position.position}:${index}`,instanceId:lmn.id,slotId:position.position,targetType:'knowledge',targetId:position.knowledgeId,metadata:{migratedFrom:'v2-lmn'},createdAt:lmn.createdAt,updatedAt:lmn.updatedAt})),parameters:{},runtimeState:{variables:{},results:{},errors:{}},layoutState:{visualOffsets:{},collapsedSlots:[]},createdAt:lmn.createdAt,updatedAt:lmn.updatedAt,migration:{source:'v2-lmn'}}));
+  const migrated=lmns.map(lmn=>({id:lmn.id,templateId:LMN_TEMPLATE.id,templateVersion:LMN_TEMPLATE.version,ownerKnowledgeId:lmn.knowledgeId,bindings:Object.values(lmn.positions??{}).filter(position=>position.knowledgeId).map((position,index)=>({id:`migration:${lmn.id}:${position.position}:${index}`,instanceId:lmn.id,slotId:previousLmnSlot(position.position),targetType:'knowledge',targetId:position.knowledgeId,metadata:{migratedFrom:'v2-lmn'},createdAt:lmn.createdAt,updatedAt:lmn.updatedAt})),parameters:{},runtimeState:{variables:{},results:{},errors:{}},layoutState:{visualOffsets:{},collapsedSlots:[]},createdAt:lmn.createdAt,updatedAt:lmn.updatedAt,migration:{source:'v2-lmn'}}));
   return{schemaVersion:3,application:'LMN Knowledge System',knowledge:clone(v2.knowledge??[]),relations:clone(v2.relations??[]),representations:clone(v2.representations??[]),structureTemplates:mergeById(BUILTIN_TEMPLATES,v2.structureTemplates??[]),structureInstances:mergeById(existingInstances,migrated),legacy:{lmns:clone(lmns),structures:clone(v2.structures??[])},migration:{from:Number(v2.schema_version??2),to:3,at:new Date().toISOString()}};
 }
 
@@ -24,7 +56,7 @@ export function migrateV3ToV4(v3){
     if(oldSemantic||oldDirected){const legacy={...clone(old),id:'legacy:'+old.id+':'+old.version,builtin:false,hidden:true,name:old.name+'（保留旧实例）'};templates.push(legacy);legacyMap.set(old.id,{id:legacy.id,before:oldDirected?5:4});}
   }
   const templateMap=new Map(templates.map(template=>[template.id,template]));
-  const instances=(source.structureInstances??[]).map(raw=>{const instance=normalizeInstance(clone(raw)),legacy=legacyMap.get(instance.templateId);if(legacy&&Number(raw.templateVersion??0)<legacy.before){instance.templateId=legacy.id;instance.migration={...(instance.migration??{}),preservedLegacySemantics:true};}if(instance.templateId==='builtin:mod-12'){instance.templateId='builtin:mod-n';instance.parameters={...instance.parameters,modulus:instance.parameters.modulus??12};instance.variables=instance.variables?.length?instance.variables:clone(ZI_WEI_BASIC_SCHEME.variables);instance.variableScheme={id:ZI_WEI_BASIC_SCHEME.id,name:ZI_WEI_BASIC_SCHEME.name,migratedFrom:'builtin:mod-12'};for(const variable of instance.variables??[])if(variable.formula){variable.formula=variable.formula.replace(/,\s*12\s*\)/g,', modulus)');try{variable.expression=parseFormula(variable.formula)}catch{}}}if(instance.templateId==='builtin:poset-hasse'&&instance.parameters.starter==null)instance.parameters.starter='diamond';const template=templateMap.get(instance.templateId);if(!instance.variables.length&&template?.variables)instance.variables=clone(template.variables);instance.templateVersion=template?.version??instance.templateVersion;return instance});
+  const instances=(source.structureInstances??[]).map(raw=>{const instance=migrateLmnInstance(normalizeInstance(clone(raw))),legacy=legacyMap.get(instance.templateId);if(legacy&&Number(raw.templateVersion??0)<legacy.before){instance.templateId=legacy.id;instance.migration={...(instance.migration??{}),preservedLegacySemantics:true};}if(instance.templateId==='builtin:mod-12'){instance.templateId='builtin:mod-n';instance.parameters={...instance.parameters,modulus:instance.parameters.modulus??12};instance.variables=instance.variables?.length?instance.variables:clone(ZI_WEI_BASIC_SCHEME.variables);instance.variableScheme={id:ZI_WEI_BASIC_SCHEME.id,name:ZI_WEI_BASIC_SCHEME.name,migratedFrom:'builtin:mod-12'};for(const variable of instance.variables??[])if(variable.formula){variable.formula=variable.formula.replace(/,\s*12\s*\)/g,', modulus)');try{variable.expression=parseFormula(variable.formula)}catch{}}}if(instance.templateId==='builtin:poset-hasse'&&instance.parameters.starter==null)instance.parameters.starter='diamond';const template=templateMap.get(instance.templateId);if(!instance.variables.length&&template?.variables)instance.variables=clone(template.variables);instance.templateVersion=template?.version??instance.templateVersion;return instance});
   const migrated={...clone(source),schemaVersion:4,application:'LMN Knowledge System',structureTemplates:templates,structureInstances:instances,variableSchemes:ensureVariableSchemes(source.variableSchemes??[]),boards:clone(source.boards??[]),placements:clone(source.placements??[]),settings:clone(source.settings??[]),migration:{from:source.schemaVersion??3,to:4,at:new Date().toISOString(),preservedIds:true,contentModel:'semantic-container-v1',boardModel:'board-frame-v1'}};ensureBoardState(migrated);migrateStateContentModels(migrated,instance=>{const template=templateMap.get(instance.templateId);return template?materializeInstanceDefinition(template,instance):null});return migrated;
 }
 

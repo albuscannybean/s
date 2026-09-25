@@ -70,7 +70,7 @@ export function createLibraryPreview(template,doc=globalThis.document){
  const id=template.id??'',factory=template.slotFactory??'',layout=template.layout?.type??'';
  if(id.includes('empty-custom')){add('rect',{x:25,y:14,width:70,height:44,rx:8,class:'mini-line','stroke-dasharray':'4 4'});line([52,36],[68,36]);line([60,28],[60,44])}
  else if(id.includes('n-center')||factory==='semantic:n-center')graph([[60,36],[60,10],[99,36],[60,62],[21,36]],[[0,1],[0,2],[0,3],[0,4]]);
- else if(id.includes('lmn-432')){for(const[x,count]of[[25,4],[60,3],[95,2]])for(let n=0;n<count;n++)add('rect',{x:x-6,y:7+n*15,width:12,height:9,rx:2,class:'mini-node'});line([31,26],[54,27]);line([66,42],[89,27])}
+ else if(id.includes('lmn-444')){for(const x of[25,60,95])for(let n=0;n<4;n++)add('rect',{x:x-6,y:4+n*14,width:12,height:9,rx:2,class:'mini-node'});line([31,19],[54,19]);line([66,33],[89,33])}
  else if(layout==='venn'||id.includes('venn')){add('ellipse',{cx:46,cy:36,rx:24,ry:25,class:'mini-line'});add('ellipse',{cx:74,cy:36,rx:24,ry:25,class:'mini-line'})}
  else if(layout==='coordinate'){line([15,50],[105,50]);line([30,62],[30,8]);add('path',{d:'M34 46 Q58 10 92 25',class:'mini-line'});line([30,50],[77,20]);node([77,20],3)}
  else if(/matrix|operation-table|cartesian/.test(id)||['table','matrix'].includes(layout)){for(let x=0;x<4;x++)line([30+x*20,12],[30+x*20,60]);for(let y=0;y<4;y++)line([30,12+y*16],[90,12+y*16])}

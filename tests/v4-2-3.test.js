@@ -32,9 +32,9 @@ test('every visible built-in structure can materialize and build a scene',()=>{
   assert.equal(mappingScene.background.some(item=>item.className?.includes('lmn-column-title')),false);
 });
 
-test('LMN N channel sends symbolization and structuring into the paired M layers',()=>{
-  const template=getBuiltinTemplate('builtin:lmn-432'),instance=createStructureInstance(template,'k'),definition=materializeInstanceDefinition(template,instance);buildSceneGeometry(definition,instance);
-  assert.deepEqual(definition.edges.filter(item=>['e7','e8','e9','e10'].includes(item.id)).map(item=>[item.sourceSlotId,item.targetSlotId,item.direction]),[['N1','M1','directed'],['N1','M2','directed'],['N2','M2','directed'],['N2','M3','directed']]);
+test('LMN N channel spans all four mediation pairs',()=>{
+  const template=getBuiltinTemplate('builtin:lmn-444'),instance=createStructureInstance(template,'k'),definition=materializeInstanceDefinition(template,instance);buildSceneGeometry(definition,instance);
+  assert.deepEqual(definition.edges.filter(item=>['e9','e10','e11','e12','e13','e14','e15','e16'].includes(item.id)).map(item=>[item.sourceSlotId,item.targetSlotId,item.direction]),[['N0','M0','directed'],['N0','M1','directed'],['N1','M1','directed'],['N1','M2','directed'],['N2','M2','directed'],['N2','M3','directed'],['N3','M3','directed'],['N3','M0','directed']]);
 });
 
 test('built-in variable schemes allow edited defaults and persistent deletion tombstones',()=>{
@@ -54,7 +54,7 @@ test('built-in template visual defaults survive migration while current topology
 
 test('V4.2.3+ source contains synchronized find scrolling, one settings tab, and three navigation modes',()=>{
   const controller=fs.readFileSync(new URL('../packages/ui/workspace-controller.js',import.meta.url),'utf8'),html=fs.readFileSync(new URL('../apps/web/index.html',import.meta.url),'utf8');
-  assert.match(html,/V5\.1\.3/);
+  assert.match(html,/V5\.1\.4/);
   assert.equal((html.match(/data-navigator=/g)??[]).length,3);
   assert.doesNotMatch(html,/data-navigator="knowledge"/);
   assert.match(controller,/scrollSourceSelectionIntoView/);

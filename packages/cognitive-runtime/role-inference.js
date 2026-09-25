@@ -10,7 +10,7 @@ const KEYWORDS=Object.freeze({
   'target-concept':['concept','概念'],contrast:['contrast','difference','distinction','区别','区分','对照'],problem:['problem','question','问题'],concept:['concept','概念'],distinction:['distinction','区分'],commitment:['commitment','承诺'],objection:['objection','critique','异议','反驳','批评'],revision:['revision','修正'],
   source:['source','passage','work','原文','文本','作品'],context:['context','background','语境','背景'],interpretation:['interpretation','reading','阐释','解读'],motif:['motif','theme','意象','主题'],
   'comparison-dimension':['dimension','criterion','维度','标准'],similarity:['similarity','same','相似','共同'],difference:['difference','differ','差异','不同'],condition:['condition','if','条件','如果'],outcome:['outcome','result','结果'],
-  essence:['essence','本质'],existence:['existence','存在'],existential:['existential','existent','存在者'],language:['language','语言'],construction:['construction','construct','构造'],realization:['realization','realize','实现'],symbolization:['symbolization','symbolize','符号化'],structuring:['structuring','structure','结构化']
+  representation:['representation','可表示','表示论'],relation:['relation','关系论'],function:['function','函数论'],composition:['composition','组合论'],construction:['construction','构造论'],generation:['generation','生成论'],abstraction:['abstraction','抽象论'],symbolization:['symbolization','符号论'],structuring:['structuring','结构论'],functionalization:['functionalization','功能论'],collectivization:['collectivization','集合论']
 });
 
 const CONTENT_ROLES=Object.freeze({definition:['definition'],theorem:['known-theorem'],proof:['proof','proof-method'],example:['example','application'],counterexample:['counterexample','boundary'],reference:['source','context'],formula:['expression']});

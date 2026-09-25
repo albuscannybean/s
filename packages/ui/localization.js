@@ -36,14 +36,14 @@ const BUILTIN_NAMES=Object.freeze({
  'builtin:operation-table':['有限运算表','Finite Operation Table'],
  'builtin:mod-n':['模结构 ℤ/nℤ','Modular Space ℤ/nℤ'],
  'builtin:poset-hasse':['偏序与哈斯图','Partial Order / Hasse'],
- 'builtin:lmn-432':['LMN 4–3–2','LMN 4–3–2'],
+ 'builtin:lmn-444':['LMN 4–4–4','LMN 4–4–4'],
  'builtin:n-center':['n 元中心','Center & Facets']
 });
 // Metadata only: no template identity, parameter value or mathematical model is changed.
 export function ensureBuiltinLocalizedRecord(template){
  const record=ensureLocalizedRecord(template),names=BUILTIN_NAMES[template.id];
  if(names)record.nameI18n=bilingual(...names);
- record.descriptionI18n=bilingual(translateUI(template.description,'zh-CN'),translateUI(template.description,'en'));
+ record.descriptionI18n=bilingual(translateUI(template.description,'zh-CN'),template.descriptionEn??translateUI(template.description,'en'));
  record.parameters=(template.parameters??[]).map(parameter=>({...parameter,labelI18n:parameter.labelI18n??bilingual(translateUI(parameter.label,'zh-CN'),translateUI(parameter.label,'en')),...(parameter.options?{options:parameter.options.map(option=>typeof option==='string'?option:{...option,labelI18n:option.labelI18n??bilingual(translateUI(option.label,'zh-CN'),translateUI(option.label,'en'))})}:{})}));
  return record;
 }

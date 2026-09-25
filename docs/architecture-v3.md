@@ -13,7 +13,7 @@ V3 separates six concepts that V2 partially coupled:
 | Binding | Assignment inside one Slot | Knowledge, Structure, value or variable |
 | Layout State | Presentation only | offsets, zoom, collapse state |
 
-Knowledge creation has no Structure side effect. LMN is `builtin:lmn-432`, following the exact same Template/Instance/Binding path as Hasse, a Venn diagram or a cyclic group.
+Knowledge creation has no Structure side effect. LMN is `builtin:lmn-444`, following the exact same Template/Instance/Binding path as Hasse, a Venn diagram or a cyclic group.
 
 ## Runtime flow
 

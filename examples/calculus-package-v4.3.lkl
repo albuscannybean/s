@@ -37,7 +37,7 @@ content derivative-definition {
 }
 
 structure-instance calculus-lmn {
-  using builtin:lmn-432
+  using builtin:lmn-444
   owner mathematics
   title "微积分 LMN"
   container M2 {

@@ -7,19 +7,22 @@ import {BUILTIN_TEMPLATES,getBuiltinTemplate,materializeTemplate} from '../packa
 import {parseMathExpression,parseStudyMarkdown,tokenizeInline} from '../packages/ui/math-markup.js';
 
 test('Blank Knowledge is default-capable and explicit LMN creates exactly one root',()=>{
-  const template=getBuiltinTemplate('builtin:lmn-432'),blank=createKnowledgeWorkspaceRecords('群'),withLmn=createKnowledgeWorkspaceRecords('群论',{withLmn:true,lmnTemplate:template});
+  const template=getBuiltinTemplate('builtin:lmn-444'),blank=createKnowledgeWorkspaceRecords('群'),withLmn=createKnowledgeWorkspaceRecords('群论',{withLmn:true,lmnTemplate:template});
   assert.equal(blank.structureInstances.length,0);
   assert.equal(blank.representations.length,0);
   assert.equal(withLmn.structureInstances.length,1);
-  assert.equal(withLmn.structureInstances[0].templateId,'builtin:lmn-432');
+  assert.equal(withLmn.structureInstances[0].templateId,'builtin:lmn-444');
   assert.equal(withLmn.representations[0].data.root,true);
 });
 
-test('LMN mediation and feedback directions match V4.1 theory',()=>{
-  const edges=new Map(getBuiltinTemplate('builtin:lmn-432').edges.map(edge=>[edge.id,edge]));
-  assert.deepEqual(['e1','e2','e3','e4','e5','e6'].map(id=>[edges.get(id).sourceSlotId,edges.get(id).targetSlotId]),[['L1','M1'],['M1','L2'],['L2','M2'],['M2','L3'],['L3','M3'],['M3','L4']]);
-  assert.deepEqual(['e7','e8','e9','e10'].map(id=>[edges.get(id).sourceSlotId,edges.get(id).targetSlotId,edges.get(id).direction]),[['N1','M1','directed'],['N1','M2','directed'],['N2','M2','directed'],['N2','M3','directed']]);
-  assert.equal(getBuiltinTemplate('builtin:lmn-432').slots.find(slot=>slot.id==='N1').role,'symbolization');
+test('LMN has four roles on every axis and closes across scales',()=>{
+  const edges=new Map(getBuiltinTemplate('builtin:lmn-444').edges.map(edge=>[edge.id,edge]));
+  assert.deepEqual(['L','M','N'].map(axis=>getBuiltinTemplate('builtin:lmn-444').slots.filter(slot=>slot.id.startsWith(axis)).map(slot=>slot.id)),[['L0','L1','L2','L3'],['M0','M1','M2','M3'],['N0','N1','N2','N3']]);
+  assert.deepEqual(['e1','e2','e3','e4','e5','e6','e7','e8'].map(id=>[edges.get(id).sourceSlotId,edges.get(id).targetSlotId]),[['L0','M0'],['M0','L1'],['L1','M1'],['M1','L2'],['L2','M2'],['M2','L3'],['L3','M3'],['M3','L0']]);
+  assert.deepEqual(['e9','e10','e11','e12','e13','e14','e15','e16'].map(id=>[edges.get(id).sourceSlotId,edges.get(id).targetSlotId]),[['N0','M0'],['N0','M1'],['N1','M1'],['N1','M2'],['N2','M2'],['N2','M3'],['N3','M3'],['N3','M0']]);
+  assert.equal(edges.get('e8').semanticAxis,'next-scale');
+  assert.equal(edges.get('e16').semanticAxis,'next-scale');
+  assert.equal(getBuiltinTemplate('builtin:lmn-444').slots.find(slot=>slot.id==='N0').role,'symbolization');
 });
 
 test('force graph layout is deterministic, compact, and not a grid fallback',()=>{

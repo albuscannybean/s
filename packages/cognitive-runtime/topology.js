@@ -2,7 +2,7 @@ const normalize=value=>String(value??'').normalize('NFKC').toLowerCase();
 const round=value=>Number(Math.max(0,Math.min(1,value)).toFixed(3));
 const unique=value=>[...new Set((value??[]).filter(Boolean))];
 
-export const PROJECTION_TEMPLATES=Object.freeze({network:'builtin:directed-graph',dependency:'builtin:directed-graph',proof:'builtin:directed-graph',hierarchy:'builtin:tree',comparison:'builtin:directed-graph',decision:'builtin:decision-tree',lmn:'builtin:lmn-432','no-structure':null});
+export const PROJECTION_TEMPLATES=Object.freeze({network:'builtin:directed-graph',dependency:'builtin:directed-graph',proof:'builtin:directed-graph',hierarchy:'builtin:tree',comparison:'builtin:directed-graph',decision:'builtin:decision-tree',lmn:'builtin:lmn-444','no-structure':null});
 
 const TYPE_GROUPS=Object.freeze({
   proof:['proves','proof-of','implies','derives','entails','supports','depends-on','requires','prerequisite'],
@@ -11,7 +11,7 @@ const TYPE_GROUPS=Object.freeze({
   comparison:['contrasts-with','differs-from','similar-to','compares','shares'],
   decision:['condition','branches-to','alternative','leads-to'],
   feedback:['feedback','responds-to','revises','cycles-to'],
-  lmn:['defines','exists-at','constructs','realizes','expresses','symbolizes','structures','desymbolizes','destructures']
+  lmn:['defines','constructs','generates','abstracts','symbolizes','desymbolizes','structures','destructures','functionalizes','defunctionalizes','collectivizes','decollectivizes']
 });
 
 function topologicalOrdering(nodeIds,edges){
@@ -65,7 +65,7 @@ export function rankProjectionCandidates({cognitivePlan={},topology={},roleInfer
   const edges=topology.edges??[],features=topology.features??{},roles=roleNames(roleInference),taskId=cognitivePlan.taskSchema?.id,preferred=new Set(cognitivePlan.projectionCandidates??[]),taskBonus=type=>preferred.has(type)?0.08:0,ids=group=>relationGroup(edges,group).map(edge=>edge.id);
   const goal=hasAny(roles,['goal','conclusion']),premiseEvidence=hasAny(roles,['premise','definition','known-theorem','lemma']),derivationEvidence=hasAny(roles,['proof','proof-method','bridge']),proofEligible=Boolean((topology.nodes?.length??0)>=3&&goal&&premiseEvidence&&derivationEvidence&&(features.proofEdgeCount??0)>=2&&!features.cyclic);
   const dependencyEligible=Boolean(features.dependencyEdgeCount&&!features.cyclic),hierarchyEligible=Boolean(features.hierarchyEdgeCount),comparisonRoles=hasAny(roles,['object-a'])&&hasAny(roles,['object-b'])&&hasAny(roles,['comparison-dimension','similarity','difference','contrast']),comparisonEligible=Boolean(features.comparisonEdgeCount&&comparisonRoles),decisionRoles=roles.has('condition')&&roles.has('outcome'),decisionEligible=Boolean(features.decisionEdgeCount&&features.branchCount&&decisionRoles);
-  const lmnRoles=['essence','existence','existential','language','definition','construction','realization','symbolization','structuring'],lmnEligible=lmnRoles.every(role=>roles.has(role))&&features.lmnEdgeCount>=8;
+  const lmnRoles=['representation','relation','function','composition','definition','construction','generation','abstraction','symbolization','structuring','functionalization','collectivization'],lmnEligible=lmnRoles.every(role=>roles.has(role))&&features.lmnEdgeCount>=16;
   const networkEligible=edges.length>0&&topology.nodes?.length>1;
   const specializedEdgeCount=(features.proofEdgeCount??0)+(features.dependencyEdgeCount??0)+(features.hierarchyEdgeCount??0)+(features.comparisonEdgeCount??0)+(features.decisionEdgeCount??0)+(features.lmnEdgeCount??0),results=[
     candidate('proof',(taskId==='proof-learning'?0.52:0.08)+Math.min(0.27,(features.proofEdgeCount??0)*0.09)+(goal?0.08:0)+(premiseEvidence&&derivationEvidence?0.06:0)+taskBonus('proof'),proofEligible,proofEligible?'检测到目标、前提、中间证明依据与至少两条真实证明/依赖关系。':'缺少目标、前提、中间证明依据或足够的真实证明链。',{roles:[...roles].filter(role=>['goal','conclusion','premise','definition','known-theorem','lemma','proof','proof-method','bridge'].includes(role)),relations:ids('proof'),warnings:features.cyclic?['证明关系存在循环']:[]}),
@@ -73,7 +73,7 @@ export function rankProjectionCandidates({cognitivePlan={},topology={},roleInfer
     candidate('decision',(taskId==='problem-solving'?0.18:0.05)+Math.min(0.5,(features.decisionEdgeCount??0)*0.14)+(features.branchCount?0.16:0)+taskBonus('decision'),decisionEligible,decisionEligible?'检测到条件、分支与结果。':'缺少条件分支或替代结果。',{roles:[...roles].filter(role=>['condition','outcome'].includes(role)),relations:ids('decision')}),
     candidate('hierarchy',(taskId==='concept-understanding'?0.15:0.08)+Math.min(0.5,(features.hierarchyEdgeCount??0)*0.14)+taskBonus('hierarchy'),hierarchyEligible,hierarchyEligible?'存在稳定的包含、特化或部分关系。':'缺少稳定层级关系。',{relations:ids('hierarchy')}),
     candidate('comparison',(taskId==='comparison'?0.48:0.1)+Math.min(0.28,(features.comparisonEdgeCount??0)*0.1)+(comparisonRoles?0.12:0)+taskBonus('comparison'),comparisonEligible,comparisonEligible?'识别出比较对象、维度以及差异/相似关系。':'缺少比较对象、共同维度或真实比较关系。',{roles:[...roles].filter(role=>['object-a','object-b','comparison-dimension','similarity','difference','contrast'].includes(role)),relations:ids('comparison')}),
-    candidate('lmn',Math.min(0.82,(features.lmnEdgeCount??0)*0.07)+(lmnEligible?0.1:0)+taskBonus('lmn'),lmnEligible,lmnEligible?'九类 LMN 语义角色与转换关系均有证据。':'LMN projection not semantically justified',{roles:[...roles].filter(role=>lmnRoles.includes(role)),relations:ids('lmn'),warnings:lmnEligible?[]:['不会随机填充 LMN 槽位']}),
+    candidate('lmn',Math.min(0.82,(features.lmnEdgeCount??0)*0.045)+(lmnEligible?0.1:0)+taskBonus('lmn'),lmnEligible,lmnEligible?'十二类四阶 LMN 角色和转换关系均有证据。':'LMN projection not semantically justified',{roles:[...roles].filter(role=>lmnRoles.includes(role)),relations:ids('lmn'),warnings:lmnEligible?[]:['不会随机填充 LMN 槽位']}),
     candidate('network',((taskId==='concept-understanding'||taskId==='interpretation')?0.24:0.12)+Math.min(0.45,edges.length*0.09)+taskBonus('network'),networkEligible,networkEligible?'激活知识之间存在可展示的真实语义关系。':'知识之间没有真实关系；关系视图不足以构成图。',{relations:edges.map(edge=>edge.id)}),
     candidate('no-structure',!edges.length?0.78:!specializedEdgeCount?0.42:0.12,true,edges.length?'保留 Knowledge + Relation 视图，避免不必要的持久结构。':'Insufficient semantic topology：没有真实关系，不生成结构。',{warnings:edges.length?[]:['未发现可支持拓扑的语义关系']})
   ];
