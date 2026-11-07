@@ -116,7 +116,7 @@ try {
   await page.setViewportSize({width:1440,height:900});
   await page.waitForFunction(()=>!document.querySelector('#navigator').inert);
   await page.evaluate(()=>{lmnWorkspace.preferences.language='en';lmnWorkspace.renderAll()});
-  assert.equal(await page.locator('.welcome h1').textContent(),'Knowledge workspace');
+  assert.equal(await page.locator('.welcome h1').textContent(),'Start with a question');
   result.errors=errors;assert.deepEqual(errors,[]);
   await writeFile('qa-output/design-system.json',JSON.stringify(result,null,2));console.log(JSON.stringify(result,null,2));
 } finally {await browser.close()}
