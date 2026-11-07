@@ -35,10 +35,50 @@ try {
     if(theme==='dark')assert.notEqual(appearance.background,'rgb(255, 255, 255)');
   }
   await shot('dark');
+  await page.locator('.welcome-tools summary').click();
   await page.locator('[data-welcome="import"]').click();
   const label=await page.locator('#importDialog').getAttribute('aria-labelledby');assert.ok(label);
   assert.ok(await page.locator(`#${label}`).isVisible());
   await page.keyboard.press('Escape');assert.equal(await page.locator('#importDialog').getAttribute('open'),null);
+  await page.locator('#learningTopic').fill('为什么一致收敛要求统一的 N？');
+  await page.locator('#learningMode').selectOption('proof');
+  await page.locator('#learningStartForm button[type=submit]').click();
+  await page.waitForFunction(()=>lmnWorkspace.knowledge?.title==='为什么一致收敛要求统一的 N？');
+  assert.equal(await page.locator('#notesDocument').isVisible(),true);
+  assert.match(await page.evaluate(()=>lmnWorkspace.knowledge.content),/独立复现/);
+  await page.evaluate(()=>lmnWorkspace.activateHome());
+  await page.locator('.learning-recent-row').filter({hasText:'为什么一致收敛要求统一的 N？'}).click();
+  assert.equal(await page.evaluate(()=>lmnWorkspace.knowledge.title),'为什么一致收敛要求统一的 N？');
+  await page.evaluate(()=>lmnWorkspace.activateHome());
+  const createByDialog=async(button,title)=>{
+    await button.click();
+    await page.locator('#textPromptInput').fill(title);
+    await page.locator('#textPromptConfirm').click();
+  };
+  await createByDialog(page.locator('#studyNewCourse'),'数学分析');
+  await page.locator('.study-course').waitFor();
+  assert.equal(await page.locator('.study-course').count(),1);
+  await createByDialog(page.locator('.study-course .study-inline-actions').first().getByText('＋ 新建章节'),'函数项级数');
+  await page.locator('.study-chapter').waitFor();
+  assert.equal(await page.locator('.study-chapter').count(),1);
+  await createByDialog(page.locator('.study-chapter .study-inline-actions').getByText('＋ 知识单元'),'一致收敛');
+  await page.waitForFunction(()=>lmnWorkspace.knowledge?.title==='一致收敛');
+  assert.match(await page.evaluate(()=>lmnWorkspace.knowledge.content),/定义与条件/);
+  await page.evaluate(()=>lmnWorkspace.activateHome());
+  await createByDialog(page.locator('.study-unit-row').getByText('＋ 习题'),'一致收敛习题');
+  await page.waitForFunction(()=>lmnWorkspace.knowledge?.title==='一致收敛习题');
+  assert.match(await page.evaluate(()=>lmnWorkspace.knowledge.content),/独立尝试/);
+  await page.evaluate(()=>lmnWorkspace.activateHome());
+  await page.locator('#studyLooseKnowledge').selectOption({label:'为什么一致收敛要求统一的 N？'});
+  await page.locator('#studyOrganizeForm button[type="submit"]').click();
+  const studyResult=await page.evaluate(async()=>{
+    const {studyCatalog}=await import('../../packages/ui/study-catalog.js');
+    const {exportLkl3,buildLkl3ImportPlan}=await import('../../packages/lkl3/package.js');
+    const tree=studyCatalog(lmnWorkspace.state),plan=buildLkl3ImportPlan(exportLkl3(lmnWorkspace.state),{});
+    return{chapters:tree[0].chapters.length,units:tree[0].chapters[0].units.length,activities:tree[0].chapters[0].units[0].activities.length,committable:plan.committable,errors:plan.errors};
+  });
+  assert.deepEqual(studyResult,{chapters:1,units:2,activities:1,committable:true,errors:[]});
+  await shot('study-catalog');
   await page.evaluate(async()=>{
     const {createKnowledge}=await import('../../packages/domain/core.js');
     const {createStructureInstance}=await import('../../packages/structure-engine/model.js');
@@ -76,7 +116,7 @@ try {
   await page.setViewportSize({width:1440,height:900});
   await page.waitForFunction(()=>!document.querySelector('#navigator').inert);
   await page.evaluate(()=>{lmnWorkspace.preferences.language='en';lmnWorkspace.renderAll()});
-  assert.equal(await page.locator('.welcome h1').textContent(),'Knowledge workspace');
+  assert.equal(await page.locator('.welcome h1').textContent(),'Start with a question');
   result.errors=errors;assert.deepEqual(errors,[]);
   await writeFile('qa-output/design-system.json',JSON.stringify(result,null,2));console.log(JSON.stringify(result,null,2));
 } finally {await browser.close()}

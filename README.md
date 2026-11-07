@@ -1,4 +1,4 @@
-# LMN Knowledge System 5.1.2 · M System Web
+# LMN Knowledge System 5.1.4 · M System Web
 
 [打开网页 / Open the app](https://albuscannybean.github.io/s/apps/web/)
 
@@ -6,6 +6,8 @@ M System 是在浏览器中运行的结构化内容工作区。L System 解析�
 
 ## 功能
 
+- 首页可以从具体数学问题建立轻量学习文档（概念、证明、解题、整理），并继续最近保存的知识；学习提纲写入现有正文，不强制建立 LMN 结构。
+- 「我的数学课程」支持课程 → 章节 → 知识单元 → 习题/证明，及将已有知识归入章节；所有条目仍是普通 Knowledge，层级以原有 placements 保存，可经 LKL3 完整导入导出。
 - 内容库统一管理知识、独立正文、结构与内容地址，支持搜索、拖动、剪切复制粘贴、批量删除和撤销。
 - 结构库提供参数化数学结构、简笔预览、自定义模板与变量方案；自定义结构和变量方案可批量管理。
 - 全局设计优先于局部样式；Boolean 哈斯图默认采用 4:3 对称布局，节点接口与箭头使用统一几何。
@@ -33,6 +35,7 @@ node tests/local-server.mjs 4174
 npm install --no-save playwright@1.62.1
 npx playwright install chromium
 node tests/qa-vnext-web.mjs
+node tests/qa-design-system.mjs
 node tests/qa-v51-web.mjs
 node tests/qa-v511-structures.mjs
 node tests/qa-v511-content.mjs
@@ -40,6 +43,14 @@ node tests/qa-v512-web.mjs
 ```
 
 `LMN_QA_URL` 可指定待验证网页。CI 执行同一组检查；Pages 从 `master` 构建并发布 `apps/web` 与 `packages`。
+
+## 使用 Codex 发布
+
+1. 在对应 PR 上确认 **Web CI** 的 `test` 和 `browser` 两个任务均通过，并审阅变更。
+2. 将 PR 合并到 `master`；`.github/workflows/pages.yml` 会因 `master` push 自动执行 `npm run build:web`、`npm test` 并部署 GitHub Pages。也可从 GitHub Actions 手动运行 **Deploy Web**。
+3. 等待 **Deploy Web** 成功，然后访问 [网页](https://albuscannybean.github.io/s/apps/web/) 检查课程创建、章节归档与笔记编辑。若浏览器仍显示旧界面，请正常刷新以等待新版 service worker 生效。
+
+可直接给 Codex 的发布任务是：「检查此 PR 的 CI 与变更，修复失败项；确认通过后合并至 `master`，等待 Deploy Web 成功，再核对线上学习目录。」注意：**发布代码不会把某个浏览器 IndexedDB 中的个人笔记上传到 GitHub**。换设备或浏览器前请在站内导出 LKL3 知识包。
 
 ## 目录
 
