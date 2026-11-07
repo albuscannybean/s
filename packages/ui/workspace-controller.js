@@ -44,6 +44,7 @@ import {applyStructureInstanceDraft,buildImportPlan,commitImportPlan,countModel,
 import {TransientOverlayManager} from './transient-overlay-manager.js';
 import {createDocumentEditor} from './document-editor.js';
 import {learningNoteBody} from './learning-notes.js';
+import {canPlaceInStudyChapter,placeStudyKnowledge,studyCatalog,studyKind,studyOverviewBody,studyParentId,studyTag} from './study-catalog.js';
 import {resultSpaceLabel} from '../structure-engine/variable-result-normalizer.js';
 import {RELATION_STYLE_FIELDS,resetRelationStyle,resolveRelationStyle,setRelationStyle} from '../structure-engine/relation-style-resolver.js';
 import {PLOT_PRESETS,evaluateMathExpression,evaluatePlotPoint,numericalDerivative,numericalIntegral,numericalLimit,numericalSeries,parsePlotExpression} from '../structure-engine/plotting.js';
@@ -98,6 +99,8 @@ class WorkspaceController{
     this.transient=new TransientOverlayManager(document).register('quickCreate',$('#quickCreate'),{emptyInput:$('#quickCreateInput')}).register('contextMenu',$('#contextMenu'));
     $('#toggleNavigator').onclick=()=>this.toggleNavigator();$('#navigatorMenu').onclick=event=>this.openNavigatorMenu(event);this.bindNavigatorResizer();all('[data-welcome]').forEach(button=>button.onclick=()=>button.dataset.welcome==='knowledge'?this.openQuickCreate():button.dataset.welcome==='library'?this.openLibrary():this.openImport());all('[data-template]').forEach(button=>button.onclick=()=>this.openStructureConfiguration(button.dataset.template));all('[data-empty-template]').forEach(button=>button.onclick=()=>this.openStructureConfiguration(button.dataset.emptyTemplate));
     $('#learningStartForm').onsubmit=event=>{event.preventDefault();this.startLearning()};
+    $('#studyNewCourse').onclick=()=>this.requestText('建立一门数学课程','',title=>this.createStudyEntry(title,'course'),{label:'课程名称',hint:'例如：数学分析、概率论。之后可在课程下建立章节。'});
+    $('#studyOrganizeForm').onsubmit=event=>{event.preventDefault();const id=$('#studyLooseKnowledge').value,parentId=$('#studyDestinationChapter').value;if(!id||!parentId)return;try{this.commit('study:organize',()=>placeStudyKnowledge(this.state,parentId,id,{idFactory:uid}))}catch(error){$('#saveStatus').textContent=error.message}};
     $('#insertStructure').onclick=()=>this.openNewTab();$('#globalSearch').onclick=()=>this.openCommand();$('#moreBtn').onclick=event=>this.openMoreMenu(event);$('#homeBtn').onclick=()=>this.activateHome();$('#backBtn').onclick=()=>this.goHistory(-1);$('#forwardBtn').onclick=()=>this.goHistory(1);$('#upBtn').onclick=()=>this.goUp();$('#undoBtn').onclick=()=>this.undo();$('#redoBtn').onclick=()=>this.redo();$('#fitBtn').onclick=()=>this.fit();$('#focusBtn').onclick=()=>this.toggleFocus();$('#structureSettingsButton').onclick=()=>this.openPanel('structure',this.currentInstanceId,'settings');$('#openDocumentsButton').onclick=event=>this.openBrowserDocumentsMenu(event);$('#closePanel').onclick=()=>this.closePanel();$('#startNotes').onclick=()=>this.startWriting();$('#emptyInsertStructure').onclick=()=>this.openLibrary();all('[data-new-tab-action]').forEach(button=>button.onclick=()=>this.runNewTabAction(button.dataset.newTabAction));
     all('.dialog-close').forEach(button=>button.onclick=()=>button.closest('dialog').close());all('dialog').forEach(dialog=>dialog.addEventListener('click',event=>{if(event.target===dialog)dialog.close()}));all('[data-navigator]').forEach(button=>button.onclick=()=>{this.closeCommandDialog();this.navigatorMode=button.dataset.navigator;this.renderNavigator()});
     $('#navigatorFilter').oninput=()=>this.renderNavigator();$('#librarySearch').oninput=()=>this.renderLibrary();all('[data-library-filter]').forEach(button=>button.onclick=()=>{this.libraryFilter=button.dataset.libraryFilter;all('[data-library-filter]').forEach(item=>item.classList.toggle('active',item===button));this.renderLibrary()});$('#quickBuilder').onclick=()=>this.openQuickBuilder();$('#advancedBuilder').onclick=()=>this.openAdvanced();$('#saveQuickTemplate').onclick=()=>this.saveQuickTemplate();$('#builderAddNode').onclick=()=>this.addQuickBuilderNode();$('#builderAddRelation').onclick=()=>{this.quickBuilderLinkSource=null;this.quickBuilderLinkMode=true;this.renderQuickBuilder()};$('#builderDeleteSelection').onclick=()=>this.deleteQuickBuilderSelection();$('#builderUseLkl').onclick=()=>{$('#quickBuilderDialog').close();this.openAdvanced()};
@@ -140,14 +143,74 @@ class WorkspaceController{
   activateHome(push=true){this.closeTransientOverlays();this.closePanel();this.activeTabKey=null;const saved=this.preferences.homeLocation;if(saved&&this.validHomeLocation(saved))this.applyLocation(saved,{remember:false,render:false});else{if(saved){this.preferences.homeLocation=null;this.savePreferences()}this.currentKnowledgeId=null;this.currentInstanceId=null;this.currentBoardId=null;this.document='welcome';this.path=[];this.selection.clear();this.fitPending=true}if(push&&this.browserHistoryReady)history.pushState({home:true,lmnLocation:this.location()},'');this.renderAll()}
   goUp(){if(this.path.length<=1){this.activateHome();return}const index=this.path.length-2,segment=this.path[index];this.navigatePath(index,segment)}
   runNewTabAction(action){if(action==='learn')return this.activateHome();if(action==='knowledge')return this.openQuickCreate(null,'blank');if(action==='lmn')return this.openQuickCreate(null,'lmn');if(action==='structure')return this.openLibrary();if(action==='notes')return this.knowledge?this.activateDocument('notes',true,this.currentKnowledgeId):this.openQuickCreate();if(action==='import')return this.openImport();if(action==='search')return this.openCommand()}
-  startLearning(){const title=$('#learningTopic').value.trim();if(!title){$('#learningTopic').focus();return}const mode=$('#learningMode').value;this.createKnowledge(title,{initialContent:learningNoteBody(mode,this.preferences.language)});}
-  renderLearningHome(){const root=$('#learningRecent');if(!root)return;root.replaceChildren();const recent=[...this.state.knowledge].filter(item=>item?.id&&item.title).sort((a,b)=>String(b.updatedAt??b.createdAt??'').localeCompare(String(a.updatedAt??a.createdAt??''))).slice(0,5);if(!recent.length){const empty=document.createElement('p');empty.className='learning-recent-empty';empty.textContent=t('还没有保存的知识。可以从上方的问题开始。');root.append(empty);return}for(const item of recent){const button=document.createElement('button');button.type='button';button.className='learning-recent-row';const title=document.createElement('span');title.textContent=item.title;const detail=document.createElement('small');detail.textContent=t('知识文档');button.append(title,detail);button.onclick=()=>this.openKnowledge(item.id);root.append(button)}}
+  startLearning(){const title=$('#learningTopic').value.trim();if(!title){$('#learningTopic').focus();return}const mode=$('#learningMode').value,parentKnowledgeId=$('#learningChapter').value||null;this.quickBind=null;this.createKnowledge(title,{initialContent:learningNoteBody(mode,this.preferences.language),studyKind:parentKnowledgeId?'unit':null,parentKnowledgeId});}
+  createStudyEntry(title,kind,parentKnowledgeId=null,mode='concept'){
+    const overview=['course','chapter'].includes(kind),content=overview?studyOverviewBody(kind,this.preferences.language):learningNoteBody(mode,this.preferences.language);
+    this.quickBind=null;return this.createKnowledge(title,{initialContent:content,studyKind:kind,parentKnowledgeId,stayOnHome:overview});
+  }
+  renderLearningHome(){
+    this.renderStudyCatalog();
+    const root=$('#learningRecent');if(!root)return;root.replaceChildren();
+    const recent=[...this.state.knowledge].filter(item=>item?.id&&item.title).sort((a,b)=>String(b.updatedAt??b.createdAt??'').localeCompare(String(a.updatedAt??a.createdAt??''))).slice(0,5);
+    if(!recent.length){const empty=document.createElement('p');empty.className='learning-recent-empty';empty.textContent=t('还没有保存的知识。可以从上方的问题开始。');root.append(empty);return}
+    for(const item of recent){const button=document.createElement('button');button.type='button';button.className='learning-recent-row';const title=document.createElement('span');title.textContent=item.title;const detail=document.createElement('small');detail.textContent=t(studyKind(item)==='course'?'课程':studyKind(item)==='chapter'?'章节':'知识文档');button.append(title,detail);button.onclick=()=>this.openKnowledge(item.id);root.append(button)}
+  }
+  renderStudyCatalog(){
+    const root=$('#studyCatalogList'),chapterChoice=$('#learningChapter'),loose=$('#studyLooseKnowledge'),destination=$('#studyDestinationChapter'),form=$('#studyOrganizeForm');
+    if(!root||!chapterChoice)return;
+    const remembered={chapter:chapterChoice.value,loose:loose.value,destination:destination.value};
+    root.replaceChildren();chapterChoice.replaceChildren();loose.replaceChildren();destination.replaceChildren();
+    chapterChoice.add(new Option(t('暂不归档'),''));
+    const catalog=studyCatalog(this.state),chapters=[],english=this.preferences.language==='en',expanded=this.studyOutlineOpen??=new Map();
+    const action=(label,callback,className='')=>{const button=document.createElement('button');button.type='button';button.textContent=t(label);button.className=className;button.onclick=callback;return button};
+    const link=(knowledge,className='')=>action(knowledge.title,()=>this.openKnowledge(knowledge.id),className);
+    if(!catalog.length){const empty=document.createElement('p');empty.className='study-empty';empty.textContent=t('还没有数学课程。建立一门课程，再添加章节、知识单元和独立练习。');root.append(empty)}
+    for(const {course,chapters:courseChapters} of catalog){
+      const courseShell=document.createElement('details');courseShell.className='study-course';courseShell.open=expanded.get(course.id)!==false;
+      courseShell.addEventListener('toggle',()=>expanded.set(course.id,courseShell.open));
+      const summary=document.createElement('summary');summary.append(document.createTextNode(course.title));
+      const courseMeta=document.createElement('small');courseMeta.textContent=english?`${courseChapters.length} chapters`:`${courseChapters.length} 个章节`;summary.append(courseMeta);courseShell.append(summary);
+      const courseActions=document.createElement('div');courseActions.className='study-inline-actions';
+      courseActions.append(link(course,'study-document-link'),action('＋ 新建章节',()=>this.requestText('新建章节','',title=>this.createStudyEntry(title,'chapter',course.id),{label:'章节名称',hint:'例如：函数项级数与一致收敛。'})));
+      courseShell.append(courseActions);
+      if(!courseChapters.length){const helper=document.createElement('p');helper.className='study-empty';helper.textContent=t('这门课程还没有章节。可以先建立一个章节。');courseShell.append(helper)}
+      for(const {chapter,units} of courseChapters){
+        chapters.push({chapter,course});
+        const chapterDetails=document.createElement('details');chapterDetails.className='study-chapter';chapterDetails.open=expanded.get(chapter.id)!==false;
+        chapterDetails.addEventListener('toggle',()=>expanded.set(chapter.id,chapterDetails.open));
+        const chapterSummary=document.createElement('summary');chapterSummary.append(document.createTextNode(chapter.title));
+        const meta=document.createElement('small');meta.textContent=english?`${units.length} learning units`:`${units.length} 个知识单元`;chapterSummary.append(meta);chapterDetails.append(chapterSummary);
+        const controls=document.createElement('div');controls.className='study-inline-actions';
+        controls.append(link(chapter,'study-document-link'),action('＋ 知识单元',()=>this.requestText('建立知识单元','',title=>this.createStudyEntry(title,'unit',chapter.id),{label:'问题、定义或定理',hint:'例如：一致收敛为什么要求统一的 N？'})));
+        chapterDetails.append(controls);
+        for(const {unit,activities} of units){
+          const unitShell=document.createElement('div');unitShell.className='study-unit';
+          const line=document.createElement('div');line.className='study-unit-row';
+          line.append(link(unit,'study-unit-link'));
+          if(activities.length){const count=document.createElement('small');count.textContent=english?`${activities.length} practices`:`${activities.length} 项训练`;line.append(count)}
+          line.append(action('＋ 习题',()=>this.requestText('新建一道练习','',title=>this.createStudyEntry(title,'practice',unit.id,'problem'),{label:'题目名称'})),action('＋ 证明',()=>this.requestText('新建一项证明训练','',title=>this.createStudyEntry(title,'proof',unit.id,'proof'),{label:'命题名称'})));
+          unitShell.append(line);
+          if(activities.length){const activityList=document.createElement('div');activityList.className='study-activities';for(const activity of activities){const row=link(activity, 'study-activity-link');row.prepend(document.createTextNode(studyKind(activity)==='proof'?t('证明 · '):t('习题 · ')));activityList.append(row)}unitShell.append(activityList)}
+          chapterDetails.append(unitShell);
+        }
+        courseShell.append(chapterDetails);
+      }
+      root.append(courseShell);
+    }
+    for(const {chapter,course} of chapters){const label=`${course.title} / ${chapter.title}`;chapterChoice.add(new Option(label,chapter.id));destination.add(new Option(label,chapter.id))}
+    const available=this.state.knowledge.filter(item=>canPlaceInStudyChapter(this.state,item.id));
+    for(const knowledge of available){const parentId=studyParentId(this.state,knowledge.id),current=chapters.find(item=>item.chapter.id===parentId);const suffix=current?` (${current.course.title} / ${current.chapter.title})`:'';loose.add(new Option(knowledge.title+suffix,knowledge.id))}
+    if([...chapterChoice.options].some(option=>option.value===remembered.chapter))chapterChoice.value=remembered.chapter;
+    if([...loose.options].some(option=>option.value===remembered.loose))loose.value=remembered.loose;
+    if([...destination.options].some(option=>option.value===remembered.destination))destination.value=remembered.destination;
+    form.classList.toggle('hidden',!chapters.length||!available.length);
+  }
   requestText(title,value,onCommit,{label='名称',hint=''}={}){const dialog=$('#textPromptDialog'),input=$('#textPromptInput');$('#textPromptTitle').textContent=t(title);$('#textPromptLabel').firstChild.textContent=t(label);$('#textPromptHint').textContent=t(hint);input.value=value??'';this.textPromptAction=onCommit;dialog.showModal();requestAnimationFrame(()=>{input.focus();input.select()})}
   finishTextPrompt(){const dialog=$('#textPromptDialog'),action=this.textPromptAction;this.textPromptAction=null;if(dialog.returnValue!=='default'||!action)return;const value=$('#textPromptInput').value.trim();if(value)action(value)}
   openQuickCreate(bindingContext=null,mode='blank'){this.quickBind=bindingContext;this.setQuickCreateMode(mode);this.transient?.open('quickCreate');$('#quickCreateInput').value='';$('#quickCreateInput').focus()}closeQuickCreate(){this.transient?.close('quickCreate','cancel')}
   setQuickCreateMode(mode){this.quickCreateMode=mode==='lmn'?'lmn':'blank';all('[data-create-mode]').forEach(button=>button.classList.toggle('active',button.dataset.createMode===this.quickCreateMode))}
   createKnowledgeFromQuick(){const title=$('#quickCreateInput').value.trim();if(!title)return;this.closeQuickCreate();this.createKnowledge(title,{withLmn:this.quickCreateMode==='lmn'})}
-  createKnowledge(title,{withLmn=false,initialContent=''}={}){
+  createKnowledge(title,{withLmn=false,initialContent='',studyKind:kind=null,parentKnowledgeId=null,stayOnHome=false}={}){
     let knowledge,instance;
     const bindingContext=this.quickBind,originPath=structuredClone(this.path),template=getBuiltinTemplate('builtin:lmn-444');
     this.quickBind=null;
@@ -159,9 +222,12 @@ class WorkspaceController{
         knowledge.content=initialContent;
         knowledge.objectContent=normalizeObjectContent({...knowledge.objectContent,body:initialContent,contentType:'note'});
       }
+      if(kind)knowledge.objectContent=normalizeObjectContent({...knowledge.objectContent,tags:[...new Set([...knowledge.objectContent.tags,studyTag(kind)])]});
       this.state.knowledge.push(knowledge);
       this.state.structureInstances.push(...records.structureInstances);
       this.state.representations.push(...records.representations);
+      if(parentKnowledgeId)placeStudyKnowledge(this.state,parentKnowledgeId,knowledge.id,{idFactory:uid});
+      if(stayOnHome)return;
       let recursivePath=null;
       if(bindingContext){
         const parent=this.state.structureInstances.find(item=>item.id===bindingContext.instanceId),parentTemplate=this.state.structureTemplates.find(item=>item.id===parent?.templateId);

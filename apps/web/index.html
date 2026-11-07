@@ -110,6 +110,7 @@
 <link rel="modulepreload" href="../../packages/ui/structure-library-actions.js">
 <link rel="modulepreload" href="../../packages/ui/structure-map.js">
 <link rel="modulepreload" href="../../packages/ui/structure-renderer.js">
+<link rel="modulepreload" href="../../packages/ui/study-catalog.js">
 <link rel="modulepreload" href="../../packages/ui/template-preview.js">
 <link rel="modulepreload" href="../../packages/ui/transient-overlay-manager.js">
 <link rel="modulepreload" href="../../packages/ui/ui-catalog.js">
@@ -154,9 +155,20 @@
       <form id="learningStartForm" class="learning-start">
         <label class="learning-topic"><span data-i18n="今天想弄清什么？">今天想弄清什么？</span><input id="learningTopic" required maxlength="120" placeholder="例如：为什么一致收敛要求统一的 N？" data-i18n-placeholder="例如：为什么一致收敛要求统一的 N？"></label>
         <label class="learning-mode"><span data-i18n="学习方式">学习方式</span><select id="learningMode"><option value="concept" data-i18n="理解概念">理解概念</option><option value="proof" data-i18n="证明训练">证明训练</option><option value="problem" data-i18n="解题练习">解题练习</option><option value="organize" data-i18n="知识整理">知识整理</option></select></label>
+        <label class="learning-chapter"><span data-i18n="所属章节（可选）">所属章节（可选）</span><select id="learningChapter"><option value="" data-i18n="暂不归档">暂不归档</option></select></label>
         <button type="submit" class="primary" data-i18n="建立学习文档">建立学习文档</button>
         <p class="learning-start-hint" data-i18n="将创建一篇可自由修改的数学笔记；题目、证明和反例均由你亲自填写。">将创建一篇可自由修改的数学笔记；题目、证明和反例均由你亲自填写。</p>
       </form>
+      <section class="study-catalog" aria-labelledby="studyCatalogTitle">
+        <header><div><h2 id="studyCatalogTitle" data-i18n="我的数学课程">我的数学课程</h2><p data-i18n="按课程、章节、知识单元组织学习；练习和证明保留为可编辑文档。">按课程、章节、知识单元组织学习；练习和证明保留为可编辑文档。</p></div><button id="studyNewCourse" type="button" data-i18n="＋ 建立课程">＋ 建立课程</button></header>
+        <div id="studyCatalogList"></div>
+        <form id="studyOrganizeForm" class="study-organize hidden">
+          <label><span data-i18n="整理已有知识">整理已有知识</span><select id="studyLooseKnowledge" required aria-label="选择要归档的知识" data-i18n-aria-label="选择要归档的知识"></select></label>
+          <label><span data-i18n="归入章节">归入章节</span><select id="studyDestinationChapter" required aria-label="选择目标章节" data-i18n-aria-label="选择目标章节"></select></label>
+          <button type="submit" data-i18n="归入本章">归入本章</button>
+        </form>
+        <p class="study-storage-note" data-i18n="内容保存在此浏览器中；更换设备前请导出 LKL3 知识包。">内容保存在此浏览器中；更换设备前请导出 LKL3 知识包。</p>
+      </section>
       <section class="welcome-recent" aria-labelledby="learningRecentTitle"><header><h2 id="learningRecentTitle" data-i18n="继续上次的工作">继续上次的工作</h2><small data-i18n="来自当前浏览器保存的知识">来自当前浏览器保存的知识</small></header><div id="learningRecent"></div></section>
       <details class="welcome-tools"><summary data-i18n="知识工具与数学结构">知识工具与数学结构</summary>
         <p data-i18n="已有的知识、结构库和导入功能仍然可用；需要时再展开。">已有的知识、结构库和导入功能仍然可用；需要时再展开。</p>
