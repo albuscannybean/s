@@ -100,6 +100,7 @@
 <link rel="modulepreload" href="../../packages/ui/document-editor.js">
 <link rel="modulepreload" href="../../packages/ui/knowledge-navigator.js">
 <link rel="modulepreload" href="../../packages/ui/knowledge-reading.js">
+<link rel="modulepreload" href="../../packages/ui/learning-notes.js">
 <link rel="modulepreload" href="../../packages/ui/library-model.js">
 <link rel="modulepreload" href="../../packages/ui/localization.js">
 <link rel="modulepreload" href="../../packages/ui/math-markup.js">
@@ -148,15 +149,26 @@
     <section id="welcome" class="welcome">
       <div class="welcome-mark"><span>L</span><span>M</span><span>N</span></div>
       <p class="eyebrow" data-i18n="LOCAL-FIRST · RECURSIVE · FORMAL">本地优先 · 递归组织 · 形式表达</p>
-      <h1 data-i18n="知识工作区">知识工作区</h1>
-      <p data-i18n="从一个 Knowledge 开始。它的笔记、LMN 骨架、数学结构和关系在同一工作空间中自然展开。">从一个知识对象开始。笔记、知识骨架、数学结构和关系在同一工作空间中展开。</p>
-      <div class="welcome-actions"><button data-welcome="knowledge" class="primary" data-i18n="新建 Knowledge">新建知识</button><button data-welcome="library" data-i18n="浏览结构库">浏览结构库</button><button data-welcome="import" data-i18n="导入 LKL / JSON">导入 LKL / JSON</button></div>
-      <div class="welcome-suggestions"><button data-template="builtin:lmn-444"><i>4·4·4</i><b>LMN</b><small data-i18n="递归知识骨架">递归知识骨架</small></button><button data-template="builtin:boolean-algebra"><i>B₄</i><b data-i18n="布尔代数">布尔代数</b><small data-i18n="16 个格元素">16 个格元素</small></button><button data-template="builtin:mod-n"><i>ℤ/nℤ</i><b data-i18n="模结构">模结构</b><small data-i18n="参数与变量方案">参数与变量方案</small></button><button data-template="builtin:regular-polygon"><i>⬡</i><b data-i18n="正 n 边形">正 n 边形</b><small data-i18n="可参数化几何">可参数化几何</small></button></div>
+      <h1 data-i18n="从一个问题开始">从一个问题开始</h1>
+      <p data-i18n="先阅读、尝试和检验，再决定是否需要结构图。学习成果可以保存在同一知识库。">先阅读、尝试和检验，再决定是否需要结构图。学习成果可以保存在同一知识库。</p>
+      <form id="learningStartForm" class="learning-start">
+        <label class="learning-topic"><span data-i18n="今天想弄清什么？">今天想弄清什么？</span><input id="learningTopic" required maxlength="120" placeholder="例如：为什么一致收敛要求统一的 N？" data-i18n-placeholder="例如：为什么一致收敛要求统一的 N？"></label>
+        <label class="learning-mode"><span data-i18n="学习方式">学习方式</span><select id="learningMode"><option value="concept" data-i18n="理解概念">理解概念</option><option value="proof" data-i18n="证明训练">证明训练</option><option value="problem" data-i18n="解题练习">解题练习</option><option value="organize" data-i18n="知识整理">知识整理</option></select></label>
+        <button type="submit" class="primary" data-i18n="建立学习文档">建立学习文档</button>
+        <p class="learning-start-hint" data-i18n="将创建一篇可自由修改的数学笔记；题目、证明和反例均由你亲自填写。">将创建一篇可自由修改的数学笔记；题目、证明和反例均由你亲自填写。</p>
+      </form>
+      <section class="welcome-recent" aria-labelledby="learningRecentTitle"><header><h2 id="learningRecentTitle" data-i18n="继续上次的工作">继续上次的工作</h2><small data-i18n="来自当前浏览器保存的知识">来自当前浏览器保存的知识</small></header><div id="learningRecent"></div></section>
+      <details class="welcome-tools"><summary data-i18n="知识工具与数学结构">知识工具与数学结构</summary>
+        <p data-i18n="已有的知识、结构库和导入功能仍然可用；需要时再展开。">已有的知识、结构库和导入功能仍然可用；需要时再展开。</p>
+        <div class="welcome-actions"><button data-welcome="knowledge" class="primary" data-i18n="新建 Knowledge">新建知识</button><button data-welcome="library" data-i18n="浏览结构库">浏览结构库</button><button data-welcome="import" data-i18n="导入 LKL / JSON">导入 LKL / JSON</button></div>
+        <div class="welcome-suggestions"><button data-template="builtin:lmn-444"><i>4·4·4</i><b>LMN</b><small data-i18n="递归知识骨架">递归知识骨架</small></button><button data-template="builtin:boolean-algebra"><i>B₄</i><b data-i18n="布尔代数">布尔代数</b><small data-i18n="16 个格元素">16 个格元素</small></button><button data-template="builtin:mod-n"><i>ℤ/nℤ</i><b data-i18n="模结构">模结构</b><small data-i18n="参数与变量方案">参数与变量方案</small></button><button data-template="builtin:regular-polygon"><i>⬡</i><b data-i18n="正 n 边形">正 n 边形</b><small data-i18n="可参数化几何">可参数化几何</small></button></div>
+      </details>
     </section>
     <section id="newTabPage" class="new-tab-page hidden" aria-label="新标签页" data-i18n-aria-label="新标签页">
       <div class="new-tab-content">
         <span class="new-tab-mark">＋</span><p class="eyebrow" data-i18n="NEW TAB">新标签页</p><h1 data-i18n="从这里继续知识工作">从这里继续知识工作</h1><p data-i18n="新建、插入与导入统一从标签页开始；每一个入口都会立即给出可见结果。">在这里新建知识、插入结构、导入资料或查找内容。</p>
         <div class="new-tab-actions">
+          <button data-new-tab-action="learn"><i>∑</i><b data-i18n="开始学习">开始学习</b><small data-i18n="从问题建立数学学习文档">从问题建立数学学习文档</small></button>
           <button data-new-tab-action="knowledge"><i>◇</i><b data-i18n="新建 Knowledge">新建知识</b><small data-i18n="创建空白知识并直接书写">创建空白知识并直接书写</small></button>
           <button data-new-tab-action="lmn"><i>4·4·4</i><b data-i18n="新建 LMN Knowledge">新建 LMN 知识</b><small data-i18n="创建带完整 LMN 骨架的知识">创建带完整 LMN 骨架的知识</small></button>
           <button data-new-tab-action="structure"><i>⬡</i><b data-i18n="插入 Structure">插入结构</b><small data-i18n="打开结构库与数学模板">打开结构库与数学模板</small></button>

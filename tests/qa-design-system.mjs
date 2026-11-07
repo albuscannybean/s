@@ -35,10 +35,21 @@ try {
     if(theme==='dark')assert.notEqual(appearance.background,'rgb(255, 255, 255)');
   }
   await shot('dark');
+  await page.locator('.welcome-tools summary').click();
   await page.locator('[data-welcome="import"]').click();
   const label=await page.locator('#importDialog').getAttribute('aria-labelledby');assert.ok(label);
   assert.ok(await page.locator(`#${label}`).isVisible());
   await page.keyboard.press('Escape');assert.equal(await page.locator('#importDialog').getAttribute('open'),null);
+  await page.locator('#learningTopic').fill('为什么一致收敛要求统一的 N？');
+  await page.locator('#learningMode').selectOption('proof');
+  await page.locator('#learningStartForm button[type=submit]').click();
+  await page.waitForFunction(()=>lmnWorkspace.knowledge?.title==='为什么一致收敛要求统一的 N？');
+  assert.equal(await page.locator('#notesDocument').isVisible(),true);
+  assert.match(await page.evaluate(()=>lmnWorkspace.knowledge.content),/独立复现/);
+  await page.evaluate(()=>lmnWorkspace.activateHome());
+  await page.locator('.learning-recent-row').filter({hasText:'为什么一致收敛要求统一的 N？'}).click();
+  assert.equal(await page.evaluate(()=>lmnWorkspace.knowledge.title),'为什么一致收敛要求统一的 N？');
+  await page.evaluate(()=>lmnWorkspace.activateHome());
   await page.evaluate(async()=>{
     const {createKnowledge}=await import('../../packages/domain/core.js');
     const {createStructureInstance}=await import('../../packages/structure-engine/model.js');
