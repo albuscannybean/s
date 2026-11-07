@@ -50,6 +50,7 @@ try{
   await page.screenshot({path:'qa-output/study-home.png'});
   const archive=await page.evaluate(async()=>{const {exportStudyArchive}=await import('../../packages/learning/study-session.js');return exportStudyArchive(lmnWorkspace.studyWorkbench.sessions)});
   const parsed=JSON.parse(archive);assert.equal(parsed.sessions.length,1);assert.equal(parsed.sessions[0].feedback.length,1);
+  await page.locator('.study-archive-tools summary').click();
   await page.locator('#studySessionsImport').setInputFiles({name:'study-archive.json',mimeType:'application/json',buffer:Buffer.from(archive)});
   await page.locator('#studyArchiveCommit').click();
   assert.match(await page.locator('#studyArchivePreview').innerText(),/导入完成/);
