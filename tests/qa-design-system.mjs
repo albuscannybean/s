@@ -43,11 +43,16 @@ try {
   await page.locator('#learningTopic').fill('为什么一致收敛要求统一的 N？');
   await page.locator('#learningMode').selectOption('proof');
   await page.locator('#learningStartForm button[type=submit]').click();
+  await page.locator('#studyWorkbench').waitFor({state:'visible'});
+  assert.equal(await page.evaluate(()=>lmnWorkspace.knowledge),undefined);
+  await page.locator('#studyDraft').fill('逐点收敛的 N 随 x 变化；一致收敛不允许如此。');
+  await page.locator('[data-study-action="submit"]').click();
+  await page.locator('[data-study-action="notes"]').click();
   await page.waitForFunction(()=>lmnWorkspace.knowledge?.title==='为什么一致收敛要求统一的 N？');
   assert.equal(await page.locator('#notesDocument').isVisible(),true);
-  assert.match(await page.evaluate(()=>lmnWorkspace.knowledge.content),/独立复现/);
+  assert.match(await page.evaluate(()=>lmnWorkspace.knowledge.content),/逐点收敛的 N/);
   await page.evaluate(()=>lmnWorkspace.activateHome());
-  await page.locator('.learning-recent-row').filter({hasText:'为什么一致收敛要求统一的 N？'}).click();
+  await page.locator('#learningRecent .learning-recent-row').filter({hasText:'为什么一致收敛要求统一的 N？'}).click();
   assert.equal(await page.evaluate(()=>lmnWorkspace.knowledge.title),'为什么一致收敛要求统一的 N？');
   await page.evaluate(()=>lmnWorkspace.activateHome());
   const createByDialog=async(button,title)=>{

@@ -42,6 +42,7 @@
 <link rel="modulepreload" href="../../packages/geometry/node-measurement.js">
 <link rel="modulepreload" href="../../packages/geometry/relation-routing.js">
 <link rel="modulepreload" href="../../packages/geometry/scene-geometry.js">
+<link rel="modulepreload" href="../../packages/learning/study-session.js">
 <link rel="modulepreload" href="../../packages/lkl/index.js">
 <link rel="modulepreload" href="../../packages/lkl/lexer.js">
 <link rel="modulepreload" href="../../packages/lkl/parser.js">
@@ -111,6 +112,7 @@
 <link rel="modulepreload" href="../../packages/ui/structure-map.js">
 <link rel="modulepreload" href="../../packages/ui/structure-renderer.js">
 <link rel="modulepreload" href="../../packages/ui/study-catalog.js">
+<link rel="modulepreload" href="../../packages/ui/study-workbench.js">
 <link rel="modulepreload" href="../../packages/ui/template-preview.js">
 <link rel="modulepreload" href="../../packages/ui/transient-overlay-manager.js">
 <link rel="modulepreload" href="../../packages/ui/ui-catalog.js">
@@ -157,8 +159,11 @@
         <label class="learning-mode"><span data-i18n="学习方式">学习方式</span><select id="learningMode"><option value="concept" data-i18n="理解概念">理解概念</option><option value="proof" data-i18n="证明训练">证明训练</option><option value="problem" data-i18n="解题练习">解题练习</option><option value="organize" data-i18n="知识整理">知识整理</option></select></label>
         <label class="learning-chapter"><span data-i18n="所属章节（可选）">所属章节（可选）</span><select id="learningChapter"><option value="" data-i18n="暂不归档">暂不归档</option></select></label>
         <button type="submit" class="primary" data-i18n="建立学习文档">建立学习文档</button>
-        <p class="learning-start-hint" data-i18n="将创建一篇可自由修改的数学笔记；题目、证明和反例均由你亲自填写。">将创建一篇可自由修改的数学笔记；题目、证明和反例均由你亲自填写。</p>
+        <p class="learning-start-hint">先进入独立尝试工作台；学习记录与知识文档分开保存，整理后再归入课程。</p>
       </form>
+      <section class="study-sessions-home" aria-labelledby="studySessionsHomeTitle"><header><div><h2 id="studySessionsHomeTitle">学习会话与到期复习</h2><small>优先继续尚未验证的思考，不用重新创建同一份笔记。</small></div></header><div id="studySessionsHome"></div>
+        <details class="study-archive-tools"><summary>学习记录备份 / 恢复</summary><p>学习会话、尝试与复习独立于 LKL3 知识包。换设备时请同时备份两份数据。</p><div class="study-actions"><button id="studySessionsExport" type="button">导出学习档案 JSON</button><label for="studySessionsImport">选择学习档案文件</label><input id="studySessionsImport" type="file" accept=".json,application/json"><button id="studyArchiveCommit" type="button" disabled>确认合并导入</button></div><p id="studyArchivePreview" aria-live="polite">导入前会校验文件，并预览会话数。</p></details>
+      </section>
       <section class="study-catalog" aria-labelledby="studyCatalogTitle">
         <header><div><h2 id="studyCatalogTitle" data-i18n="我的数学课程">我的数学课程</h2><p data-i18n="按课程、章节、知识单元组织学习；练习和证明保留为可编辑文档。">按课程、章节、知识单元组织学习；练习和证明保留为可编辑文档。</p></div><button id="studyNewCourse" type="button" data-i18n="＋ 建立课程">＋ 建立课程</button></header>
         <div id="studyCatalogList"></div>
@@ -176,6 +181,7 @@
         <div class="welcome-suggestions"><button data-template="builtin:lmn-444"><i>4·4·4</i><b>LMN</b><small data-i18n="递归知识骨架">递归知识骨架</small></button><button data-template="builtin:boolean-algebra"><i>B₄</i><b data-i18n="布尔代数">布尔代数</b><small data-i18n="16 个格元素">16 个格元素</small></button><button data-template="builtin:mod-n"><i>ℤ/nℤ</i><b data-i18n="模结构">模结构</b><small data-i18n="参数与变量方案">参数与变量方案</small></button><button data-template="builtin:regular-polygon"><i>⬡</i><b data-i18n="正 n 边形">正 n 边形</b><small data-i18n="可参数化几何">可参数化几何</small></button></div>
       </details>
     </section>
+    <section id="studyWorkbench" class="study-workbench hidden" aria-label="数学学习工作台"><div id="studyWorkbenchBody"></div><p id="studyStatus" class="study-status" role="status" aria-live="polite">学习内容保存在本浏览器中。</p></section>
     <section id="newTabPage" class="new-tab-page hidden" aria-label="新标签页" data-i18n-aria-label="新标签页">
       <div class="new-tab-content">
         <span class="new-tab-mark">＋</span><p class="eyebrow" data-i18n="NEW TAB">新标签页</p><h1 data-i18n="从这里继续知识工作">从这里继续知识工作</h1><p data-i18n="新建、插入与导入统一从标签页开始；每一个入口都会立即给出可见结果。">在这里新建知识、插入结构、导入资料或查找内容。</p>
