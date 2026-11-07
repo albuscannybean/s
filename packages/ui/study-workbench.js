@@ -51,9 +51,13 @@ export class StudyWorkbench {
     };
     $('#studyArchiveCommit').onclick=async()=>{
       if(!this.archivePreview)return;
-      for(const timeout of this.draftTimers.values())clearTimeout(timeout);this.draftTimers.clear();await this.saving;
-      const merged=mergeStudySessions(this.sessions,this.archivePreview);await Promise.all(merged.map(item=>put('studySessions',item)));
-      this.sessions=merged;this.archivePreview=null;$('#studyArchiveCommit').disabled=true;$('#studyArchivePreview').textContent='导入完成。原有知识库与 LKL3 数据没有被修改。';this.renderHome();
+      $('#studyArchiveCommit').disabled=true;
+      $('#studyArchivePreview').textContent='正在合并学习档案，请稍候…';
+      try{
+        for(const timeout of this.draftTimers.values())clearTimeout(timeout);this.draftTimers.clear();await this.saving;
+        const merged=mergeStudySessions(this.sessions,this.archivePreview);await Promise.all(merged.map(item=>put('studySessions',item)));
+        this.sessions=merged;this.archivePreview=null;$('#studyArchivePreview').textContent='导入完成。原有知识库与 LKL3 数据没有被修改。';this.renderHome();
+      }catch(error){$('#studyArchivePreview').textContent=`保存失败：${error.message}。请检查浏览器存储后重试。`;$('#studyArchiveCommit').disabled=false}
     };
   }
   start(title,mode,chapterId){const session=createStudySession({title,mode,chapterId});this.persist(session);this.open(session.id)}

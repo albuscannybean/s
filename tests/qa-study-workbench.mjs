@@ -53,6 +53,7 @@ try{
   await page.locator('.study-archive-tools summary').click();
   await page.locator('#studySessionsImport').setInputFiles({name:'study-archive.json',mimeType:'application/json',buffer:Buffer.from(archive)});
   await page.locator('#studyArchiveCommit').click();
+  await page.waitForFunction(()=>document.querySelector('#studyArchivePreview')?.textContent.includes('导入完成'));
   assert.match(await page.locator('#studyArchivePreview').innerText(),/导入完成/);
   await page.locator('#studySessionsHome .learning-recent-row').first().click();
   await page.screenshot({path:'qa-output/study-workbench.png'});
