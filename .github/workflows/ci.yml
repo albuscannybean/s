@@ -28,6 +28,7 @@ jobs:
       - run: node tests/qa-math-release.mjs
       - run: node tests/qa-math-content.mjs
       - run: node tests/qa-platform-ui.mjs
+      - run: node tests/qa-cache-refresh.mjs
       - run: node tests/qa-structure-map.mjs
       - run: node tests/qa-unified-reading.mjs
       - run: node tests/qa-v51-web.mjs
