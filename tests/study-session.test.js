@@ -62,3 +62,17 @@ test('study archive validates and merges by identity without discarding newer lo
   assert.throws(()=>validateStudyArchive('{"format":"lmn-study-sessions/1","sessions":[{"id":"a"}]}'),/不合法/);
   assert.throws(()=>validateStudyArchive({format:'lmn-study-sessions/1',sessions:[local,local]}),/重复/);
 });
+
+test('archive rejects malformed data that would break rendering or overwrite local edits',()=>{
+  const local=attempt(start());
+  const validate=session=>validateStudyArchive({format:'lmn-study-sessions/1',sessions:[session]});
+  for(const change of [
+    {updatedAt:'tomorrow'}, {drafts:{main:123}}, {lessonKey:'unknown'},
+    {hints:[{task:'main',level:99,createdAt:day}]},
+    {feedback:[{id:'f',attemptId:'attempt-1',sessionId:local.id,createdAt:day}]},
+    {reviews:[{id:'r',remembered:true,createdAt:day}]}
+  ])assert.throws(()=>validate({...local,...change}));
+  const feedback=parseStudyFeedback(JSON.stringify({format:'lmn-study-feedback/1',sessionId:local.id,attemptId:'attempt-1',summary:'继续验证',strengths:[],issues:['缺反例'],nextAction:'构造反例'}),local);
+  const complete=acceptStudyFeedback(revealStudyHint(local,{now:day}),feedback,{now:day,id:'f'});
+  assert.deepEqual(validate(complete),[complete]);
+});

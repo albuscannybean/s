@@ -102,6 +102,20 @@ export function validateStudyArchive(input){
   if(value?.format!==STUDY_ARCHIVE_FORMAT||!Array.isArray(value.sessions)||value.sessions.length>10000)throw new Error('不是受支持的 LMN 学习档案');
   for(const session of value.sessions){
     if(!session||!nonempty(session.id)||!nonempty(session.title)||!STUDY_TASKS.includes(session.task)||!['active','review'].includes(session.status)||!Array.isArray(session.attempts)||!Array.isArray(session.hints)||!Array.isArray(session.feedback)||!Array.isArray(session.reviews)||typeof session.draft!=='string'||session.attempts.length>10000||session.hints.length>10000||session.feedback.length>10000||session.reviews.length>10000||!uniqueIds(session.attempts)||!session.attempts.every(item=>nonempty(item.id)&&nonempty(item.content)&&STUDY_TASKS.includes(item.task))||!session.hints.every(item=>STUDY_TASKS.includes(item.task)&&Number.isInteger(item.level))||!session.feedback.every(item=>nonempty(item.id)&&nonempty(item.attemptId)&&session.attempts.some(attempt=>attempt.id===item.attemptId))||!session.reviews.every(item=>nonempty(item.id)&&typeof item.remembered==='boolean'))throw new Error('学习档案包含不合法的会话或尝试');
+    // Validate every field consumed by the workbench before anything reaches IndexedDB.
+    const validDate=date=>typeof date==='string'&&Number.isFinite(Date.parse(date))&&new Date(date).toISOString()===date;
+    if(!validDate(session.createdAt)||!validDate(session.updatedAt)||(session.dueAt!==null&&!validDate(session.dueAt))||
+      !['concept','proof','problem','organize'].includes(session.mode)||![null,UNIFORM_N].includes(session.lessonKey)||
+      (session.status==='review'&&!session.dueAt)||typeof session.recap!=='string'||
+      !session.drafts||!STUDY_TASKS.every(task=>typeof session.drafts[task]==='string')||
+      !session.selfChecks||Object.values(session.selfChecks).some(value=>typeof value!=='boolean')||
+      !session.attempts.every(item=>validDate(item.createdAt)&&Number.isInteger(item.hintCount)&&item.hintCount>=0)||
+      !session.hints.every((item,index)=>session.lessonKey===UNIFORM_N&&item.task==='main'&&item.level===index+1&&item.level<=UNIFORM_N_LESSON.hints.length&&validDate(item.createdAt))||
+      !uniqueIds(session.feedback)||!session.feedback.every(item=>validDate(item.createdAt))||
+      !uniqueIds(session.reviews)||!session.reviews.every(item=>validDate(item.createdAt))||
+      session.reviews.length>session.attempts.filter(item=>item.task==='review').length)
+      throw new Error('学习档案包含不合法的日期、草稿、提示或复习记录');
+    for(const feedback of session.feedback)parseStudyFeedback(JSON.stringify(feedback),session);
   }
   if(!uniqueIds(value.sessions))throw new Error('学习档案中有重复会话 ID');
   return value.sessions;

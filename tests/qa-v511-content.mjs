@@ -57,7 +57,7 @@ try{
  result.dragAddress=await page.evaluate(id=>lmnWorkspace.navigationIndex().pathFor({kind:'knowledge',id}).map(item=>item.id),result.copy);
  assert.deepEqual(result.dragAddress,['qa511:A',result.copy]);
 
- await page.locator('#homeBtn').click();await page.locator('#navigatorMenu').click();
+ await page.locator('#homeBtn').click();await page.locator('#toggleNavigator').click();await page.locator('#navigatorMenu').click();
  await page.locator('#contextMenu').getByRole('button',{name:/批量管理/}).click();
  await page.locator('#batchContentType').selectOption('structure');
  await page.locator('#batchDeleteList .batch-delete-row').filter({hasText:'QA511 未归类结构'}).locator('input').check();
@@ -68,7 +68,7 @@ try{
  await page.locator('#dangerConfirm').click();
  result.deleted=await page.evaluate(({note,structure})=>({note:!lmnWorkspace.state.contentObjects.some(item=>item.id===note),structure:!lmnWorkspace.state.structureInstances.some(item=>item.id===structure.id),knowledge:lmnWorkspace.state.knowledge.length}),{note:result.note,structure:result.structure});
  assert.deepEqual(result.deleted,{note:true,structure:true,knowledge:4});
- await page.locator('#undoBtn').click();
+ await page.keyboard.press('Control+z');
  result.undo=await page.evaluate(({note,structure})=>({note:lmnWorkspace.state.contentObjects.some(item=>item.id===note),structure:lmnWorkspace.state.structureInstances.some(item=>item.id===structure.id)}),{note:result.note,structure:result.structure});
  assert.deepEqual(result.undo,{note:true,structure:true});
 

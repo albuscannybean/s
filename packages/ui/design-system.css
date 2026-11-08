@@ -5,7 +5,7 @@
   --space-5:20px; --space-6:24px; --space-8:32px; --space-12:48px;
   --text-meta:.857rem; --text-body:1rem; --text-section:1.143rem; --text-title:1.714rem;
   --radius-sm:4px; --radius:6px; --radius-lg:8px;
-  --control-height:32px; --toolbar-height:48px; --inspector-width:360px;
+  --control-height:32px; --toolbar-height:48px; --topbar-height:56px; --inspector-width:360px;
   --shadow-1:none; --shadow-2:0 8px 24px rgb(0 0 0 / .12); --shadow-3:0 16px 48px rgb(0 0 0 / .2);
   --ease:120ms ease-out;
   --ui-app:var(--canvas); --ui-workspace:var(--paper); --ui-panel:var(--sidebar);
@@ -342,7 +342,7 @@ html[data-theme="dark"] #appShell[data-high-clarity="true"] :is(.topbar,.documen
 .knowledge-reader .document-properties-grid { grid-template-columns:minmax(0,1fr); }
 
 /* Panel dimensions are independent of the active tab or its child widgets. */
-#appShell .floating-panel { width:min(var(--inspector-width),calc(100vw - 16px)); max-width:calc(100vw - 16px); top:104px; bottom:28px; height:auto; min-height:0; overflow:hidden; }
+#appShell .floating-panel { width:min(var(--inspector-width),calc(100vw - 16px)); max-width:calc(100vw - 16px); top:calc(var(--topbar-height) + var(--toolbar-height)); bottom:28px; height:auto; min-height:0; overflow:hidden; }
 #appShell .floating-panel>header,#appShell .floating-panel .panel-tabs { flex-shrink:0; position:static; }
 #appShell .floating-panel .panel-content { min-width:0; min-height:0; max-width:100%; overflow:auto; scrollbar-gutter:stable; }
 #floatingPanel .panel-content>* { min-width:0; max-width:100%; }

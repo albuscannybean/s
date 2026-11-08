@@ -111,6 +111,7 @@ try {
     assert.ok(bounds.page<=width+1,'Page must not overflow horizontally');
     if(width<=900)assert.equal(bounds.workspace.x,0);
     assert.ok(await page.locator('#globalSearch').isVisible(),'Command entry remains reachable');
+    assert.ok(await page.locator('.math-brand-copy b').isVisible(),'Math site title remains visible');
     for(const action of ['knowledge','library','import']){
       const box=await page.locator(`[data-welcome="${action}"]`).boundingBox();assert.ok(box.x>=0&&box.x+box.width<=width+1);
     }
@@ -121,6 +122,9 @@ try {
   await page.locator('#navigatorFilter').click();assert.equal(await page.locator(':focus').getAttribute('id'),'navigatorFilter');await page.keyboard.press('Escape');
   assert.equal(await page.locator('#navigator').evaluate(e=>e.inert),true);
   assert.equal(await page.locator(':focus').getAttribute('id'),'toggleNavigator');
+  await page.locator('#toggleNavigator').click();
+  await page.locator('#workspace').click({position:{x:380,y:350}});
+  assert.equal(await page.locator('#navigator').evaluate(e=>e.inert),true,'Clicking the workspace dismisses home navigation');
   await page.setViewportSize({width:1440,height:900});
   await page.evaluate(()=>lmnWorkspace.openNewTab());
   await page.waitForFunction(()=>!document.querySelector('#navigator').inert);
