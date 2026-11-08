@@ -40,18 +40,18 @@ try{
     assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`page overflow at ${width}`);
     const bounds=await page.locator('#globalSearch').boundingBox();assert.ok(bounds.x+bounds.width<=width+1);
   }
-  await page.locator('[data-math-nav="sessions"]').click();
-  assert.equal(await page.locator('[data-math-nav="sessions"]').getAttribute('aria-current'),'page');
-  await page.locator('[data-math-nav="courses"]').click();
+  await page.locator('#documentTabs [data-math-nav="sessions"]').click();
+  assert.equal(await page.locator('#documentTabs [data-math-nav="sessions"]').getAttribute('aria-current'),'page');
+  await page.locator('#documentTabs [data-math-nav="courses"]').click();
   await page.locator('[data-archive-kind="course"]').waitFor({state:'visible'});
   await page.locator('#mathToolboxToggle').click();await page.locator('[data-math-tool="structure"]').click();await page.locator('#structureLibrary').waitFor({state:'visible'});await page.keyboard.press('Escape');
   await page.locator('#globalSearch').click();await page.locator('#mathSearch').waitFor({state:'visible'});
   await page.locator('#mathToolboxToggle').click();await page.locator('[data-math-tool="import"]').click();await page.locator('#importDialog').waitFor({state:'visible'});await page.keyboard.press('Escape');
-  await page.locator('[data-math-nav="home"]').click();
+  await page.locator('.math-brand').click();
   await page.screenshot({path:'qa-output/math-release-desktop.png'});
   await page.setViewportSize({width:390,height:844});
   await page.screenshot({path:'qa-output/math-release-mobile.png'});
-  await page.locator('[data-math-action="example"]').click();
+  await page.locator('[data-featured-problem="ANA-UC-P02"]').click();
   await page.locator('[data-math-archive-action="start"]').click();
   await page.locator('#studyWorkbench').waitFor({state:'visible'});
   assert.ok(await page.locator('#studyQuestion .katex').count()>0);

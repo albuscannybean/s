@@ -15,14 +15,14 @@ try {
   assert.equal(await page.locator(':focus').getAttribute('class'),'skip-link');
   await page.keyboard.press('Enter');assert.equal(await page.locator(':focus').getAttribute('id'),'workspace');
   // The study home hides advanced editing navigation until a document is open.
-  await page.evaluate(()=>lmnWorkspace.openNewTab());
+  await page.evaluate(()=>{lmnWorkspace.openNewTab();lmnWorkspace.toggleNavigator()});
   await page.locator('#navigator-tab-outline').focus();await page.keyboard.press('ArrowRight');
   assert.equal(await page.locator('#navigator-tab-library').getAttribute('aria-selected'),'true');
   assert.equal(await page.locator('#navigatorPanel').getAttribute('aria-labelledby'),'navigator-tab-library');
   await page.keyboard.press('Home');assert.equal(await page.locator('#navigator-tab-outline').getAttribute('aria-selected'),'true');
-  await page.locator('#navigatorResizer').focus();await page.keyboard.press('ArrowRight');
-  assert.equal(await page.locator('#navigatorResizer').getAttribute('aria-valuenow'),'320');
-  await page.keyboard.press('ArrowLeft');
+  assert.equal(await page.locator('#navigatorResizer').isVisible(),false);
+  await page.keyboard.press('Escape');
+  await page.locator('#mathToolboxToggle').click();
   await page.locator('#moreBtn').click();
   assert.ok(await page.locator('#contextMenu').evaluate(e=>e.contains(document.activeElement)));
   await page.keyboard.press('End');assert.ok(await page.locator('#contextMenu button:not(:disabled)').last().evaluate(e=>e===document.activeElement));
@@ -117,19 +117,20 @@ try {
     }
     result.viewports.push({width,...bounds});await shot(`width-${width}`);
   }
-  await page.locator('#toggleNavigator').click();assert.equal(await page.locator('#navigator').evaluate(e=>e.inert),false);
+  await page.locator('#mathToolboxToggle').click();await page.locator('#toggleNavigator').click();assert.equal(await page.locator('#navigator').evaluate(e=>e.inert),false);
   await page.waitForFunction(()=>getComputedStyle(document.querySelector('#navigator')).visibility==='visible');
   await page.locator('#navigatorFilter').click();assert.equal(await page.locator(':focus').getAttribute('id'),'navigatorFilter');await page.keyboard.press('Escape');
   assert.equal(await page.locator('#navigator').evaluate(e=>e.inert),true);
-  assert.equal(await page.locator(':focus').getAttribute('id'),'toggleNavigator');
-  await page.locator('#toggleNavigator').click();
-  await page.locator('#workspace').click({position:{x:380,y:350}});
-  assert.equal(await page.locator('#navigator').evaluate(e=>e.inert),true,'Clicking the workspace dismisses home navigation');
+  assert.equal(await page.locator('#contentLibraryDialog').evaluate(e=>e.open),false);
+  await page.evaluate(()=>lmnWorkspace.toggleNavigator());
+  await page.locator('#contentLibraryDialog > header .dialog-close').click();
+  await page.waitForFunction(()=>document.querySelector('#navigator').inert);
+  assert.equal(await page.locator('#navigator').evaluate(e=>e.inert),true,'Closing the content dialog releases hidden navigation');
   await page.setViewportSize({width:1440,height:900});
   await page.evaluate(()=>lmnWorkspace.openNewTab());
-  await page.waitForFunction(()=>!document.querySelector('#navigator').inert);
+  await page.waitForFunction(()=>document.querySelector('#navigator').inert);
   await page.evaluate(()=>{lmnWorkspace.preferences.language='en';lmnWorkspace.applyPreferences();lmnWorkspace.openMathHome()});
-  assert.match(await page.locator('.math-home-intro h1').textContent(),/每一次思考/);
+  assert.match(await page.locator('#welcome .math-home-intro h1').textContent(),/理论学习/);
   result.errors=errors;assert.deepEqual(errors,[]);
   await writeFile('qa-output/design-system.json',JSON.stringify(result,null,2));console.log(JSON.stringify(result,null,2));
 } finally {await browser.close()}

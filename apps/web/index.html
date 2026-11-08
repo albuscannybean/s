@@ -129,30 +129,29 @@
 <div id="appShell">
   <header class="topbar math-site-topbar">
     <div class="math-masthead">
-      <div class="brand math-brand">
-        <button id="toggleNavigator" aria-controls="navigator" aria-expanded="false" class="icon-button" aria-label="切换高级内容库" title="高级内容库">☰</button>
-        <span class="math-brand-symbol" aria-hidden="true">∑</span>
-        <span class="math-brand-copy"><b>数学 · LMN</b><small>课程、知识、题目与自由探索</small></span><em class="math-release-tag">V5.1.4 · 内容版</em>
-      </div>
-      <nav id="breadcrumbs" class="math-breadcrumbs" aria-label="递归知识路径" data-i18n-aria-label="递归知识路径"></nav>
+      <nav id="breadcrumbs" class="hidden" aria-label="知识路径"></nav>
+      <button class="brand math-brand" type="button" data-math-nav="home" aria-label="数学 LMN 首页"><span class="math-brand-symbol">数</span><span class="math-brand-copy"><b>数学 <span class="brand-dot">·</span> LMN</b><small>理论理解与数学应用</small></span><em class="math-release-tag">V5.1.4 · 内容版</em></button>
       <div class="math-header-actions">
-        <button id="globalSearch" class="command-trigger" aria-label="搜索与命令行"><span>⌕ 搜索知识、问题与命令</span><span class="math-sr-only">命令行</span><kbd>Ctrl K</kbd></button>
-        <button id="insertStructure" class="primary hidden" aria-hidden="true" tabindex="-1" data-i18n="＋ 新建">＋ 新建</button>
-        <button id="moreBtn" class="math-tools-trigger" aria-label="更多工具与设置">⚙ <span>更多工具</span></button>
+        <button id="globalSearch" class="command-trigger" aria-label="搜索与命令行"><svg class="site-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="6.5"/><path d="m15 15 5 5"/></svg><span>检索</span><span class="math-sr-only">命令行</span><kbd>Ctrl K</kbd></button>
+        <button id="appearanceButton" type="button"><svg class="site-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18Z"/></svg><span>外观</span></button>
+        <details id="mathToolbox" class="shell-menu"><summary id="mathToolboxToggle" aria-controls="mathToolboxPanel" aria-expanded="false"><svg class="site-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14 6 4 4M3 21l6-6m3-12a6 6 0 0 0-5 8L2 16a3 3 0 0 0 4 4l5-5a6 6 0 0 0 8-5l-4 3-4-4 3-4Z"/></svg><span>资料工具</span><span aria-hidden="true">⌄</span></summary>
+          <div id="mathToolboxPanel" class="shell-menu-panel hidden"><h2>知识与学习资料</h2>
+            <button type="button" id="toggleNavigator" data-math-tool="navigator" aria-controls="navigator" aria-expanded="false" aria-label="打开内容库">内容库与私人课程</button>
+            <button type="button" data-math-tool="knowledge">新建私人 Knowledge</button><button type="button" data-math-tool="structure">浏览结构库</button><button type="button" data-math-tool="import">导入 LKL／JSON</button>
+            <button type="button" data-platform-action="export">导出知识与结构</button><button type="button" data-math-nav="sessions">学习记录与备份</button><button type="button" data-math-nav="about">关于数学 · LMN</button><button id="moreBtn" aria-label="更多工具与设置">更多工具与设置</button>
+            <p>本机资料独立保存。账户与站点管理将在后续阶段接入。</p>
+          </div></details>
+        <button id="insertStructure" class="primary hidden" aria-hidden="true" tabindex="-1">新建</button>
       </div>
     </div>
-    <nav class="math-main-nav" aria-label="数学工作台主导航">
-      <button type="button" class="active" data-math-nav="home"><span aria-hidden="true">⌂</span> 首页</button>
-      <button type="button" data-math-nav="courses"><span aria-hidden="true">▤</span> 课程</button>
-      <button type="button" data-math-nav="problems"><span aria-hidden="true">✎</span> 题库</button>
-      <button type="button" data-math-nav="knowledge"><span aria-hidden="true">◇</span> 知识库</button>
-      <button type="button" data-math-nav="methods"><span aria-hidden="true">↗</span> 方法库</button>
-      <button type="button" data-math-nav="sessions"><span aria-hidden="true">◷</span> 学习记录</button>
-      <button type="button" data-math-nav="about"><span aria-hidden="true">ⓘ</span> 关于</button>
+    <nav class="math-main-nav" aria-label="网站板块">
+      <button type="button" data-platform-module="theory"><svg class="site-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 6c-3-2-6-2-9-1v14c3-1 6-1 9 1 3-2 6-2 9-1V5c-3-1-6-1-9 1ZM12 6v14"/></svg><span>理论学习</span></button>
+      <button type="button" data-platform-module="applied"><svg class="site-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><path d="M14 17h7m-3.5-3.5v7"/></svg><span>应用数学</span></button>
     </nav>
   </header>
 
-  <aside id="navigator" class="navigator">
+  <dialog id="contentLibraryDialog" class="content-library-dialog" aria-labelledby="contentLibraryTitle"><header><h2 id="contentLibraryTitle">内容库</h2><button type="button" class="dialog-close" aria-label="关闭内容库">×</button></header>
+  <aside id="navigator" class="navigator" inert>
     <div class="navigator-modes" role="tablist" aria-label="导航视图">
       <button data-navigator="outline" class="active" title="内容库" data-i18n-title="内容库"><span>☷</span><small data-i18n="内容库">内容库</small></button>
       <button data-navigator="library" title="结构库" data-i18n-title="结构库"><span>⬡</span><small data-i18n="结构库">结构库</small></button>
@@ -163,6 +162,7 @@
     <div id="navigatorPanel" class="navigator-panel" role="tabpanel" tabindex="0" aria-labelledby="navigator-tab-outline"><div id="navigatorContent" class="navigator-content"></div></div>
     <div id="navigatorResizer" aria-controls="navigator" aria-valuemin="220" aria-valuemax="620" aria-valuenow="300" class="navigator-resizer" role="separator" aria-orientation="vertical" aria-label="调整内容库宽度" tabindex="0" data-i18n-aria-label="调整内容库宽度"></div>
   </aside>
+  </dialog>
 
   <main id="workspace" tabindex="-1" aria-label="知识工作区" class="workspace">
     <div class="document-bar">
@@ -170,13 +170,20 @@
       <div class="document-tab-shell"><div id="documentTabs" class="document-tabs"></div><button id="openDocumentsButton" class="open-documents" title="打开的文档" data-i18n-title="打开的文档">▾</button></div>
       <div class="canvas-actions"><button id="structureSettingsButton" class="structure-settings hidden" data-i18n="⚙ 结构设置">⚙ 结构设置</button><button id="undoBtn" title="撤销 (Ctrl+Z)" data-i18n-title="撤销 (Ctrl+Z)">↶</button><button id="redoBtn" title="重做 (Ctrl+Shift+Z)" data-i18n-title="重做 (Ctrl+Shift+Z)">↷</button><button id="fitBtn" data-i18n="适合窗口">适合窗口</button><button id="focusBtn">专注</button></div>
     </div>
+    <section id="appliedHome" class="applied-home hidden" aria-label="应用数学">
+      <div class="math-home-layout"><div class="math-home-main"><header class="math-home-intro"><span class="math-kicker">数学 · 应用工作台</span><h1>应用数学</h1><p>把数学对象写成规则，通过计算、构造与可视化检验自己的理解。</p></header>
+        <section class="math-surface"><h2>计算与交互式可视化</h2><p class="math-section-description">使用已经具备的工具，从一个具体的数学对象开始。</p><div class="application-grid">
+          <button data-template="builtin:coordinate-plane"><b>函数与几何</b><span>函数绘图、坐标、向量与动点</span></button><button data-template="builtin:matrix-grid"><b>矩阵与网格</b><span>矩阵录入、运算与结构观察</span></button><button data-template="builtin:mod-n"><b>模运算与有限结构</b><span>有限集合、映射与模空间</span></button><button data-template="builtin:boolean-algebra"><b>布尔代数</b><span>格结构、关系与可视化</span></button>
+        </div></section><section class="math-surface"><h2>结构与算法建模</h2><p class="math-section-description">保留原有结构库、节点、关系、变量与运行规则；自主搭建用于观察和模拟的数学结构。</p><div class="study-actions"><button type="button" data-platform-action="structures">浏览全部结构工具</button><button type="button" data-platform-action="library">打开我的内容库</button><button type="button" data-platform-action="search">探索与结构检索</button></div></section>
+      </div><aside class="math-home-rail"><header class="math-reference-heading"><span class="math-kicker">本机 · 应用档案</span><h2>我的构造</h2><p>已有数学对象与保存的结构</p></header><div id="appliedSavedStructures"></div><section class="math-reference-note"><h2>从理解到使用</h2><p>应用与理论相互关联，计算结果可以帮助观察、寻找反例和检验边界。</p><button type="button" data-math-nav="courses">返回理论课程 →</button></section></aside></div>
+    </section>
     <section id="welcome" class="welcome math-home">
       <div class="math-home-layout">
         <div class="math-home-main">
           <div class="math-home-intro">
-            <span class="math-kicker">MATHEMATICS · LEARNING ARCHIVE</span>
-            <h1>让每一次思考，都成为下一次理解的起点。</h1>
-            <p>从一个数学问题出发，独立尝试、检验思路、获得反馈，再把真正掌握的内容保存下来。</p>
+            <span class="math-kicker">数学 · 理论学习</span>
+            <h1>理论学习</h1>
+            <p>阅读课程与知识，完成独立尝试，检验方法并整理自己的学习记录。</p>
             <div class="math-home-pill-row"><span>独立思考</span><span>渐进提示</span><span>AI 协作</span><span>知识积累</span></div>
           </div>
           <section class="math-surface math-featured-surface" aria-labelledby="mathFeaturedTitle">
@@ -305,17 +312,6 @@
       </div>
     </section>
   </main>
-  <div id="mathToolbox" class="math-toolbox">
-    <button id="mathToolboxToggle" type="button" aria-controls="mathToolboxPanel" aria-expanded="false">＋ <span>工具箱</span></button>
-    <div id="mathToolboxPanel" class="math-toolbox-panel hidden" role="group" aria-label="知识与结构工具">
-      <strong>知识与结构工具</strong><small>需要构造时再打开；不影响资料阅读。</small>
-      <button type="button" data-math-tool="knowledge">＋ 新建私人 Knowledge</button>
-      <button type="button" data-math-tool="structure">⬡ 浏览结构库</button>
-      <button type="button" data-math-tool="navigator">☷ 旧内容库／高级导航</button>
-      <button type="button" data-math-tool="import">⇧ 导入 LKL／JSON</button>
-    </div>
-  </div>
-
   <aside id="floatingPanel" class="floating-panel hidden" aria-label="属性面板" data-i18n-aria-label="属性面板"><header><div><span id="panelEyebrow" class="eyebrow">属性</span><h2 id="panelTitle">属性</h2></div><button id="closePanel" aria-label="关闭属性面板" data-i18n-aria-label="关闭属性面板" class="icon-button">×</button></header><div id="panelTabs" class="panel-tabs"></div><div id="panelContent" class="panel-content"></div></aside>
   <div id="contextMenu" class="context-menu hidden" role="menu"></div>
   <div id="quickCreate" class="quick-create hidden" role="dialog" aria-label="快速新建知识" data-i18n-aria-label="快速新建知识"><span>◇</span><input id="quickCreateInput" placeholder="Knowledge 名称" data-i18n-placeholder="Knowledge 名称"><div class="quick-create-mode" aria-label="Knowledge 类型" data-i18n-aria-label="Knowledge 类型"><button data-create-mode="blank" class="active" data-i18n="空白">空白</button><button data-create-mode="lmn" data-i18n="含 LMN">含 LMN</button></div><button id="cancelQuickCreate" class="quick-create-cancel" data-i18n="取消">取消</button><kbd>Enter</kbd></div>

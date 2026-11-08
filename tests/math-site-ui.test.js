@@ -29,9 +29,9 @@ test('archive design supports desktop, mobile, dark theme and focused learning',
   assert.match(html,/href="math-site\.css"/);
   assert.match(css,/data-view="home"/);
   assert.match(css,/data-view="study"/);
-  assert.match(css,/@media \(max-width:780px\)/);
-  assert.match(css,/@media \(max-width:540px\)/);
-  assert.match(css,/html\[data-theme="dark"\]/);
+  assert.match(css,/@media\(max-width:800px\)/);
+  assert.match(css,/@media\(max-width:600px\)/);
+  assert.match(css,/var\(--paper\)/);
   const sharedCss=readFileSync(new URL('../packages/ui/design-system.css',import.meta.url),'utf8');
   assert.match(sharedCss,/:focus-visible/);
 });

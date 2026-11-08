@@ -21,7 +21,7 @@ try{
   const context=await browser.newContext({viewport:{width:1440,height:1000},serviceWorkers:'block',reducedMotion:'reduce'}),page=await context.newPage();
   page.on('pageerror',error=>errors.push(error.message));assert.equal((await page.goto(url,{waitUntil:'networkidle'})).status(),200);
   await page.waitForFunction(()=>!!globalThis.lmnWorkspace);
-  const nav=kind=>page.locator(`.math-main-nav [data-math-nav="${kind}"]`);
+  const nav=kind=>page.locator(`#documentTabs [data-math-nav="${kind}"]`);
   await nav('courses').click();await page.locator('[data-archive-kind="course"]').click();
   assert.equal(await page.locator('#mathArchive [data-archive-kind="knowledge"]').count(),10);
   assert.equal(await page.locator('#mathArchive [data-archive-kind="problem"]').count(),20);
@@ -70,7 +70,7 @@ try{
   await page.locator('#mathToolboxToggle').click();await page.locator('[data-math-tool="navigator"]').click();
   assert.equal(await page.locator('#navigator').evaluate(e=>e.inert),false);assert.equal(await page.locator('#navigator').isVisible(),true);
   await page.locator('#navigatorFilter').focus();await page.keyboard.press('Escape');assert.equal(await page.locator('#navigator').evaluate(e=>e.inert),true);
-  assert.equal(await page.locator(':focus').getAttribute('id'),'toggleNavigator');
+  assert.equal(await page.locator('#contentLibraryDialog').evaluate(e=>e.open),false);
   await page.evaluate(id=>lmnWorkspace.studyWorkbench.open(id),sessionId);assert.equal(await page.locator('#studyHints .study-hint').count(),2);
   assert.equal(await page.evaluate(()=>lmnWorkspace.state.knowledge.length),0,'Public content must not populate private Knowledge');
   const archive=await page.evaluate(async()=>{const {exportStudyArchive,validateStudyArchive}=await import('../../packages/learning/study-session.js');return validateStudyArchive(exportStudyArchive(lmnWorkspace.studyWorkbench.sessions))});

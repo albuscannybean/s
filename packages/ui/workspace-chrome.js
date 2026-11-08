@@ -19,11 +19,8 @@ export function createIcon(name, documentRef=document) {
 }
 export function syncNavigatorState(controller) {
   const shell=document.querySelector('#appShell'), nav=document.querySelector('#navigator');
-  const overlay=controller.document==='welcome'||controller.document?.startsWith('study-workbench:')||controller.document?.startsWith('math-archive:');
-  const open=overlay?shell.classList.contains('home-navigator-open'):!shell.classList.contains('navigator-collapsed');
-  const toggle=document.querySelector('#toggleNavigator');
-  toggle.setAttribute('aria-expanded',String(open)); nav.inert=!open;
-  if(!open&&nav.contains(document.activeElement))toggle.focus();
+  const open=!!document.querySelector('#contentLibraryDialog')?.open;
+  document.querySelector('#toggleNavigator').setAttribute('aria-expanded',String(open));nav.inert=!open;
   const handle=document.querySelector('#navigatorResizer');
   handle.setAttribute('aria-valuenow',String(controller.preferences.navigatorWidth));
 }
@@ -39,7 +36,7 @@ export function focusMenu(root) {
   options()[0]?.focus();
 }
 export function bindWorkspaceChrome(controller) {
-  const icons={toggleNavigator:'menu',navigatorMenu:'more',moreBtn:'more',homeBtn:'home',backBtn:'back',forwardBtn:'forward',upBtn:'up',undoBtn:'undo',redoBtn:'redo',closePanel:'close'};
+  const icons={toggleNavigator:'menu',navigatorMenu:'more',homeBtn:'home',backBtn:'back',forwardBtn:'forward',upBtn:'up',undoBtn:'undo',redoBtn:'redo',closePanel:'close'};
   for(const[id,icon]of Object.entries(icons)){
     const button=document.getElementById(id); if(!button)continue;
     button.replaceChildren(createIcon(icon));
@@ -63,21 +60,7 @@ export function bindWorkspaceChrome(controller) {
       if(button.textContent.trim()==='×'){button.setAttribute('aria-label','关闭');button.dataset.i18nAriaLabel='关闭';button.replaceChildren(createIcon('close'))}
     }
   }
-  const compact=matchMedia('(max-width:900px)');
-  const update=()=>{
-    if(controller._desktopNavigatorCollapsed===undefined)controller._desktopNavigatorCollapsed=document.querySelector('#appShell').classList.contains('navigator-collapsed');
-    if(compact.matches){
-      controller._desktopNavigatorCollapsed=document.querySelector('#appShell').classList.contains('navigator-collapsed');
-      document.querySelector('#appShell').classList.add('navigator-collapsed');
-    }else document.querySelector('#appShell').classList.toggle('navigator-collapsed',controller._desktopNavigatorCollapsed);
-    syncNavigatorState(controller); controller.scheduler.request('responsive-layout');
-  };
-  compact.addEventListener('change',update);update();
-  document.querySelector('#workspace').addEventListener('pointerdown',()=>{
-    const shell=document.querySelector('#appShell');
-    if(shell.classList.contains('home-navigator-open')||(compact.matches&&!shell.classList.contains('navigator-collapsed')))controller.toggleNavigator();
-  });
-  document.querySelector('#navigator').addEventListener('keydown',event=>{
-    if(event.key==='Escape'&&(compact.matches||document.querySelector('#appShell').classList.contains('home-navigator-open'))){event.preventDefault();controller.toggleNavigator()}
-  });
+  document.querySelector('#navigator').addEventListener('keydown',event=>{if(event.key==='Escape'){event.preventDefault();document.querySelector('#contentLibraryDialog').close();syncNavigatorState(controller)}});
+  addEventListener('resize',()=>controller.scheduler.request('responsive-layout'));
+
 }
