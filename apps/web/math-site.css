@@ -23,6 +23,12 @@ html[data-theme="warm"] #appShell {
 #appShell[data-view="home"] .navigator,
 #appShell[data-view="study"] .navigator,
 #appShell[data-view="home"] .document-bar { display:none; }
+#appShell[data-view="home"].home-navigator-open .navigator,
+#appShell[data-view="study"].home-navigator-open .navigator {
+  display:flex; position:fixed; top:120px; left:0; bottom:28px;
+  width:var(--navigator-width,300px); opacity:1; transform:none;
+  pointer-events:auto; z-index:85; box-shadow:8px 5px 22px rgb(24 25 44 / 16%);
+}
 
 .math-site-topbar.topbar {
   height:120px; padding:0; display:flex; flex-direction:column; gap:0;
@@ -48,6 +54,7 @@ html[data-theme="warm"] #appShell {
 .math-brand .math-brand-copy { display:flex; flex-direction:column; align-items:flex-start; gap:2px; }
 .math-brand .math-brand-copy b { font:700 17px/1.2 "Microsoft YaHei UI",sans-serif; color:var(--ink); letter-spacing:.01em; }
 .math-brand .math-brand-copy small { font-size:11px; color:var(--muted); font-weight:450; }
+.math-brand .math-release-tag { font-size:10px; color:var(--muted); font-style:normal; background:transparent; padding:2px 0; }
 .math-site-topbar .math-breadcrumbs { flex:1; justify-content:center; max-width:440px; }
 .math-header-actions { display:flex; gap:10px; align-items:center; }
 .math-site-topbar .command-trigger {
@@ -195,7 +202,10 @@ html[data-theme="warm"] #appShell {
   .math-main-nav { height:54px; padding:7px 12px; gap:7px; }
   .math-main-nav button { min-width:116px; }
   .navigator { top:113px; }
+  #appShell[data-view="home"].home-navigator-open .navigator,
+  #appShell[data-view="study"].home-navigator-open .navigator { top:113px; width:min(300px,84vw); }
   .math-header-actions .command-trigger { min-width:38px; width:38px; padding:7px; }
+  .math-site-topbar .math-header-actions .command-trigger { display:flex!important; }
   .math-header-actions .command-trigger span { display:inline; font-size:18px; }
   .math-header-actions .command-trigger kbd { display:none; }
   .math-tools-trigger { min-width:38px; justify-content:center; padding:0 9px; }
@@ -209,6 +219,7 @@ html[data-theme="warm"] #appShell {
   .math-brand .math-brand-symbol { width:35px; height:35px; font-size:22px; }
   .math-brand .math-brand-copy b { font-size:14px; }
   .math-brand .math-brand-copy small { font-size:9px; }
+  .math-brand .math-release-tag { display:none; }
   .math-brand.brand { gap:6px; }
   .math-brand .icon-button { min-width:27px; }
   .math-masthead { gap:8px; }
