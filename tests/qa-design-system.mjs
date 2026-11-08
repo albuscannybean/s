@@ -124,7 +124,8 @@ try {
   assert.equal(await page.locator('#contentLibraryDialog').evaluate(e=>e.open),false);
   await page.evaluate(()=>lmnWorkspace.toggleNavigator());
   await page.locator('#contentLibraryDialog > header .dialog-close').click();
-  assert.equal(await page.locator('#navigator').evaluate(e=>e.inert),true,'Clicking the workspace dismisses home navigation');
+  await page.waitForFunction(()=>document.querySelector('#navigator').inert);
+  assert.equal(await page.locator('#navigator').evaluate(e=>e.inert),true,'Closing the content dialog releases hidden navigation');
   await page.setViewportSize({width:1440,height:900});
   await page.evaluate(()=>lmnWorkspace.openNewTab());
   await page.waitForFunction(()=>document.querySelector('#navigator').inert);
