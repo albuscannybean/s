@@ -14,6 +14,8 @@ try {
   await page.keyboard.press('Tab');
   assert.equal(await page.locator(':focus').getAttribute('class'),'skip-link');
   await page.keyboard.press('Enter');assert.equal(await page.locator(':focus').getAttribute('id'),'workspace');
+  // The study home hides advanced editing navigation until a document is open.
+  await page.evaluate(()=>lmnWorkspace.openNewTab());
   await page.locator('#navigator-tab-outline').focus();await page.keyboard.press('ArrowRight');
   assert.equal(await page.locator('#navigator-tab-library').getAttribute('aria-selected'),'true');
   assert.equal(await page.locator('#navigatorPanel').getAttribute('aria-labelledby'),'navigator-tab-library');
@@ -25,6 +27,7 @@ try {
   assert.ok(await page.locator('#contextMenu').evaluate(e=>e.contains(document.activeElement)));
   await page.keyboard.press('End');assert.ok(await page.locator('#contextMenu button:not(:disabled)').last().evaluate(e=>e===document.activeElement));
   await page.keyboard.press('Escape');assert.equal(await page.locator(':focus').getAttribute('id'),'moreBtn');
+  await page.evaluate(()=>lmnWorkspace.openMathHome());
   await shot('home');
   result.themes=[];
   for(const theme of ['warm','paper','violet','slate','dark']){

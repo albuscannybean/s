@@ -99,6 +99,8 @@ class WorkspaceController{
   bindUI(){
     this.transient=new TransientOverlayManager(document).register('quickCreate',$('#quickCreate'),{emptyInput:$('#quickCreateInput')}).register('contextMenu',$('#contextMenu'));
     $('#toggleNavigator').onclick=()=>this.toggleNavigator();$('#navigatorMenu').onclick=event=>this.openNavigatorMenu(event);this.bindNavigatorResizer();all('[data-welcome]').forEach(button=>button.onclick=()=>button.dataset.welcome==='knowledge'?this.openQuickCreate():button.dataset.welcome==='library'?this.openLibrary():this.openImport());all('[data-template]').forEach(button=>button.onclick=()=>this.openStructureConfiguration(button.dataset.template));all('[data-empty-template]').forEach(button=>button.onclick=()=>this.openStructureConfiguration(button.dataset.emptyTemplate));
+    all('[data-math-nav]').forEach(button=>button.onclick=()=>this.navigateMathSection(button.dataset.mathNav));
+    all('[data-math-action]').forEach(button=>button.onclick=()=>this.runMathHomeAction(button.dataset.mathAction));
     $('#learningStartForm').onsubmit=event=>{event.preventDefault();this.startLearning()};
     $('#studyNewCourse').onclick=()=>this.requestText('建立一门数学课程','',title=>this.createStudyEntry(title,'course'),{label:'课程名称',hint:'例如：数学分析、概率论。之后可在课程下建立章节。'});
     $('#studyOrganizeForm').onsubmit=event=>{event.preventDefault();const id=$('#studyLooseKnowledge').value,parentId=$('#studyDestinationChapter').value;if(!id||!parentId)return;try{this.commit('study:organize',()=>placeStudyKnowledge(this.state,parentId,id,{idFactory:uid}))}catch(error){$('#saveStatus').textContent=error.message}};
@@ -141,7 +143,42 @@ class WorkspaceController{
   effectiveSlotTitle(instance,slot){return getEffectiveTitle(slot,{kind:'slot',instance,state:this.state,container:instance?.containers?.[slot.id]})}
   openNewTab(){this.closeTransientOverlays();this.closePanel();this.document=`new-tab:${uid()}`;this.rememberDocument(this.currentKnowledgeId,this.document);this.path=this.knowledge?[...(this.knowledge?[knowledgeSegment(this.knowledge)]:[]),{kind:'document',id:this.document,label:t('新标签页'),document:this.document}]:[{kind:'document',id:this.document,label:t('新标签页'),document:this.document}];this.pushLocation();this.renderAll()}
   validHomeLocation(location){if(!location)return false;if(location.knowledgeId&&!this.state.knowledge.some(item=>item.id===location.knowledgeId))return false;if(location.instanceId&&!this.state.structureInstances.some(item=>item.id===location.instanceId))return false;return location.document==='notes'||location.document?.startsWith('new-tab')||(location.document?.startsWith('study-workbench:')&&this.studyWorkbench?.sessions.some(item=>location.document===`study-workbench:${item.id}`))||this.documentRoute(location.document).valid}
-  activateHome(push=true){this.closeTransientOverlays();this.closePanel();this.activeTabKey=null;const saved=this.preferences.homeLocation;if(saved&&this.validHomeLocation(saved))this.applyLocation(saved,{remember:false,render:false});else{if(saved){this.preferences.homeLocation=null;this.savePreferences()}this.currentKnowledgeId=null;this.currentInstanceId=null;this.currentBoardId=null;this.document='welcome';this.path=[];this.selection.clear();this.fitPending=true}if(push&&this.browserHistoryReady)history.pushState({home:true,lmnLocation:this.location()},'');this.renderAll()}
+  activateHome(push=true){this.mathHomeSection='';this.closeTransientOverlays();this.closePanel();this.activeTabKey=null;const saved=this.preferences.homeLocation;if(saved&&this.validHomeLocation(saved))this.applyLocation(saved,{remember:false,render:false});else{if(saved){this.preferences.homeLocation=null;this.savePreferences()}this.currentKnowledgeId=null;this.currentInstanceId=null;this.currentBoardId=null;this.document='welcome';this.path=[];this.selection.clear();this.fitPending=true}if(push&&this.browserHistoryReady)history.pushState({home:true,lmnLocation:this.location()},'');this.renderAll()}
+  openMathHome(section=''){
+    this.closeTransientOverlays();this.closePanel();this.activeTabKey=null;
+    this.mathHomeSection=section;
+    this.currentKnowledgeId=null;this.currentInstanceId=null;this.currentBoardId=null;
+    this.document='welcome';this.path=[];this.selection.clear();this.fitPending=true;
+    this.pushLocation();this.renderAll();
+    if(section)requestAnimationFrame(()=>document.getElementById(section)?.scrollIntoView({behavior:'auto',block:'start'}));
+  }
+  navigateMathSection(section){
+    if(section==='home')return this.openMathHome();
+    if(section==='sessions')return this.openMathHome('studySessionsHomeTitle');
+    if(section==='courses')return this.openMathHome('studyCatalogTitle');
+    if(section==='library')return this.openLibrary();
+    if(section==='search')return this.openSearchWorkbench();
+    if(section==='import')return this.openImport();
+  }
+  runMathHomeAction(action){
+    if(action==='example'){
+      $('#learningTopic').value='为什么一致收敛要求统一的 N？';
+      $('#learningMode').value='concept';
+      this.startLearning();
+    }else if(action==='course')$('#studyNewCourse').click();
+    else if(action==='search')this.openSearchWorkbench();
+    else if(action==='import')this.openImport();
+  }
+  updateMathSiteChrome(){
+    const home=this.document==='welcome',isStudy=this.document.startsWith('study-workbench:');
+    $('#appShell').dataset.view=home?'home':isStudy?'study':'workbench';
+    const active=home?(this.mathHomeSection==='studySessionsHomeTitle'?'sessions':this.mathHomeSection==='studyCatalogTitle'?'courses':'home'):isStudy?'sessions':this.document==='search-workbench'?'search':this.currentKnowledgeId?'courses':'';
+    all('[data-math-nav]').forEach(button=>{
+      const selected=button.dataset.mathNav===active;
+      button.classList.toggle('active',selected);
+      if(selected)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current');
+    });
+  }
   goUp(){if(this.path.length<=1){this.activateHome();return}const index=this.path.length-2,segment=this.path[index];this.navigatePath(index,segment)}
   runNewTabAction(action){if(action==='learn')return this.activateHome();if(action==='knowledge')return this.openQuickCreate(null,'blank');if(action==='lmn')return this.openQuickCreate(null,'lmn');if(action==='structure')return this.openLibrary();if(action==='notes')return this.knowledge?this.activateDocument('notes',true,this.currentKnowledgeId):this.openQuickCreate();if(action==='import')return this.openImport();if(action==='search')return this.openCommand()}
   startLearning(){const title=$('#learningTopic').value.trim();if(!title){$('#learningTopic').focus();return}const mode=$('#learningMode').value,chapterId=$('#learningChapter').value||null;this.studyWorkbench.start(title,mode,chapterId)}
@@ -934,6 +971,7 @@ class WorkspaceController{
   renderStructureSearchResults(){const root=$('#searchWorkbenchResults');if(!root)return;root.replaceChildren();if(this.searchNavigationError){const error=document.createElement('p');error.className='nav-empty search-navigation-error';error.textContent=this.searchNavigationError;root.append(error)}if(!this.searchQueryAst){if(!root.children.length)root.innerHTML=translateUIFragment('<p class="nav-empty">先添加一个结构作为查询根。</p>',document.documentElement.lang);return}const textQuery=$('#searchWorkbenchQuery')?.value.trim().toLowerCase()??'',labels=(this.searchKnowledgeLabels??[]).map(id=>this.state.knowledge.find(item=>item.id===id)?.title.toLowerCase()).filter(Boolean),results=searchStructureQuery(this.searchQueryAst,this.state,{pathFor:instance=>(this.buildConstructionPath('structure',instance.id)??[]).map(item=>item.label)});let count=0;for(const result of results){const instance=this.state.structureInstances.find(item=>item.id===result.instanceId),template=this.state.structureTemplates.find(item=>item.id===result.templateId),owner=this.state.knowledge.find(item=>item.id===result.ownerKnowledgeId);if(!instance||!template)continue;const source=serializeStructureInstance(template,instance).toLowerCase(),haystack=`${source} ${owner?.title??''} ${owner?.content??''}`.toLowerCase();if(textQuery&&!haystack.includes(textQuery)||labels.some(label=>!haystack.includes(label)))continue;const card=document.createElement('button');card.className='search-result-card';card.innerHTML=ui`<span>⬡</span><div><b>${escapeHtml(this.structureDisplayTitle(instance,template))}</b><small>${escapeHtml(result.path.join(' › ')||owner?.title||'内容库')}</small><em>${result.matchedNodeIds.length} 个节点 · ${result.matchedEdgeIds.length} 条关系命中</em></div><i>打开并高亮 →</i>`;card.onclick=()=>this.openSearchResult({kind:'structure',instanceId:instance.id},{highlight:{slotIds:result.matchedNodeIds,edgeIds:result.matchedEdgeIds}});root.append(card);count++}if(!count&&!this.searchNavigationError)root.innerHTML=translateUIFragment('<p class="nav-empty">当前结构语义、方向或嵌套条件没有匹配结果。</p>',document.documentElement.lang)}
 
   renderWorkspace(){
+    this.updateMathSiteChrome();
     const isStudy=this.document.startsWith('study-workbench:');
     $('#studyWorkbench').classList.toggle('hidden',!isStudy);
     if(isStudy){for(const selector of ['#welcome','#newTabPage','#searchWorkbench','#globalSettingsPage','#lklManualPage','#canvasViewport','#notesDocument','#containerDocument','#contentDocument','#sourceWorkbench'])$(selector).classList.add('hidden');this.studyWorkbench?.render();return}
