@@ -22,6 +22,7 @@ try{
  });
  for(let n=0;n<2;n++){
   const selector=await page.evaluate(id=>{const a=lmnWorkspace;a.openInstance(id);const index=a.navigationIndex(),entry=index.find({kind:'note',id:'structure-body',instanceId:id,contentScope:'structure'});a.navExpanded().add(index.find({kind:'structure',id}).key);a.renderNavigator();return '[data-object-key="'+CSS.escape(entry.key)+'"] .nav-location-open'},ids[n]);
+  await page.evaluate(()=>lmnWorkspace.toggleNavigator());
   await page.locator(selector).click();assert.match(await page.locator('#contentDocumentContent').innerText(),new RegExp('Structure body '+n));
  }
  await page.evaluate(id=>{const a=lmnWorkspace,e=a.navigationIndex().find({kind:'note',id:'structure-body',instanceId:id,contentScope:'structure'});a.openSearchResult(e)},ids[0]);

@@ -5,7 +5,7 @@ const require=createRequire(import.meta.url),{chromium}=require(process.env.PLAY
 const browser=await chromium.launch({headless:true,...(process.env.LMN_BROWSER_EXECUTABLE?{executablePath:process.env.LMN_BROWSER_EXECUTABLE}:{})});
 const page=await browser.newPage({viewport:{width:1440,height:1000},serviceWorkers:'block'}),errors=[],result={};
 page.on('pageerror',error=>errors.push(error.message));await mkdir('qa-output',{recursive:true});
-const rowFor=async target=>page.locator(await page.evaluate(target=>{const entry=lmnWorkspace.navigationIndex().find(target);if(!entry)throw new Error('Missing test target '+JSON.stringify(target));return '.nav-location-row[data-object-key="'+CSS.escape(entry.key)+'"]';},target)).first();
+const rowFor=async target=>page.locator(await page.evaluate(target=>{if(!document.querySelector('#contentLibraryDialog').open)lmnWorkspace.toggleNavigator();const entry=lmnWorkspace.navigationIndex().find(target);if(!entry)throw new Error('Missing test target '+JSON.stringify(target));return '.nav-location-row[data-object-key="'+CSS.escape(entry.key)+'"]';},target)).first();
 try{
  await page.goto(process.env.LMN_QA_URL||'http://127.0.0.1:4174/apps/web/',{waitUntil:'networkidle'});await page.waitForFunction(()=>!!globalThis.lmnWorkspace);
  await page.evaluate(async()=>{
@@ -17,6 +17,7 @@ try{
  });
  assert.equal(await page.locator('#navigatorTitle').innerText(),'内容库');
 
+ await page.evaluate(()=>lmnWorkspace.toggleNavigator());
  await page.getByRole('button',{name:'＋ 正文',exact:true}).click();
  await page.locator('#contentDocumentContent .document-title-input').fill('QA511 未归类正文');
  const noteBody='## 可独立保存的正文\n\n![tiny](data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Wl6J94AAAAASUVORK5CYII=)\n\nIndependent content survives reload.';
@@ -30,7 +31,7 @@ try{
  result.savedArchive=await page.evaluate(id=>{const item=lmnWorkspace.state.contentObjects.find(item=>item.id===id);return{body:item.body,objectBody:item.objectContent.body,owner:item.ownerKnowledgeId??null};},result.note);
  assert.equal(result.savedArchive.body,result.savedArchive.objectBody);assert.equal(result.savedArchive.owner,null);
 
- await page.getByRole('button',{name:'＋ 结构',exact:true}).click();
+ await page.evaluate(()=>{if(!document.querySelector('#contentLibraryDialog').open)lmnWorkspace.toggleNavigator()});await page.getByRole('button',{name:'＋ 结构',exact:true}).click();
  await page.locator('#structureLibrary .template-card').filter({has:page.locator('h3',{hasText:/n.*中心/})}).click();
  assert.ok(await page.locator('#configParameters input,#configParameters select').count());
  assert.ok(await page.locator('#configPreview svg').count());await page.locator('#confirmStructureInsert').click();
@@ -57,7 +58,7 @@ try{
  result.dragAddress=await page.evaluate(id=>lmnWorkspace.navigationIndex().pathFor({kind:'knowledge',id}).map(item=>item.id),result.copy);
  assert.deepEqual(result.dragAddress,['qa511:A',result.copy]);
 
- await page.locator('#homeBtn').click();await page.locator('#toggleNavigator').click();await page.locator('#navigatorMenu').click();
+ await page.locator('.math-brand').click();await page.evaluate(()=>lmnWorkspace.toggleNavigator());await page.locator('#navigatorMenu').click();
  await page.locator('#contextMenu').getByRole('button',{name:/批量管理/}).click();
  await page.locator('#batchContentType').selectOption('structure');
  await page.locator('#batchDeleteList .batch-delete-row').filter({hasText:'QA511 未归类结构'}).locator('input').check();
@@ -74,9 +75,9 @@ try{
 
  // Canceling either stage of standalone insertion must not change the owner of
  // the next ordinary insertion under an existing Knowledge.
- await page.getByRole('button',{name:'＋ 结构',exact:true}).click();await page.locator('#structureLibrary > header .dialog-close').click();
+ await page.evaluate(()=>{if(!document.querySelector('#contentLibraryDialog').open)lmnWorkspace.toggleNavigator()});await page.getByRole('button',{name:'＋ 结构',exact:true}).click();await page.locator('#structureLibrary > header .dialog-close').click();
  await page.waitForFunction(()=>!lmnWorkspace.standaloneStructureInsert);
- await page.getByRole('button',{name:'＋ 结构',exact:true}).click();await page.locator('#structureLibrary .template-card').filter({has:page.locator('h3',{hasText:/n.*中心/})}).click();
+ await page.evaluate(()=>{if(!document.querySelector('#contentLibraryDialog').open)lmnWorkspace.toggleNavigator()});await page.getByRole('button',{name:'＋ 结构',exact:true}).click();await page.locator('#structureLibrary .template-card').filter({has:page.locator('h3',{hasText:/n.*中心/})}).click();
  await page.locator('#structureConfigDialog footer .dialog-close').click();await page.waitForFunction(()=>!lmnWorkspace.standaloneStructureInsert);
  await page.evaluate(()=>{lmnWorkspace.openKnowledge('qa511:A');lmnWorkspace.openLibrary();});
  await page.locator('#structureLibrary .template-card').filter({has:page.locator('h3',{hasText:/n.*中心/})}).click();await page.locator('#confirmStructureInsert').click();
@@ -98,8 +99,10 @@ try{
 
  await page.evaluate(()=>lmnWorkspace.openGlobalSettings());await page.locator('[data-global-pref=language]').selectOption('en');
  await page.waitForFunction(()=>document.documentElement.lang==='en');
+ await page.evaluate(()=>{if(!document.querySelector('#contentLibraryDialog').open)lmnWorkspace.toggleNavigator()});
  assert.match(await page.locator('[data-navigator=outline] small').innerText(),/^Content library$/i);assert.match(await page.locator('#navigatorTitle').innerText(),/^Content library$/i);
  assert.equal(await page.getByRole('button',{name:'＋ Note',exact:true}).count(),1);
+ await page.evaluate(()=>{if(!document.querySelector('#contentLibraryDialog').open)lmnWorkspace.toggleNavigator()});
  await page.locator('#navigatorMenu').click();result.englishMenu=await page.locator('#contextMenu').innerText();assert.doesNotMatch(result.englishMenu,/[\u3400-\u9fff]/);
  await page.locator('#contextMenu').getByRole('button',{name:/Manage \/ delete/}).click();
  assert.equal(await page.locator('#batchContentType option[value=unassigned]').textContent(),'Unassigned only');

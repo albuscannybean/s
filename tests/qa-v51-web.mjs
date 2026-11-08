@@ -17,9 +17,11 @@ try{
   app.__qa51={root:root.id,child:child.id,first:first.id,last:last.id};app.openKnowledge(root.id);document.querySelector('#navigatorFilter').value='unique-deep-body';app.navigatorMode='search';app.searchMode='text';app.renderNavigator();
   return{root:root.id,child:child.id};
  });
+ await page.evaluate(()=>lmnWorkspace.toggleNavigator());
  await page.locator('#navigatorContent .nav-item').filter({hasText:'最终知识'}).click();
  result.address=await page.evaluate(()=>({path:lmnWorkspace.path.map(s=>s.id),query:document.querySelector('#navigatorFilter').value,mode:lmnWorkspace.navigatorMode,document:lmnWorkspace.document}));
  assert.equal(result.address.path[0],result.root);assert.ok(result.address.path.includes('qa:结构/6'));assert.equal(result.address.path.at(-1),result.child);assert.equal(result.address.query,'');assert.equal(result.address.mode,'outline');
+ await page.evaluate(()=>lmnWorkspace.toggleNavigator());
  const firstToggle=page.locator('.nav-location-row[data-kind=structure]').first().locator('.nav-location-toggle');
  await firstToggle.click();assert.equal(await page.locator('.nav-location-row[data-kind=structure]').first().getAttribute('aria-expanded'),'false');
  await firstToggle.click();assert.equal(await page.locator('.nav-location-row[data-kind=structure]').first().getAttribute('aria-expanded'),'true');
@@ -40,7 +42,7 @@ try{
  result.contentOutline=await page.evaluate(async()=>{
   const app=lmnWorkspace,{createStructureInstance}=await import(new URL('../../packages/structure-engine/model.js',location.href)),template=app.state.structureTemplates.find(t=>t.id==='builtin:directed-graph');
   for(let i=0;i<40;i++){const instance=createStructureInstance(template);instance.id=`qa-scroll-${i}`;instance.displayTitle=`滚动位置 ${i}`;instance.containers.A.content.body='已填充正文';app.state.structureInstances.push(instance);}
-  app.renderNavigator();const key=app.navigationIndex().find({kind:'structure',id:'qa-scroll-25'}).key,row=[...document.querySelectorAll('.nav-location-row')].find(e=>e.dataset.objectKey===key);row.scrollIntoView({block:'center'});app.__qa51.scrollKey=key;
+  app.renderNavigator();if(!document.querySelector('#contentLibraryDialog').open)app.toggleNavigator();const key=app.navigationIndex().find({kind:'structure',id:'qa-scroll-25'}).key,row=[...document.querySelectorAll('.nav-location-row')].find(e=>e.dataset.objectKey===key);row.scrollIntoView({block:'center'});app.__qa51.scrollKey=key;
   return {before:document.querySelector('#navigatorContent').scrollTop,key};
  });
  const scrollToggle=page.locator('.nav-location-row').filter({has:page.locator('.nav-location-label',{hasText:/^滚动位置 25$/})}).locator('.nav-location-toggle');
