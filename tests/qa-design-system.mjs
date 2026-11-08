@@ -14,6 +14,8 @@ try {
   await page.keyboard.press('Tab');
   assert.equal(await page.locator(':focus').getAttribute('class'),'skip-link');
   await page.keyboard.press('Enter');assert.equal(await page.locator(':focus').getAttribute('id'),'workspace');
+  // The study home hides advanced editing navigation until a document is open.
+  await page.evaluate(()=>lmnWorkspace.openNewTab());
   await page.locator('#navigator-tab-outline').focus();await page.keyboard.press('ArrowRight');
   assert.equal(await page.locator('#navigator-tab-library').getAttribute('aria-selected'),'true');
   assert.equal(await page.locator('#navigatorPanel').getAttribute('aria-labelledby'),'navigator-tab-library');
@@ -25,6 +27,7 @@ try {
   assert.ok(await page.locator('#contextMenu').evaluate(e=>e.contains(document.activeElement)));
   await page.keyboard.press('End');assert.ok(await page.locator('#contextMenu button:not(:disabled)').last().evaluate(e=>e===document.activeElement));
   await page.keyboard.press('Escape');assert.equal(await page.locator(':focus').getAttribute('id'),'moreBtn');
+  await page.evaluate(()=>lmnWorkspace.openMathHome());
   await shot('home');
   result.themes=[];
   for(const theme of ['warm','paper','violet','slate','dark']){
@@ -43,11 +46,16 @@ try {
   await page.locator('#learningTopic').fill('为什么一致收敛要求统一的 N？');
   await page.locator('#learningMode').selectOption('proof');
   await page.locator('#learningStartForm button[type=submit]').click();
+  await page.locator('#studyWorkbench').waitFor({state:'visible'});
+  assert.equal(await page.evaluate(()=>lmnWorkspace.knowledge),undefined);
+  await page.locator('#studyDraft').fill('逐点收敛的 N 随 x 变化；一致收敛不允许如此。');
+  await page.locator('[data-study-action="submit"]').click();
+  await page.locator('[data-study-action="notes"]').click();
   await page.waitForFunction(()=>lmnWorkspace.knowledge?.title==='为什么一致收敛要求统一的 N？');
   assert.equal(await page.locator('#notesDocument').isVisible(),true);
-  assert.match(await page.evaluate(()=>lmnWorkspace.knowledge.content),/独立复现/);
+  assert.match(await page.evaluate(()=>lmnWorkspace.knowledge.content),/逐点收敛的 N/);
   await page.evaluate(()=>lmnWorkspace.activateHome());
-  await page.locator('.learning-recent-row').filter({hasText:'为什么一致收敛要求统一的 N？'}).click();
+  await page.locator('#learningRecent .learning-recent-row').filter({hasText:'为什么一致收敛要求统一的 N？'}).click();
   assert.equal(await page.evaluate(()=>lmnWorkspace.knowledge.title),'为什么一致收敛要求统一的 N？');
   await page.evaluate(()=>lmnWorkspace.activateHome());
   const createByDialog=async(button,title)=>{
@@ -103,6 +111,7 @@ try {
     assert.ok(bounds.page<=width+1,'Page must not overflow horizontally');
     if(width<=900)assert.equal(bounds.workspace.x,0);
     assert.ok(await page.locator('#globalSearch').isVisible(),'Command entry remains reachable');
+    assert.ok(await page.locator('.math-brand-copy b').isVisible(),'Math site title remains visible');
     for(const action of ['knowledge','library','import']){
       const box=await page.locator(`[data-welcome="${action}"]`).boundingBox();assert.ok(box.x>=0&&box.x+box.width<=width+1);
     }
@@ -113,10 +122,14 @@ try {
   await page.locator('#navigatorFilter').click();assert.equal(await page.locator(':focus').getAttribute('id'),'navigatorFilter');await page.keyboard.press('Escape');
   assert.equal(await page.locator('#navigator').evaluate(e=>e.inert),true);
   assert.equal(await page.locator(':focus').getAttribute('id'),'toggleNavigator');
+  await page.locator('#toggleNavigator').click();
+  await page.locator('#workspace').click({position:{x:380,y:350}});
+  assert.equal(await page.locator('#navigator').evaluate(e=>e.inert),true,'Clicking the workspace dismisses home navigation');
   await page.setViewportSize({width:1440,height:900});
+  await page.evaluate(()=>lmnWorkspace.openNewTab());
   await page.waitForFunction(()=>!document.querySelector('#navigator').inert);
-  await page.evaluate(()=>{lmnWorkspace.preferences.language='en';lmnWorkspace.renderAll()});
-  assert.equal(await page.locator('.welcome h1').textContent(),'Start with a question');
+  await page.evaluate(()=>{lmnWorkspace.preferences.language='en';lmnWorkspace.applyPreferences();lmnWorkspace.openMathHome()});
+  assert.match(await page.locator('.math-home-intro h1').textContent(),/每一次思考/);
   result.errors=errors;assert.deepEqual(errors,[]);
   await writeFile('qa-output/design-system.json',JSON.stringify(result,null,2));console.log(JSON.stringify(result,null,2));
 } finally {await browser.close()}

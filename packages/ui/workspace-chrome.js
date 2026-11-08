@@ -19,7 +19,8 @@ export function createIcon(name, documentRef=document) {
 }
 export function syncNavigatorState(controller) {
   const shell=document.querySelector('#appShell'), nav=document.querySelector('#navigator');
-  const open=!shell.classList.contains('navigator-collapsed');
+  const overlay=controller.document==='welcome'||controller.document?.startsWith('study-workbench:');
+  const open=overlay?shell.classList.contains('home-navigator-open'):!shell.classList.contains('navigator-collapsed');
   const toggle=document.querySelector('#toggleNavigator');
   toggle.setAttribute('aria-expanded',String(open)); nav.inert=!open;
   if(!open&&nav.contains(document.activeElement))toggle.focus();
@@ -73,9 +74,10 @@ export function bindWorkspaceChrome(controller) {
   };
   compact.addEventListener('change',update);update();
   document.querySelector('#workspace').addEventListener('pointerdown',()=>{
-    if(compact.matches&&!document.querySelector('#appShell').classList.contains('navigator-collapsed'))controller.toggleNavigator();
+    const shell=document.querySelector('#appShell');
+    if(shell.classList.contains('home-navigator-open')||(compact.matches&&!shell.classList.contains('navigator-collapsed')))controller.toggleNavigator();
   });
   document.querySelector('#navigator').addEventListener('keydown',event=>{
-    if(event.key==='Escape'&&compact.matches){event.preventDefault();controller.toggleNavigator()}
+    if(event.key==='Escape'&&(compact.matches||document.querySelector('#appShell').classList.contains('home-navigator-open'))){event.preventDefault();controller.toggleNavigator()}
   });
 }

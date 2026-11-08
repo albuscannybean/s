@@ -14,6 +14,7 @@ html[data-theme="slate"]{--canvas:#eef1f1;--surface:#f6f8f7;--sidebar:#e4e9e7;--
 html[data-theme="dark"]{--canvas:#151a19;--surface:#1d2422;--sidebar:#181f1d;--paper:#222a27;--elevated:#28312e;--ink:#edf3f0;--muted:#a5b4ae;--faint:#74857e;--line:#34413c;--line-strong:#53645d;--green:#66b993;--green-soft:#243e33;--gold:#d8a651;--gold-soft:#403522;--violet:#ad8bd8;--violet-soft:#352d43;--danger:#e47972;--danger-soft:#432b29;}
 html[data-canvas="paper"]{--canvas:#f6f5ef}
 html[data-canvas="white"]{--canvas:#fff}
+html[data-theme="warm"]{--canvas:#f1f0ec;--green:#3e427d;--green-soft:#efeff8;--sidebar:#f1f0eb;--line:#e3e1dc;--line-strong:#cac8c6}
 html[data-accent="blue"]{--green:#426f86;--green-soft:#eaf2f6}
 html[data-accent="violet"]{--green:#6b55a0;--green-soft:#f0edf8}
 
