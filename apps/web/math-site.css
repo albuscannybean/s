@@ -325,7 +325,7 @@ html[data-theme="dark"] .document-editor-page { border-color:var(--line); }
 .study-solution-panel summary { cursor:pointer; font-size:13px; font-weight:650; color:var(--green); }
 .study-solution-panel details>div { padding:14px; background:var(--elevated); margin-top:12px; border-radius:8px; }
 
-.math-toolbox { position:fixed; right:20px; bottom:41px; z-index:80; display:flex; flex-direction:column; align-items:flex-end; gap:8px; pointer-events:none; }
+.math-toolbox { position:fixed; right:20px; bottom:41px; z-index:60; display:flex; flex-direction:column; align-items:flex-end; gap:8px; pointer-events:none; }
 .math-toolbox>* { pointer-events:auto; }
 .math-toolbox>#mathToolboxToggle { padding:12px 18px; font-size:13px; border-radius:999px; border:1px solid var(--green); background:var(--green); color:var(--ui-on-accent); font-weight:700; box-shadow:0 5px 20px rgb(30 35 90 / 24%); }
 .math-toolbox-panel { display:flex; flex-direction:column; gap:8px; width:min(275px,calc(100vw - 30px)); padding:17px; border:1px solid var(--line); border-radius:13px; background:var(--paper); box-shadow:var(--shadow-2); }

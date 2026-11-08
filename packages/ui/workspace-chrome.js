@@ -19,7 +19,7 @@ export function createIcon(name, documentRef=document) {
 }
 export function syncNavigatorState(controller) {
   const shell=document.querySelector('#appShell'), nav=document.querySelector('#navigator');
-  const overlay=controller.document==='welcome'||controller.document?.startsWith('study-workbench:');
+  const overlay=controller.document==='welcome'||controller.document?.startsWith('study-workbench:')||controller.document?.startsWith('math-archive:');
   const open=overlay?shell.classList.contains('home-navigator-open'):!shell.classList.contains('navigator-collapsed');
   const toggle=document.querySelector('#toggleNavigator');
   toggle.setAttribute('aria-expanded',String(open)); nav.inert=!open;

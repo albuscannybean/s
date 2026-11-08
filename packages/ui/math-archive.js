@@ -37,15 +37,22 @@ export class MathArchive{
     });
   }
   updateAnnotation(id,patch){if(!this.validAnnotationTarget(id))return;const key=annotationId(id),old=this.annotations.get(key)??{id:key,subjectId:id,body:'',mastery:'未学习'};
-    const next={...old,...patch,updatedAt:new Date().toISOString()};this.annotations.set(key,next);clearTimeout(this.timers.get(key));this.timers.set(key,setTimeout(()=>{this.timers.delete(key);put('mathAnnotations',next).catch(error=>this.showNotice(`批注保存失败：${error.message}`))},400));
+    const next={...old,...patch,updatedAt:new Date().toISOString()};this.annotations.set(key,next);clearTimeout(this.timers.get(key));this.timers.set(key,setTimeout(()=>{this.timers.delete(key);put('mathAnnotations',this.annotations.get(key)).catch(error=>this.showNotice(`批注保存失败：${error.message}`))},400));
     this.showNotice('私人批注已更新，将保存在当前浏览器中。');
   }
   validAnnotationTarget(id){return Boolean(mathKnowledgeById(id)||mathProblemById(id)||mathMethodById(id))}
+  async flushAnnotations(){
+    const pending=[...this.timers.keys()].map(key=>this.annotations.get(key));
+    for(const timer of this.timers.values())clearTimeout(timer);this.timers.clear();
+    await Promise.all(pending.map(note=>put('mathAnnotations',note)));
+  }
   showNotice(value){this.notice=value;const target=$('#mathArchiveStatus');if(target)target.textContent=value}
   async importAnnotations(input){const file=input.files?.[0];input.value='';if(!file)return;
     try{if(file.size>5*1024*1024)throw new Error('文件不能超过 5MB');const data=JSON.parse(await file.text());
       if(data?.format!=='lmn-math-annotations/1'||!Array.isArray(data.annotations)||data.annotations.length>20000)throw new Error('不是受支持的个人批注文件');
-      const seen=new Set(),incoming=[];for(const item of data.annotations){if(!item||!this.validAnnotationTarget(item.subjectId)||item.id!==annotationId(item.subjectId)||typeof item.body!=='string'||item.body.length>100000||!masteryLabels.includes(item.mastery)||typeof item.updatedAt!=='string'||seen.has(item.id))throw new Error('批注数据存在无效或重复记录');seen.add(item.id);incoming.push(item)}
+      const seen=new Set(),incoming=[];for(const item of data.annotations){if(!item||!this.validAnnotationTarget(item.subjectId)||item.id!==annotationId(item.subjectId)||typeof item.body!=='string'||item.body.length>100000||!masteryLabels.includes(item.mastery)||typeof item.updatedAt!=='string'||!Number.isFinite(Date.parse(item.updatedAt))||new Date(item.updatedAt).toISOString()!==item.updatedAt||seen.has(item.id))throw new Error('批注数据存在无效或重复记录');seen.add(item.id);incoming.push(item)}
+      // Finish pending local saves before merging, so a debounce timer cannot undo the import.
+      await this.flushAnnotations();
       let count=0;for(const item of incoming){const current=this.annotations.get(item.id);if(!current||String(item.updatedAt)>String(current.updatedAt)){await put('mathAnnotations',item);this.annotations.set(item.id,item);count++}}
       this.showNotice(`批注导入完成，更新 ${count} 条；本地较新的记录已保留。`);this.render();
     }catch(error){this.showNotice(`导入失败：${error.message}`)}
