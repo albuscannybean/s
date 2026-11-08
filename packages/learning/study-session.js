@@ -2,6 +2,7 @@
 export const STUDY_ARCHIVE_FORMAT='lmn-study-sessions/1';
 export const FEEDBACK_FORMAT='lmn-study-feedback/1';
 export const UNIFORM_N='uniform-n';
+import {mathProblemById} from './math-content.js';
 export const STUDY_TASKS=Object.freeze(['main','transfer','review']);
 export const UNIFORM_N_LESSON=Object.freeze({
   question:'一致收敛为何要求统一的 N？',
@@ -22,9 +23,10 @@ const nonempty=value=>typeof value==='string'&&value.trim().length>0;
 const uniqueIds=items=>new Set(items.map(item=>item.id)).size===items.length;
 export const isUniformNTopic=title=>/一致收敛|uniform convergence/i.test(title)&&/(统一|N|量词|uniform)/i.test(title);
 
-export function createStudySession({title,mode='concept',chapterId=null,now=timestamp(),id=newId()}={}){
+export function createStudySession({title,mode='concept',chapterId=null,problemId=null,now=timestamp(),id=newId()}={}){
   if(!nonempty(title)||title.trim().length>120)throw new Error('学习问题应为 1–120 个字符');
-  return {id,title:title.trim(),mode,chapterId,lessonKey:isUniformNTopic(title)?UNIFORM_N:null,
+  if(problemId&&!mathProblemById(problemId))throw new Error('题库中不存在该题目');
+  return {id,title:title.trim(),mode,chapterId,problemId,lessonKey:problemId?null:isUniformNTopic(title)?UNIFORM_N:null,
     task:'main',draft:'',drafts:{main:'',transfer:'',review:''},attempts:[],hints:[],feedback:[],reviews:[],selfChecks:{},recap:'',
     status:'active',dueAt:null,createdAt:now,updatedAt:now};
 }
@@ -41,10 +43,11 @@ export function updateStudyDraft(session,draft,{now=timestamp()}={}){
 }
 
 export function revealStudyHint(session,{now=timestamp()}={}){
-  if(session.lessonKey!==UNIFORM_N||session.task!=='main')throw new Error('当前问题没有预设的分层提示，可导出问题请 AI 提示');
+  const problem=mathProblemById(session.problemId),available=problem?.hints??(session.lessonKey===UNIFORM_N?UNIFORM_N_LESSON.hints:null);
+  if(!available||session.task!=='main')throw new Error('当前问题没有预设的分层提示，可导出问题请 AI 提示');
   if(!session.attempts.some(attempt=>attempt.task===session.task))throw new Error('先保存至少一次独立尝试，再查看提示');
   const level=session.hints.filter(hint=>hint.task===session.task).length+1;
-  if(level>UNIFORM_N_LESSON.hints.length)throw new Error('全部提示已经显示');
+  if(level>available.length)throw new Error('全部提示已经显示');
   return {...session,hints:[...session.hints,{task:session.task,level,createdAt:now}],updatedAt:now};
 }
 
@@ -77,7 +80,9 @@ export function dueStudySessions(sessions,now=timestamp()){
 
 export function studyContextPacket(session){
   const attempt=session.attempts.filter(item=>item.task===session.task).at(-1)??null;
+  const problem=mathProblemById(session.problemId);
   return {format:'lmn-study-context/1',sessionId:session.id,attemptId:attempt?.id??null,question:session.title,
+    ...(problem?{problemId:problem.id,problemStatement:problem.prompt,knowledgeIds:problem.knowledgeIds,methodIds:problem.methodIds}:{}),
     task:session.task,attempt:attempt?.content??session.draft,hintLevel:session.hints.filter(item=>item.task===session.task).length,
     instruction:'你是数学学习教练。先判断学生已展示的证据和缺口；除非明确请求完整解答，否则只提供下一步最小提示，注意量词顺序、反例与可检验证据。请返回 JSON：{ "format":"lmn-study-feedback/1", "sessionId":"原 sessionId", "attemptId":"原 attemptId", "summary":"...", "strengths":["..."], "issues":["..."], "nextAction":"..." }。不要替学生编造已经学会的内容。'};
 }
@@ -101,16 +106,18 @@ export function validateStudyArchive(input){
   let value;try{value=typeof input==='string'?JSON.parse(input):input}catch{throw new Error('学习档案不是有效 JSON')}
   if(value?.format!==STUDY_ARCHIVE_FORMAT||!Array.isArray(value.sessions)||value.sessions.length>10000)throw new Error('不是受支持的 LMN 学习档案');
   for(const session of value.sessions){
+    if(session?.problemId!=null&&(!nonempty(session.problemId)||session.problemId.length>120))throw new Error('习题关联 ID 不合法');
     if(!session||!nonempty(session.id)||!nonempty(session.title)||!STUDY_TASKS.includes(session.task)||!['active','review'].includes(session.status)||!Array.isArray(session.attempts)||!Array.isArray(session.hints)||!Array.isArray(session.feedback)||!Array.isArray(session.reviews)||typeof session.draft!=='string'||session.attempts.length>10000||session.hints.length>10000||session.feedback.length>10000||session.reviews.length>10000||!uniqueIds(session.attempts)||!session.attempts.every(item=>nonempty(item.id)&&nonempty(item.content)&&STUDY_TASKS.includes(item.task))||!session.hints.every(item=>STUDY_TASKS.includes(item.task)&&Number.isInteger(item.level))||!session.feedback.every(item=>nonempty(item.id)&&nonempty(item.attemptId)&&session.attempts.some(attempt=>attempt.id===item.attemptId))||!session.reviews.every(item=>nonempty(item.id)&&typeof item.remembered==='boolean'))throw new Error('学习档案包含不合法的会话或尝试');
     // Validate every field consumed by the workbench before anything reaches IndexedDB.
     const validDate=date=>typeof date==='string'&&Number.isFinite(Date.parse(date))&&new Date(date).toISOString()===date;
+    const availableHints=mathProblemById(session.problemId)?.hints??(session.lessonKey===UNIFORM_N?UNIFORM_N_LESSON.hints:null);
     if(!validDate(session.createdAt)||!validDate(session.updatedAt)||(session.dueAt!==null&&!validDate(session.dueAt))||
       !['concept','proof','problem','organize'].includes(session.mode)||![null,UNIFORM_N].includes(session.lessonKey)||
       (session.status==='review'&&!session.dueAt)||typeof session.recap!=='string'||
       !session.drafts||!STUDY_TASKS.every(task=>typeof session.drafts[task]==='string')||
       !session.selfChecks||Object.values(session.selfChecks).some(value=>typeof value!=='boolean')||
       !session.attempts.every(item=>validDate(item.createdAt)&&Number.isInteger(item.hintCount)&&item.hintCount>=0)||
-      !session.hints.every((item,index)=>session.lessonKey===UNIFORM_N&&item.task==='main'&&item.level===index+1&&item.level<=UNIFORM_N_LESSON.hints.length&&validDate(item.createdAt))||
+      !session.hints.every((item,index)=>availableHints&&item.task==='main'&&item.level===index+1&&item.level<=availableHints.length&&validDate(item.createdAt))||
       !uniqueIds(session.feedback)||!session.feedback.every(item=>validDate(item.createdAt))||
       !uniqueIds(session.reviews)||!session.reviews.every(item=>validDate(item.createdAt))||
       session.reviews.length>session.attempts.filter(item=>item.task==='review').length)

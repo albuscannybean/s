@@ -21,7 +21,7 @@ try{
     const preserved=await Promise.all(stores.map(async name=>JSON.stringify(await db.get(name,`preserve:${name}`))===JSON.stringify(sentinel(name))));
     return{version:current.version,stores:stores.length,preserved:preserved.every(Boolean),newStoreEmpty:(await db.list('studySessions')).length===0};
   });
-  assert.deepEqual(result.upgrade,{version:8,stores:15,preserved:true,newStoreEmpty:true});await upgrade.close();
+  assert.deepEqual(result.upgrade,{version:9,stores:15,preserved:true,newStoreEmpty:true});await upgrade.close();
 
   const context=await browser.newContext({viewport:{width:1440,height:1000}}),page=await context.newPage();
   page.on('pageerror',error=>errors.push(error.message));
@@ -31,7 +31,7 @@ try{
   await page.waitForFunction(()=>!!navigator.serviceWorker.controller);
   // Cache installation must include the actual lesson modules and theme resources.
   result.cached=await page.evaluate(async()=>{const keys=await caches.keys(),cache=await caches.open(keys.find(key=>key.startsWith('lmn-v')));return(await cache.keys()).map(request=>new URL(request.url).pathname)});
-  for(const suffix of ['/math-site.css','/study-session.js','/study-workbench.js'])assert.ok(result.cached.some(path=>path.endsWith(suffix)));
+  for(const suffix of ['/math-site.css','/study-session.js','/study-workbench.js','/math-content.js','/math-archive.js'])assert.ok(result.cached.some(path=>path.endsWith(suffix)));
   result.cached=result.cached.length;
   for(const width of [320,390,768,1024,1440]){
     await page.setViewportSize({width,height:950});
@@ -43,15 +43,16 @@ try{
   await page.locator('[data-math-nav="sessions"]').click();
   assert.equal(await page.locator('[data-math-nav="sessions"]').getAttribute('aria-current'),'page');
   await page.locator('[data-math-nav="courses"]').click();
-  assert.equal(await page.locator('#studyNewCourse').isVisible(),true);
-  await page.locator('[data-math-nav="library"]').click();await page.locator('#structureLibrary').waitFor({state:'visible'});await page.keyboard.press('Escape');
-  await page.locator('[data-math-nav="search"]').click();await page.locator('#searchWorkbench').waitFor({state:'visible'});
-  await page.locator('[data-math-nav="import"]').click();await page.locator('#importDialog').waitFor({state:'visible'});await page.keyboard.press('Escape');
+  await page.locator('[data-archive-kind="course"]').waitFor({state:'visible'});
+  await page.locator('#mathToolboxToggle').click();await page.locator('[data-math-tool="structure"]').click();await page.locator('#structureLibrary').waitFor({state:'visible'});await page.keyboard.press('Escape');
+  await page.locator('#globalSearch').click();await page.locator('#mathSearch').waitFor({state:'visible'});
+  await page.locator('#mathToolboxToggle').click();await page.locator('[data-math-tool="import"]').click();await page.locator('#importDialog').waitFor({state:'visible'});await page.keyboard.press('Escape');
   await page.locator('[data-math-nav="home"]').click();
   await page.screenshot({path:'qa-output/math-release-desktop.png'});
   await page.setViewportSize({width:390,height:844});
   await page.screenshot({path:'qa-output/math-release-mobile.png'});
   await page.locator('[data-math-action="example"]').click();
+  await page.locator('[data-math-archive-action="start"]').click();
   await page.locator('#studyWorkbench').waitFor({state:'visible'});
   assert.ok(await page.locator('#studyQuestion .katex').count()>0);
   await page.locator('#studyDraft').fill('离线保留的独立尝试：N 不应依赖 x。');
@@ -61,8 +62,10 @@ try{
   await context.setOffline(true);await page.reload();await page.waitForFunction(()=>!!globalThis.lmnWorkspace);
   await page.locator('#studySessionsHome .learning-recent-row').click();
   assert.match(await page.locator('.study-records').textContent(),/离线保留的独立尝试/);
-  await page.locator('[data-study-action="hint"]').click();assert.match(await page.locator('#studyHints').textContent(),/量词/);
+  await page.locator('[data-study-action="hint"]').click();assert.match(await page.locator('#studyHints').textContent(),/固定/);
   await page.screenshot({path:'qa-output/math-release-offline-study.png'});
+  await page.locator('[data-study-action="knowledge"][data-value="ANA-UC-K02"]').click();
+  assert.ok(await page.locator('#mathReadingBody .katex').count()>0);result.offlineContent=true;
   assert.deepEqual(errors,[]);result.offlineStudy=true;result.errors=errors;
   await writeFile('qa-output/math-release.json',JSON.stringify(result,null,2));
   console.log(JSON.stringify(result,null,2));await context.close();

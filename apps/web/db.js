@@ -1,5 +1,5 @@
-const DB_NAME='lmn-knowledge-system',DB_VERSION=8;
-export const STORES=['knowledge','relations','representations','structureTemplates','structureInstances','variableSchemes','knowledgePackages','contentObjects','structureViews','boards','placements','settings','migrationState','lmns','structures','studySessions'];
+const DB_NAME='lmn-knowledge-system',DB_VERSION=9;
+export const STORES=['knowledge','relations','representations','structureTemplates','structureInstances','variableSchemes','knowledgePackages','contentObjects','structureViews','boards','placements','settings','migrationState','lmns','structures','studySessions','mathAnnotations'];
 let connection;
 export function openDatabase(){
  if(connection)return connection;
