@@ -1,6 +1,7 @@
 import {list,put} from '../../apps/web/db.js';
 import {acceptStudyFeedback,changeStudyTask,createStudySession,dueStudySessions,exportStudyArchive,finishStudySession,mergeStudySessions,parseStudyFeedback,recordStudyReview,revealStudyHint,STUDY_TASKS,studyContextPacket,submitStudyAttempt,UNIFORM_N_LESSON,updateStudyDraft,validateStudyArchive} from '../learning/study-session.js';
-import {renderStudyMarkdown} from './math-markup.js';
+import {appendInlineContent,renderStudyMarkdown} from './math-markup.js';
+import {mathKnowledgeById,mathProblemById} from '../learning/math-content.js';
 
 const $=selector=>document.querySelector(selector);
 const html=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
@@ -61,6 +62,11 @@ export class StudyWorkbench {
     };
   }
   start(title,mode,chapterId){const session=createStudySession({title,mode,chapterId});this.persist(session);this.open(session.id)}
+  startProblem(problemId){const problem=mathProblemById(problemId);if(!problem)throw new Error('无法找到该题目');
+    const existing=this.sessions.find(session=>session.problemId===problemId&&session.status==='active');
+    if(existing){this.open(existing.id);return existing}
+    const session=createStudySession({title:problem.title,mode:'problem',problemId:problem.id});this.persist(session);this.open(session.id);return session;
+  }
   open(id){const session=this.sessions.find(item=>item.id===id);if(!session)return;
     const c=this.controller;c.closeTransientOverlays();c.closePanel();c.currentKnowledgeId=null;c.currentInstanceId=null;c.currentBoardId=null;
     c.document=`study-workbench:${session.id}`;c.path=[{kind:'document',id:c.document,label:'学习 · '+session.title,document:c.document}];c.rememberDocument(null,c.document);c.pushLocation();c.renderAll();
@@ -77,15 +83,17 @@ export class StudyWorkbench {
     }
   }
   render(){const session=this.current(),root=$('#studyWorkbenchBody');if(!session||!root)return;
+    const problem=mathProblemById(session.problemId);
     const lesson=session.lessonKey==='uniform-n'?UNIFORM_N_LESSON:null;
+    const guidedHints=problem?.hints??lesson?.hints??[];
     const task=session.task,ownAttempts=session.attempts.filter(item=>item.task===task),hints=session.hints.filter(item=>item.task===task),feedback=session.feedback.filter(item=>item.attemptId===ownAttempts.at(-1)?.id);
-    const taskPrompt=lesson?.[task]??(task==='main'?`独立说明或解决这个问题：${session.title}`:task==='transfer'?'请改变一个条件，自己构造新的例子并验证结论。':'不看笔记复述核心定义、思路及适用边界。');
+    const taskPrompt=problem?(task==='main'?problem.prompt:task==='transfer'?problem.transfer:`不看答案，重新独立完成：${problem.prompt}`):lesson?.[task]??(task==='main'?`独立说明或解决这个问题：${session.title}`:task==='transfer'?'请改变一个条件，自己构造新的例子并验证结论。':'不看笔记复述核心定义、思路及适用边界。');
     const feedbackText=this.feedbackInput.get(session.id)??'',preview=this.feedbackPreview.get(session.id);
     root.innerHTML=`
-      <header class="study-workbench-header"><div><p class="eyebrow">学习会话 · ${html(session.mode)}</p><h1>${html(session.title)}</h1><p>先独立思考 → 最小提示与反馈 → 重新尝试 → 迁移与复习。每次提交都会留下可检验的原始记录。</p></div><button type="button" data-study-action="home">返回学习首页</button></header>
+      <header class="study-workbench-header"><div><p class="eyebrow">${problem?`题库 · ${html(problem.id)} · ${html(problem.type)}`:`学习会话 · ${html(session.mode)}`}</p><h1>${html(session.title)}</h1><p>先独立思考 → 最小提示与反馈 → 重新尝试 → 迁移与复习。每次提交都会留下可检验的原始记录。</p></div><button type="button" data-study-action="${problem?'problem':'home'}" ${problem?`data-value="${html(problem.id)}"`:''}>${problem?'返回题目档案':'返回学习首页'}</button></header>
       <nav class="study-workbench-steps" aria-label="学习阶段"><button type="button" class="${task==='main'?'active':''}" data-study-action="stage" data-value="main">1 · 自主理解</button><button type="button" class="${task==='transfer'?'active':''}" data-study-action="stage" data-value="transfer" ${session.attempts.some(item=>item.task==='main')?'':'disabled'}>2 · 迁移检验</button><button type="button" class="${task==='review'?'active':''}" data-study-action="stage" data-value="review" ${session.status==='review'?'':'disabled'}>3 · 延迟回忆</button></nav>
       <div class="study-workbench-grid"><section class="study-task-panel"><h2>本轮任务 · ${taskName[task]}</h2><div class="study-question" id="studyQuestion"></div>
-        <section class="study-definition"><h3>学习目标</h3><p>${lesson?'辨认量词差异 → 用一个序列反驳错误直觉 → 迁移到收敛成立的情形':'以定义、例子与独立推理建立可检验的理解。'}</p></section>
+        <section class="study-definition"><h3>${problem?'相关知识 · 可随时查阅':'学习目标'}</h3>${problem?problem.knowledgeIds.map(id=>`<button type="button" class="study-knowledge-link" data-study-action="knowledge" data-value="${html(id)}">${html(mathKnowledgeById(id)?.title??id)} ↗</button>`).join(''):lesson?'辨认量词差异 → 用一个序列反驳错误直觉 → 迁移到收敛成立的情形':'以定义、例子与独立推理建立可检验的理解。'}</section>
         <section class="study-evidence"><h3>理解证据（由你标记，非 AI 评分）</h3>
           ${[['definition','能准确叙述相关定义'],['counterexample','能解释一个反例或边界'],['independent','能不看提示独立推导'],['transfer','能迁移到变化后的条件']].map(([key,label])=>`<label><input type="checkbox" data-study-check="${key}" ${session.selfChecks?.[key]?'checked':''}>${label}</label>`).join('')}
         </section>
@@ -93,7 +101,8 @@ export class StudyWorkbench {
       </section><div class="study-practice-column"><section class="study-writing-panel"><header><div><h2>先写下自己的想法</h2><small>支持 Markdown 与 LaTeX（如 $\\forall x$）；草稿自动保存</small></div><span>${ownAttempts.length} 次已提交</span></header>
           <label for="studyDraft">草稿 / 证明 / 反例</label><textarea id="studyDraft" rows="10" placeholder="先用自己的话解释。哪里不确定，也请明确写出……">${html(session.draft)}</textarea>
           <div class="study-actions"><button type="button" class="primary" data-study-action="submit">保存本轮独立尝试</button><button type="button" data-study-action="preview">预览公式与正文</button></div><div class="study-draft-preview hidden" id="studyDraftPreview"></div></section>
-        <section class="study-hint-panel"><header><div><h2>逐层提示</h2><p>先提交一次自己的尝试，才会解锁提示。提示使用次数会保留。</p></div><button type="button" data-study-action="hint" ${!lesson||task!=='main'||!ownAttempts.length||hints.length===lesson.hints.length?'disabled':''}>${!lesson?'本题暂无内置提示':hints.length===lesson.hints.length?'提示已全部展示':`查看第 ${hints.length+1} 层提示`}</button></header><div id="studyHints"></div></section>
+        <section class="study-hint-panel"><header><div><h2>逐层提示</h2><p>先提交一次自己的尝试，才会解锁提示。提示使用次数会保留。</p></div><button type="button" data-study-action="hint" ${!guidedHints.length||task!=='main'||!ownAttempts.length||hints.length>=guidedHints.length?'disabled':''}>${!guidedHints.length?'本题暂无内置提示':hints.length===guidedHints.length?'提示已全部展示':`查看第 ${hints.length+1} 层提示`}</button></header><div id="studyHints"></div></section>
+        ${problem?`<section class="study-solution-panel"><h2>参考解答与自我校验</h2>${session.attempts.length?`<details><summary>展开经过校核的参考解答</summary><div id="studySolution"></div></details>`:'<p>请先保存至少一次独立尝试，然后才能查看完整参考解答。</p>'}<p>参考解答是对照材料，不等于你的独立掌握程度。</p></section>`:''}
         <section class="study-ai-panel"><header><div><h2>AI 辅导 · 导出与导入</h2><p>网站尚未连接在线模型。将上下文交给 AI，再把反馈 JSON 粘贴回来；只有确认后才入档。</p></div></header>
           <div class="study-actions"><button type="button" data-study-action="copy-context">复制本轮 AI 请求</button><button type="button" data-study-action="download-context">下载请求 JSON</button></div>
           <details><summary>查看完整 AI 请求</summary><textarea aria-label="AI 请求 JSON" readonly rows="8" id="studyContextJson"></textarea></details>
@@ -106,11 +115,13 @@ export class StudyWorkbench {
           <div class="study-actions"><button type="button" data-study-action="stage" data-value="transfer" ${session.attempts.some(item=>item.task==='main')?'':'disabled'}>开始迁移检验</button><button type="button" data-study-action="finish" ${session.attempts.some(item=>item.task==='main')?'':'disabled'}>${session.status==='review'?'重新安排明日复习':'结束本次学习，安排明日复习'}</button><button type="button" data-study-action="notes">将学习成果整理为知识笔记</button></div>
           ${session.status==='review'?`<p>下次复习：${html(day(session.dueAt))}。不看提示提交一份回忆尝试后，再选择本轮回忆结果。</p><div class="study-actions"><button type="button" data-study-action="review" data-value="yes" ${session.attempts.filter(a=>a.task==='review').length>session.reviews.length?'':'disabled'}>独立回忆成功</button><button type="button" data-study-action="review" data-value="no" ${session.attempts.filter(a=>a.task==='review').length>session.reviews.length?'':'disabled'}>仍需补足</button></div>`:''}
         </section></div></div>`;
+    const heading=root.querySelector('.study-workbench-header h1');heading.replaceChildren();appendInlineContent(heading,session.title);
     renderStudyMarkdown($('#studyQuestion'),taskPrompt);
-    for(const hint of hints){const box=document.createElement('div');box.className='study-hint';const heading=document.createElement('strong');heading.textContent=`第 ${hint.level} 层提示`;box.append(heading);const body=document.createElement('div');renderStudyMarkdown(body,lesson.hints[hint.level-1]);box.append(body);$('#studyHints').append(box)}
+    for(const hint of hints){const box=document.createElement('div');box.className='study-hint';const heading=document.createElement('strong');heading.textContent=`第 ${hint.level} 层提示`;box.append(heading);const body=document.createElement('div');renderStudyMarkdown(body,guidedHints[hint.level-1]??'');box.append(body);$('#studyHints').append(box)}
+    if(problem&&session.attempts.length)renderStudyMarkdown($('#studySolution'),problem.solution);
     $('#studyContextJson').value=JSON.stringify(studyContextPacket(session),null,2);
   }
-  async action(action,value){const session=this.current();if(action==='home'){this.controller.activateHome();return}if(!session)return;
+  async action(action,value){const session=this.current();if(action==='home'){this.controller.activateHome();return}if(action==='problem'){this.controller.openMathArchive('problem',value);return}if(action==='knowledge'){this.controller.openMathArchive('knowledge',value);return}if(!session)return;
     if(action==='submit'){this.persist(submitStudyAttempt(session));this.feedbackPreview.delete(session.id);message('独立尝试已保存，可以继续思考或请求提示。')}
     else if(action==='hint'){this.persist(revealStudyHint(session));message('已记录这次提示使用。')}
     else if(action==='stage'){this.persist(changeStudyTask(session,value))}

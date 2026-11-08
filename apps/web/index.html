@@ -4,9 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#3b407d">
-  <meta name="description" content="LMN 数学学习与研究工作台：从问题出发，独立尝试、获得反馈、整理知识并持续复习。">
-  <title>LMN 数学工作台 · V5.1.4</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232f7658'/%3E%3Ctext x='32' y='42' text-anchor='middle' font-size='30' fill='white' font-family='Georgia'%3EL%3C/text%3E%3C/svg%3E">
+  <meta name="description" content="数学 · LMN：真实数学课程、知识档案、原创题库、方法库，以及独立尝试与 AI 反馈工作台。">
+  <title>数学 · LMN — 课程、知识与题库</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%233b407d'/%3E%3Ctext x='32' y='44' text-anchor='middle' font-size='38' fill='white' font-family='Georgia'%3E%CE%A3%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="vendor/katex/katex.min.css">
   <link rel="stylesheet" href="../../packages/ui/design-tokens.css">
   <link rel="stylesheet" href="styles.css">
@@ -44,6 +44,7 @@
 <link rel="modulepreload" href="../../packages/geometry/node-measurement.js">
 <link rel="modulepreload" href="../../packages/geometry/relation-routing.js">
 <link rel="modulepreload" href="../../packages/geometry/scene-geometry.js">
+<link rel="modulepreload" href="../../packages/learning/math-content.js">
 <link rel="modulepreload" href="../../packages/learning/study-session.js">
 <link rel="modulepreload" href="../../packages/lkl/index.js">
 <link rel="modulepreload" href="../../packages/lkl/lexer.js">
@@ -106,6 +107,7 @@
 <link rel="modulepreload" href="../../packages/ui/learning-notes.js">
 <link rel="modulepreload" href="../../packages/ui/library-model.js">
 <link rel="modulepreload" href="../../packages/ui/localization.js">
+<link rel="modulepreload" href="../../packages/ui/math-archive.js">
 <link rel="modulepreload" href="../../packages/ui/math-markup.js">
 <link rel="modulepreload" href="../../packages/ui/math-workbench.js">
 <link rel="modulepreload" href="../../packages/ui/object-interaction-contract.js">
@@ -128,9 +130,9 @@
   <header class="topbar math-site-topbar">
     <div class="math-masthead">
       <div class="brand math-brand">
-        <button id="toggleNavigator" aria-controls="navigator" aria-expanded="true" class="icon-button" aria-label="切换内容库" title="显示或隐藏内容库">☰</button>
+        <button id="toggleNavigator" aria-controls="navigator" aria-expanded="false" class="icon-button" aria-label="切换高级内容库" title="高级内容库">☰</button>
         <span class="math-brand-symbol" aria-hidden="true">∑</span>
-        <span class="math-brand-copy"><b>LMN · 数学</b><small>理解、证明与自由探索</small></span><em class="math-release-tag">V5.1.4</em>
+        <span class="math-brand-copy"><b>数学 · LMN</b><small>课程、知识、题目与自由探索</small></span><em class="math-release-tag">V5.1.4 · 内容版</em>
       </div>
       <nav id="breadcrumbs" class="math-breadcrumbs" aria-label="递归知识路径" data-i18n-aria-label="递归知识路径"></nav>
       <div class="math-header-actions">
@@ -140,12 +142,13 @@
       </div>
     </div>
     <nav class="math-main-nav" aria-label="数学工作台主导航">
-      <button type="button" class="active" data-math-nav="home"><span aria-hidden="true">⌂</span> 学习首页</button>
+      <button type="button" class="active" data-math-nav="home"><span aria-hidden="true">⌂</span> 首页</button>
+      <button type="button" data-math-nav="courses"><span aria-hidden="true">▤</span> 课程</button>
+      <button type="button" data-math-nav="problems"><span aria-hidden="true">✎</span> 题库</button>
+      <button type="button" data-math-nav="knowledge"><span aria-hidden="true">◇</span> 知识库</button>
+      <button type="button" data-math-nav="methods"><span aria-hidden="true">↗</span> 方法库</button>
       <button type="button" data-math-nav="sessions"><span aria-hidden="true">◷</span> 学习记录</button>
-      <button type="button" data-math-nav="courses"><span aria-hidden="true">▤</span> 课程与知识</button>
-      <button type="button" data-math-nav="library"><span aria-hidden="true">⬡</span> 结构工具</button>
-      <button type="button" data-math-nav="search"><span aria-hidden="true">⌕</span> 探索与检索</button>
-      <button type="button" data-math-nav="import"><span aria-hidden="true">⇧</span> 导入资料</button>
+      <button type="button" data-math-nav="about"><span aria-hidden="true">ⓘ</span> 关于</button>
     </nav>
   </header>
 
@@ -176,6 +179,12 @@
             <p>从一个数学问题出发，独立尝试、检验思路、获得反馈，再把真正掌握的内容保存下来。</p>
             <div class="math-home-pill-row"><span>独立思考</span><span>渐进提示</span><span>AI 协作</span><span>知识积累</span></div>
           </div>
+          <section class="math-surface math-featured-surface" aria-labelledby="mathFeaturedTitle">
+            <div class="math-section-head"><div><span class="math-kicker">A REAL START · 数学分析（二）</span><h2 id="mathFeaturedTitle">从今天的一道题开始</h2></div><button type="button" data-math-nav="problems">浏览全部 20 道题 →</button></div>
+            <p>不需要自己建立课程。第一批一致收敛教学内容已经写入公开档案，知识与题目可以相互追溯。</p>
+            <div id="mathFeaturedProblems" class="math-featured-grid"></div>
+            <div class="math-featured-footer"><button type="button" data-math-nav="knowledge">阅读 10 篇知识正文</button><button type="button" data-math-nav="methods">查看 5 个解题方法</button></div>
+          </section>
           <section class="math-surface math-start-surface" aria-labelledby="mathStartTitle">
             <div class="math-section-head"><div><span class="math-kicker">01 / START HERE</span><h2 id="mathStartTitle">今天，想弄清什么？</h2></div><span class="math-section-icon" aria-hidden="true">✎</span></div>
       <form id="learningStartForm" class="learning-start">
@@ -190,7 +199,7 @@
         <details class="study-archive-tools"><summary>学习记录备份 / 恢复</summary><p>学习会话、尝试与复习独立于 LKL3 知识包。换设备时请同时备份两份数据。</p><div class="study-actions"><button id="studySessionsExport" type="button">导出学习档案 JSON</button><label for="studySessionsImport">选择学习档案文件</label><input id="studySessionsImport" type="file" accept=".json,application/json"><button id="studyArchiveCommit" type="button" disabled>确认合并导入</button></div><p id="studyArchivePreview" aria-live="polite">导入前会校验文件，并预览会话数。</p></details>
       </section>
       <section class="study-catalog" aria-labelledby="studyCatalogTitle">
-        <header><div><h2 id="studyCatalogTitle" data-i18n="我的数学课程">我的数学课程</h2><p data-i18n="按课程、章节、知识单元组织学习；练习和证明保留为可编辑文档。">按课程、章节、知识单元组织学习；练习和证明保留为可编辑文档。</p></div><button id="studyNewCourse" type="button" data-i18n="＋ 建立课程">＋ 建立课程</button></header>
+        <header><div><h2 id="studyCatalogTitle">我的私人课程与知识</h2><p>个人 Knowledge / LKL3 内容独立保存，不会被公开教材更新覆盖。</p></div><button id="studyNewCourse" type="button" data-i18n="＋ 建立课程">＋ 建立课程</button></header>
         <div id="studyCatalogList"></div>
         <form id="studyOrganizeForm" class="study-organize hidden">
           <label><span data-i18n="整理已有知识">整理已有知识</span><select id="studyLooseKnowledge" required aria-label="选择要归档的知识" data-i18n-aria-label="选择要归档的知识"></select></label>
@@ -210,13 +219,13 @@
           <section class="math-surface math-archive-card">
             <div class="math-archive-symbol" aria-hidden="true">∑</div>
             <span class="math-kicker">LMN · 学习档案</span>
-            <h2>数学工作台</h2>
+            <h2>数学 · LMN</h2>
             <p>知识不是静止的目录。让问题、解法与学习记录彼此关联，在一次次尝试中逐渐清晰。</p>
             <div class="math-archive-formula" aria-label="学习循环">问题 <span>→</span> 尝试 <span>→</span> 反馈 <span>→</span> 复习</div>
           </section>
           <section class="math-surface math-quick-panel">
             <div class="math-section-head"><div><span class="math-kicker">QUICK ACCESS</span><h2>常用入口</h2></div></div>
-            <button type="button" data-math-action="example"><span class="math-quick-icon">∑</span><span><b>体验一致收敛学习</b><small>从统一的 N 开始思考</small></span><i aria-hidden="true">↗</i></button>
+            <button type="button" data-math-action="example"><span class="math-quick-icon">∑</span><span><b>体验一致收敛学习</b><small>从一道真实习题出发</small></span><i aria-hidden="true">↗</i></button>
             <button type="button" data-math-action="course"><span class="math-quick-icon">▤</span><span><b>建立数学课程</b><small>课程、章节与知识单元</small></span><i aria-hidden="true">↗</i></button>
             <button type="button" data-math-action="search"><span class="math-quick-icon">⌕</span><span><b>探索已有知识</b><small>搜索概念、正文与关系</small></span><i aria-hidden="true">↗</i></button>
             <button type="button" data-math-action="import"><span class="math-quick-icon">⇧</span><span><b>导入已有资料</b><small>LKL、JSON 与知识包</small></span><i aria-hidden="true">↗</i></button>
@@ -228,6 +237,7 @@
         </aside>
       </div>
     </section>
+    <section id="mathArchive" class="math-archive hidden" aria-label="数学公开课程与知识档案"></section>
     <section id="studyWorkbench" class="study-workbench hidden" aria-label="数学学习工作台"><div id="studyWorkbenchBody"></div><p id="studyStatus" class="study-status" role="status" aria-live="polite">学习内容保存在本浏览器中。</p></section>
     <section id="newTabPage" class="new-tab-page hidden" aria-label="新标签页" data-i18n-aria-label="新标签页">
       <div class="new-tab-content">
@@ -295,6 +305,16 @@
       </div>
     </section>
   </main>
+  <div id="mathToolbox" class="math-toolbox">
+    <button id="mathToolboxToggle" type="button" aria-controls="mathToolboxPanel" aria-expanded="false">＋ <span>工具箱</span></button>
+    <div id="mathToolboxPanel" class="math-toolbox-panel hidden" role="group" aria-label="知识与结构工具">
+      <strong>知识与结构工具</strong><small>需要构造时再打开；不影响资料阅读。</small>
+      <button type="button" data-math-tool="knowledge">＋ 新建私人 Knowledge</button>
+      <button type="button" data-math-tool="structure">⬡ 浏览结构库</button>
+      <button type="button" data-math-tool="navigator">☷ 旧内容库／高级导航</button>
+      <button type="button" data-math-tool="import">⇧ 导入 LKL／JSON</button>
+    </div>
+  </div>
 
   <aside id="floatingPanel" class="floating-panel hidden" aria-label="属性面板" data-i18n-aria-label="属性面板"><header><div><span id="panelEyebrow" class="eyebrow">属性</span><h2 id="panelTitle">属性</h2></div><button id="closePanel" aria-label="关闭属性面板" data-i18n-aria-label="关闭属性面板" class="icon-button">×</button></header><div id="panelTabs" class="panel-tabs"></div><div id="panelContent" class="panel-content"></div></aside>
   <div id="contextMenu" class="context-menu hidden" role="menu"></div>
