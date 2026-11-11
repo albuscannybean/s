@@ -18,12 +18,12 @@ try{
   await page.reload({waitUntil:'networkidle'});await page.waitForFunction(()=>!!globalThis.lmnWorkspace);
   assert.equal(await page.locator('meta[name="lmn-cache-probe"]').count(),0,'Online reload must replace stale cached HTML');
   assert.equal(await page.evaluate(()=>getComputedStyle(document.documentElement).getPropertyValue('--cache-probe')),'','Online reload must replace stale CSS');
-  assert.equal(await page.locator('.math-main-nav button').count(),2);
+  assert.equal(await page.locator('.math-main-nav button').count(),8);
   // A completed response must also persist into the offline fallback cache.
   await page.waitForFunction(async()=>{const c=await caches.open((await caches.keys()).find(k=>k.startsWith('lmn-v')));return !(await(await c.match(new URL('./',location.href))).text()).includes('lmn-cache-probe')});
   await context.setOffline(true);await page.reload();await page.waitForFunction(()=>!!globalThis.lmnWorkspace);
   assert.equal(await page.locator('meta[name="lmn-cache-probe"]').count(),0);
-  assert.equal(await page.locator('.math-main-nav button').count(),2);
+  assert.equal(await page.locator('.math-main-nav button').count(),8);
   const saved=await page.evaluate(async()=>{const {get}=await import(new URL('db.js',location.href));return get('settings','qa-cache-preserve')});
   assert.equal(saved.value,'keep my learning data');
   console.log('PASS: stale HTML/CSS refreshed online; new UI works offline; IndexedDB preserved');
