@@ -1,21 +1,172 @@
 name: Deploy Web
+
 on:
   workflow_dispatch:
-  push: { branches: [master] }
-permissions: { contents: read, pages: write, id-token: write }
-concurrency: { group: pages, cancel-in-progress: true }
+  push:
+    branches: [master]
+  workflow_run:
+    workflows: ["Web CI"]
+    types: [completed]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
 jobs:
-  deploy:
-    environment: { name: github-pages, url: "${{ steps.deployment.outputs.page_url }}apps/web/" }
+  build:
+    if: >-
+      github.event_name != 'workflow_run' ||
+      (
+        github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.event == 'pull_request' &&
+        github.event.workflow_run.head_branch == 'feature/discovery-math-v3'
+      )
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout production master
+        uses: actions/checkout@v4
+        with:
+          ref: master
+          persist-credentials: false
+
       - uses: actions/setup-node@v4
-        with: { node-version: 20 }
-      - run: npm run build:web
-      - run: npm test
-      - run: mkdir -p site/apps && cp -r apps/web site/apps/ && cp -r packages site/
+        with:
+          node-version: 20
+
+      - name: Build production site
+        run: |
+          npm run build:web
+          npm test
+          mkdir -p site/apps
+          cp -r apps/web site/apps/
+          cp -r packages site/
+
+      - name: Resolve PR #17 preview revision
+        id: preview
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          pr_json="$(gh api "repos/${GITHUB_REPOSITORY}/pulls/17")"
+          state="$(jq -r '.state // "closed"' <<<"$pr_json")"
+          merged="$(jq -r '.merged // false' <<<"$pr_json")"
+          head_repo="$(jq -r '.head.repo.full_name // ""' <<<"$pr_json")"
+          head_sha="$(jq -r '.head.sha // ""' <<<"$pr_json")"
+          if [[ "$state" == "open" && "$merged" == "false" && "$head_repo" == "$GITHUB_REPOSITORY" && -n "$head_sha" ]]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+            echo "sha=$head_sha" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "PR #17 is not open; publishing production only."
+          fi
+
+      - name: Checkout PR #17 source
+        if: steps.preview.outputs.enabled == 'true'
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository }}
+          ref: ${{ steps.preview.outputs.sha }}
+          path: preview-src
+          persist-credentials: false
+
+      - name: Build and test PR #17
+        if: steps.preview.outputs.enabled == 'true'
+        working-directory: preview-src
+        run: |
+          npm run build:web
+          npm test
+
+      - name: Isolate preview data, cache and identity
+        if: steps.preview.outputs.enabled == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # Keep preview IndexedDB separate from the production site's database.
+          sed -i "s/const DB_NAME='lmn-knowledge-system'/const DB_NAME='lmn-knowledge-system-preview-math-v3'/" preview-src/apps/web/db.js
+
+          # Keep browser preferences and task context separate from production.
+          sed -i 's/lmn-v4\./lmn-preview-v4./g' preview-src/packages/ui/workspace-controller.js
+          sed -i 's/lmn-v4\.3\.1-task-context/lmn-preview-v4.3.1-task-context/g' preview-src/packages/cognitive-runtime/task-context.js
+
+          # Service-worker caches share an origin; use a dedicated preview namespace.
+          sed -i \
+            -e "s/const CACHE='lmn-v/const CACHE='lmn-preview-v/" \
+            -e "s/key.startsWith('lmn-v')/key.startsWith('lmn-preview-v')/" \
+            preview-src/apps/web/sw.js
+
+          node --input-type=module <<'NODE'
+          import { readFileSync, writeFileSync } from 'node:fs';
+
+          const htmlPath = 'preview-src/apps/web/index.html';
+          let html = readFileSync(htmlPath, 'utf8');
+          html = html.replace(/<title>[^<]*<\\/title>/, '<title>数学 · LMN — V3 预览 · PR #17</title>');
+          html = html.replaceAll('V5.1.4 · 内容版', 'V3 预览 · PR #17');
+          html = html.replace('<meta name="viewport"', '<meta name="robots" content="noindex, nofollow">\\n  <meta name="viewport"');
+          writeFileSync(htmlPath, html);
+
+          const manifestPath = 'preview-src/apps/web/manifest.webmanifest';
+          const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
+          manifest.name = '数学 · LMN — V3 预览';
+          manifest.short_name = 'LMN V3';
+          manifest.description = '数学 · LMN PR #17 公开预览版本；个人数据与正式网站隔离。';
+          writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + '\\n');
+          NODE
+
+          # Publish the PR build under an isolated subpath of the existing Pages site.
+          mkdir -p site/previews/math-v3/apps
+          cp -r preview-src/apps/web site/previews/math-v3/apps/
+          cp -r preview-src/packages site/previews/math-v3/
+
+          cat > site/previews/math-v3/index.html <<'HTML'
+          <!doctype html>
+          <html lang="zh-CN">
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <meta name="robots" content="noindex, nofollow">
+            <meta http-equiv="refresh" content="0; url=./apps/web/">
+            <title>数学 · LMN V3 预览</title>
+          </head>
+          <body>
+            <p>正在打开数学 · LMN V3 预览……</p>
+            <p><a href="./apps/web/">如果没有自动跳转，请点击这里。</a></p>
+            <script>location.replace('./apps/web/');</script>
+          </body>
+          </html>
+          HTML
+
+          echo "### 数学 · LMN V3 预览" >> "$GITHUB_STEP_SUMMARY"
+          echo "https://${GITHUB_REPOSITORY_OWNER}.github.io/${GITHUB_REPOSITORY#*/}/previews/math-v3/" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Publish production-only summary
+        if: steps.preview.outputs.enabled != 'true'
+        run: |
+          echo "### 数学 · LMN 正式站部署" >> "$GITHUB_STEP_SUMMARY"
+          echo "PR #17 已关闭，当前部署不包含预览目录。" >> "$GITHUB_STEP_SUMMARY"
+
       - uses: actions/upload-pages-artifact@v3
-        with: { path: site }
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    if: needs.build.result == 'success'
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}apps/web/
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    steps:
       - id: deployment
         uses: actions/deploy-pages@v4
