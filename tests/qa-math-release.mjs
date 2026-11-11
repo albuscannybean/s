@@ -31,7 +31,7 @@ try{
   await page.waitForFunction(()=>!!navigator.serviceWorker.controller);
   // Cache installation must include the actual lesson modules and theme resources.
   result.cached=await page.evaluate(async()=>{const keys=await caches.keys(),cache=await caches.open(keys.find(key=>key.startsWith('lmn-v')));return(await cache.keys()).map(request=>new URL(request.url).pathname)});
-  for(const suffix of ['/math-site.css','/study-session.js','/study-workbench.js','/math-content.js','/math-archive.js'])assert.ok(result.cached.some(path=>path.endsWith(suffix)));
+  for(const suffix of ['/math-site.css','/study-session.js','/study-workbench.js','/math-content.js','/math-archive.js','/math-discovery.js'])assert.ok(result.cached.some(path=>path.endsWith(suffix)));
   result.cached=result.cached.length;
   for(const width of [320,390,768,1024,1440]){
     await page.setViewportSize({width,height:950});
@@ -40,9 +40,9 @@ try{
     assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`page overflow at ${width}`);
     const bounds=await page.locator('#globalSearch').boundingBox();assert.ok(bounds.x+bounds.width<=width+1);
   }
-  await page.locator('#documentTabs [data-math-nav="sessions"]').click();
+  await page.locator('.math-main-nav [data-math-nav="sessions"]').click();
   assert.equal(await page.locator('#documentTabs [data-math-nav="sessions"]').getAttribute('aria-current'),'page');
-  await page.locator('#documentTabs [data-math-nav="courses"]').click();
+  await page.locator('.math-main-nav [data-math-nav="courses"]').click();
   await page.locator('[data-archive-kind="course"]').waitFor({state:'visible'});
   await page.locator('#mathToolboxToggle').click();await page.locator('[data-math-tool="structure"]').click();await page.locator('#structureLibrary').waitFor({state:'visible'});await page.keyboard.press('Escape');
   await page.locator('#globalSearch').click();await page.locator('#mathSearch').waitFor({state:'visible'});

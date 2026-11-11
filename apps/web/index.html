@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#3b407d">
-  <meta name="description" content="数学 · LMN：真实数学课程、知识档案、原创题库、方法库，以及独立尝试与 AI 反馈工作台。">
+  <meta name="description" content="数学 · LMN：真实数学课程、知识档案、原创题库、方法库，以及改变参数与条件与 AI 反馈工作台。">
   <title>数学 · LMN — 课程、知识与题库</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%233b407d'/%3E%3Ctext x='32' y='44' text-anchor='middle' font-size='38' fill='white' font-family='Georgia'%3E%CE%A3%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="vendor/katex/katex.min.css">
@@ -130,7 +130,7 @@
   <header class="topbar math-site-topbar">
     <div class="math-masthead">
       <nav id="breadcrumbs" class="hidden" aria-label="知识路径"></nav>
-      <button class="brand math-brand" type="button" data-math-nav="home" aria-label="数学 LMN 首页"><span class="math-brand-symbol">数</span><span class="math-brand-copy"><b>数学 <span class="brand-dot">·</span> LMN</b><small>理论理解与数学应用</small></span><em class="math-release-tag">V5.1.4 · 内容版</em></button>
+      <button class="brand math-brand" type="button" data-math-nav="home" aria-label="数学 LMN 首页"><span class="math-brand-symbol">数</span><span class="math-brand-copy"><b>数学 <span class="brand-dot">·</span> LMN</b><small>观察 · 归纳 · 理解 · 应用</small></span><em class="math-release-tag">V5.1.4 · 内容版</em></button>
       <div class="math-header-actions">
         <button id="globalSearch" class="command-trigger" aria-label="搜索与命令行"><svg class="site-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="6.5"/><path d="m15 15 5 5"/></svg><span>检索</span><span class="math-sr-only">命令行</span><kbd>Ctrl K</kbd></button>
         <button id="appearanceButton" type="button"><svg class="site-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18Z"/></svg><span>外观</span></button>
@@ -144,8 +144,14 @@
         <button id="insertStructure" class="primary hidden" aria-hidden="true" tabindex="-1">新建</button>
       </div>
     </div>
-    <nav class="math-main-nav" aria-label="网站板块">
-      <button type="button" data-platform-module="theory"><svg class="site-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 6c-3-2-6-2-9-1v14c3-1 6-1 9 1 3-2 6-2 9-1V5c-3-1-6-1-9 1ZM12 6v14"/></svg><span>理论学习</span></button>
+    <nav class="math-main-nav" aria-label="数学板块">
+      <button type="button" data-math-nav="home"><svg class="site-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-6v-7h-4v7H4a1 1 0 0 1-1-1z"/></svg><span>首页</span></button>
+      <button type="button" data-math-nav="discovery"><svg class="site-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m15.8 8.2-2.4 5.2-5.2 2.4 2.4-5.2z"/></svg><span>发现</span></button>
+      <button type="button" data-math-nav="courses"><svg class="site-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 4.5v17M8 6h8M8 10h8"/></svg><span>课程</span></button>
+      <button type="button" data-math-nav="problems"><svg class="site-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg><span>题库</span></button>
+      <button type="button" data-math-nav="knowledge"><svg class="site-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5.5C6 4 9 4.3 12 6v15c-3-1.7-6-2-9-.5zM21 5.5C18 4 15 4.3 12 6v15c3-1.7 6-2 9-.5z"/></svg><span>知识</span></button>
+      <button type="button" data-math-nav="methods"><svg class="site-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="5" r="2"/><circle cx="18" cy="19" r="2"/><circle cx="18" cy="5" r="2"/><path d="M8 5h8M6 7v7a5 5 0 0 0 5 5h5"/></svg><span>方法</span></button>
+      <button type="button" data-math-nav="sessions"><svg class="site-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 2.6-6.4L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg><span>记录</span></button>
       <button type="button" data-platform-module="applied"><svg class="site-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><path d="M14 17h7m-3.5-3.5v7"/></svg><span>应用数学</span></button>
     </nav>
   </header>
@@ -181,25 +187,30 @@
       <div class="math-home-layout">
         <div class="math-home-main">
           <div class="math-home-intro">
-            <span class="math-kicker">数学 · 理论学习</span>
-            <h1>理论学习</h1>
-            <p>阅读课程与知识，完成独立尝试，检验方法并整理自己的学习记录。</p>
-            <div class="math-home-pill-row"><span>独立思考</span><span>渐进提示</span><span>AI 协作</span><span>知识积累</span></div>
+            <span class="math-kicker">数学 · 发现与研究</span>
+            <h1>从观察开始，发现数学。</h1>
+            <p>先接触具体对象，观察变化、比较差异、寻找共同规律；猜想可以保留，反例也值得记录。</p>
+            <div class="math-home-pill-row"><span>样本观察</span><span>比较变化</span><span>形成猜想</span><span>检验与修订</span></div>
           </div>
+          <section class="math-surface math-discovery-home" aria-labelledby="mathDiscoveryTitle">
+            <div class="math-section-head"><div><span class="math-kicker">OBSERVE · COMPARE · CONJECTURE</span><h2 id="mathDiscoveryTitle">先从一组具体样本开始</h2></div><button type="button" data-math-nav="discovery">进入发现室 →</button></div>
+            <p>改变参数、观察图像、追踪固定点与移动点。这里提供可反复比较的数学材料，不要求按固定步骤完成。</p>
+            <div id="mathDiscoveryFeatured" class="math-discovery-home-grid"></div>
+          </section>
           <section class="math-surface math-featured-surface" aria-labelledby="mathFeaturedTitle">
-            <div class="math-section-head"><div><span class="math-kicker">A REAL START · 数学分析（二）</span><h2 id="mathFeaturedTitle">从今天的一道题开始</h2></div><button type="button" data-math-nav="problems">浏览全部 20 道题 →</button></div>
-            <p>不需要自己建立课程。第一批一致收敛教学内容已经写入公开档案，知识与题目可以相互追溯。</p>
+            <div class="math-section-head"><div><span class="math-kicker">A REAL START · 数学分析（二）</span><h2 id="mathFeaturedTitle">从观察转向练习</h2></div><button type="button" data-math-nav="problems">浏览全部 20 道题 →</button></div>
+            <p>当某个现象引起你的兴趣时，可以再进入题库，用题目检验、修订或扩展自己的猜想。</p>
             <div id="mathFeaturedProblems" class="math-featured-grid"></div>
             <div class="math-featured-footer"><button type="button" data-math-nav="knowledge">阅读 10 篇知识正文</button><button type="button" data-math-nav="methods">查看 5 个解题方法</button></div>
           </section>
           <section class="math-surface math-start-surface" aria-labelledby="mathStartTitle">
-            <div class="math-section-head"><div><span class="math-kicker">01 / START HERE</span><h2 id="mathStartTitle">今天，想弄清什么？</h2></div><span class="math-section-icon" aria-hidden="true">✎</span></div>
+            <div class="math-section-head"><div><span class="math-kicker">01 / START HERE</span><h2 id="mathStartTitle">随手记录一个想继续追问的问题</h2></div><span class="math-section-icon" aria-hidden="true">✎</span></div>
       <form id="learningStartForm" class="learning-start">
-        <label class="learning-topic"><span>数学问题 / 学习目标</span><input id="learningTopic" required maxlength="120" placeholder="例如：为什么一致收敛要求统一的 N？" data-i18n-placeholder="例如：为什么一致收敛要求统一的 N？"></label>
-        <label class="learning-mode"><span data-i18n="学习方式">学习方式</span><select id="learningMode"><option value="concept" data-i18n="理解概念">理解概念</option><option value="proof" data-i18n="证明训练">证明训练</option><option value="problem" data-i18n="解题练习">解题练习</option><option value="organize" data-i18n="知识整理">知识整理</option></select></label>
+        <label class="learning-topic"><span>数学对象 / 问题 / 猜想</span><input id="learningTopic" required maxlength="120" placeholder="例如：为什么一致收敛要求统一的 N？" data-i18n-placeholder="例如：为什么一致收敛要求统一的 N？"></label>
+        <label class="learning-mode"><span data-i18n="学习方式">学习方式</span><select id="learningMode"><option value="concept" data-i18n="自由探索">自由探索</option><option value="proof" data-i18n="论证与检验">论证与检验</option><option value="problem" data-i18n="解题练习">解题练习</option><option value="organize" data-i18n="整理发现">整理发现</option></select></label>
         <label class="learning-chapter"><span data-i18n="所属章节（可选）">所属章节（可选）</span><select id="learningChapter"><option value="" data-i18n="暂不归档">暂不归档</option></select></label>
-        <button type="submit" class="primary">开始独立探索 →</button>
-        <p class="learning-start-hint">先进入独立尝试工作台；学习记录与知识文档分开保存，整理后再归入课程。</p>
+        <button type="submit" class="primary">保存这个探索入口 →</button>
+        <p class="learning-start-hint">先把对象或问题记下来。你可以自由决定先看例子、做比较、写猜想，或暂时搁置。</p>
       </form>
           </section>
       <section class="study-sessions-home" aria-labelledby="studySessionsHomeTitle"><header><div><h2 id="studySessionsHomeTitle">学习会话与到期复习</h2><small>优先继续尚未验证的思考，不用重新创建同一份笔记。</small></div></header><div id="studySessionsHome"></div>
@@ -227,19 +238,19 @@
             <div class="math-archive-symbol" aria-hidden="true">∑</div>
             <span class="math-kicker">LMN · 学习档案</span>
             <h2>数学 · LMN</h2>
-            <p>知识不是静止的目录。让问题、解法与学习记录彼此关联，在一次次尝试中逐渐清晰。</p>
-            <div class="math-archive-formula" aria-label="学习循环">问题 <span>→</span> 尝试 <span>→</span> 反馈 <span>→</span> 复习</div>
+            <p>让数学对象成为可观察的材料。比较它们的变化，再逐渐形成自己的概念与判断。</p>
+            <div class="math-archive-formula" aria-label="学习循环">观察 <span>·</span> 比较 <span>·</span> 猜想 <span>·</span> 修订</div>
           </section>
           <section class="math-surface math-quick-panel">
             <div class="math-section-head"><div><span class="math-kicker">QUICK ACCESS</span><h2>常用入口</h2></div></div>
-            <button type="button" data-math-action="example"><span class="math-quick-icon">∑</span><span><b>体验一致收敛学习</b><small>从一道真实习题出发</small></span><i aria-hidden="true">↗</i></button>
+            <button type="button" data-math-nav="discovery"><span class="math-quick-icon">∿</span><span><b>进入数学发现室</b><small>观察、比较并记录自己的猜想</small></span><i aria-hidden="true">↗</i></button>
             <button type="button" data-math-action="course"><span class="math-quick-icon">▤</span><span><b>建立数学课程</b><small>课程、章节与知识单元</small></span><i aria-hidden="true">↗</i></button>
             <button type="button" data-math-action="search"><span class="math-quick-icon">⌕</span><span><b>探索已有知识</b><small>搜索概念、正文与关系</small></span><i aria-hidden="true">↗</i></button>
             <button type="button" data-math-action="import"><span class="math-quick-icon">⇧</span><span><b>导入已有资料</b><small>LKL、JSON 与知识包</small></span><i aria-hidden="true">↗</i></button>
           </section>
           <section class="math-surface math-guide-panel">
-            <span class="math-kicker">HOW IT WORKS</span><h2>一次完整的数学学习</h2>
-            <ol><li><b>提出问题</b><span>明确本次真正想解决的困难。</span></li><li><b>独立尝试</b><span>先保留自己的思考和证明。</span></li><li><b>检验与反馈</b><span>渐进提示、AI 反馈与迁移题。</span></li><li><b>整理与复习</b><span>把成果保存为可复用的知识。</span></li></ol>
+            <span class="math-kicker">HOW IT WORKS</span><h2>探索可以从任何地方开始</h2>
+            <ol><li><b>看一个具体样本</b><span>先观察对象本身，不急着套用定义。</span></li><li><b>独立尝试</b><span>看哪些特征随之变化，哪些保持不变。</span></li><li><b>比较相似与差异</b><span>从多个例子中寻找共同模式。</span></li><li><b>保留猜想与反例</b><span>需要时再抽象、证明、修订和应用。</span></li></ol>
           </section>
         </aside>
       </div>
