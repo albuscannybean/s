@@ -26,7 +26,7 @@ try{
   await page.keyboard.press('Escape');assert.equal(await page.locator('#navigator').isVisible(),false);
   await page.locator('#mathToolboxToggle').click();await page.locator('[data-platform-action="export"]').click();await page.locator('#exportDialog').waitFor({state:'visible'});await page.keyboard.press('Escape');
   await page.locator(`[data-tab-key="${knowledgeTab}"]`).click();assert.equal(await page.locator('#mathPrivateNote').inputValue(),'UI 重整保留的私人批注');
-  assert.equal(await page.locator('[data-math-nav="knowledge"]').getAttribute('aria-current'),'page');
+  assert.equal(await page.locator('.math-main-nav [data-math-nav="knowledge"]').getAttribute('aria-current'),'page');
   await page.locator('.math-brand').click();await page.screenshot({path:'qa-output/platform-theory.png'});
   await page.locator('[data-platform-module="applied"]').click();await page.screenshot({path:'qa-output/platform-applied.png'});
   result.viewports=[];
