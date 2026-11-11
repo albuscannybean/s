@@ -37,11 +37,11 @@ try{
     await page.setViewportSize({width,height:950});
     await page.waitForFunction(width=>document.documentElement.clientWidth===width,width);
     assert.ok(await page.locator('.math-brand-copy b').isVisible());
-    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`page overflow at ${width}`);
+    const overflow=await page.evaluate(()=>[...document.querySelectorAll('body *')].map(el=>({tag:el.tagName,cls:typeof el.className==='string'?el.className:'',left:Math.round(el.getBoundingClientRect().left),right:Math.round(el.getBoundingClientRect().right),width:Math.round(el.getBoundingClientRect().width)})).filter(item=>item.right>innerWidth+1||item.left< -1).slice(0,18));assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`page overflow at ${width}: ${JSON.stringify(overflow)}`);
     const bounds=await page.locator('#globalSearch').boundingBox();assert.ok(bounds.x+bounds.width<=width+1);
   }
   await page.locator('.math-main-nav [data-math-nav="sessions"]').click();
-  assert.equal(await page.locator('#documentTabs [data-math-nav="sessions"]').getAttribute('aria-current'),'page');
+  assert.equal(await page.locator('.math-main-nav [data-math-nav="sessions"]').getAttribute('aria-current'),'page');
   await page.locator('.math-main-nav [data-math-nav="courses"]').click();
   await page.locator('[data-archive-kind="course"]').waitFor({state:'visible'});
   await page.locator('#mathToolboxToggle').click();await page.locator('[data-math-tool="structure"]').click();await page.locator('#structureLibrary').waitFor({state:'visible'});await page.keyboard.press('Escape');
