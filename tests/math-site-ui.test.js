@@ -17,7 +17,7 @@ test('mathematics archive offers content-first navigation without removing legac
 });
 
 test('real problem entrance connects to the study archive and workbench',()=>{
-  assert.match(html,/data-math-action="example"/);
+  assert.match(html,/data-math-nav="discovery"/);
   assert.match(controller,/this\.openMathArchive\('problem','ANA-UC-P02'\)/);
   assert.match(controller,/this\.openMathArchive\('problem'/);
   assert.match(controller,/this\.studyWorkbench\.start\(title,mode,chapterId\)/);
