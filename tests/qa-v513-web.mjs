@@ -1,4 +1,5 @@
-import assert from 'node:assert/strict';
+YªçŠx%¢ŠEK¬uç%j·Â+ar‰ì¶ë•ë_¢ºÞjË"‚v›•ëÚ®&›•ëj¹âž	h¢“Ú¶±×œ•ªÞw­…Ê'²Û¬zW­~Šëy«,Š	ÚnW¯j¸šnW¬YªçŠx%¢ŠQ¢‹pjÇ^rV«yÜ"¶(žËn±é^µú+­æ¬²('i¹^½ªâi¹^±f«ž)à–Š)
+¼©¶Œ±×œ•ªÞw­…Ê'²Û¬zW­~Šëy«,Š	ÚnW¯j¸šnW¬YªçŠx%¢ŠQy§pjÇ^rV«yÜ"¶(žËn±é^µú+­æ¬²('i¹^½ªâi¹^±f«ž)à–Š)Z¸­{¬uç%j·Â+ar‰ì¶ë•ë_¢ºÞjË"‚v›•ëÚ®&›•ëj¹âž	h¢‘ŠÜ±×œ•ªÞw­…Ê'²Û¬zW­~Šëy«,Š	ÚnW¯j¸šnW¬import assert from 'node:assert/strict';
 import {createRequire} from 'node:module';
 import {mkdir,writeFile} from 'node:fs/promises';
 const require=createRequire(import.meta.url),{chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
@@ -16,7 +17,14 @@ try{
  const poset=await page.evaluate(()=>{const a=lmnWorkspace,e=a.currentScene.nodes.find(n=>n.label==='e5');return{rank:e.semanticCoordinate.rank,y:e.y,edges:a.currentScene.edges.filter(x=>x.targetSlotId===e.id).length,parents:a.currentScene.nodes.filter(n=>['{a}','{b}'].includes(n.label)).map(n=>n.y)}});
  assert.equal(poset.rank,5);assert.equal(poset.edges,2);assert.ok(poset.parents.every(y=>y>poset.y));await page.screenshot({path:'qa-output/v513-poset.png'});
  await page.evaluate(()=>{lmnWorkspace.closePanel();lmnWorkspace.insertTemplate('builtin:tree')});
- const initialY=await page.evaluate(()=>lmnWorkspace.currentScene.nodes.find(n=>n.id==='left').y),left=page.locator('#nodeLayer [data-slot-id=left]');await left.waitFor({state:'visible'});const box=await left.boundingBox();assert.ok(box);await page.mouse.move(box.x+box.width/2,box.y+box.height/2);await page.mouse.down();await page.mouse.move(box.x+box.width/2,box.y+box.height/2+155,{steps:12});await page.mouse.up();
+ const initialY=await page.evaluate(()=>lmnWorkspace.currentScene.nodes.find(n=>n.id==='left').y);
+ const leftBounds=await page.waitForFunction(()=>{
+   const node=document.querySelector('#nodeLayer [data-slot-id=left]');
+   if(!node)return null;
+   const {x,y,width,height}=node.getBoundingClientRect();
+   return width>0&&height>0?{x,y,width,height}:null;
+ });
+ const box=await leftBounds.jsonValue();await page.mouse.move(box.x+box.width/2,box.y+box.height/2);await page.mouse.down();await page.mouse.move(box.x+box.width/2,box.y+box.height/2+155,{steps:12});await page.mouse.up();
  const tree=await page.evaluate(()=>{const a=lmnWorkspace,root=a.currentScene.nodes.find(n=>n.id==='root'),children=a.currentScene.nodes.filter(n=>n.id!=='root');return{rootX:root.x,childX:children.map(n=>n.x),drag:a.instance.layoutState.nodePositions.left,zoom:a.view.zoom}});
  assert.ok(tree.childX.every(x=>x>tree.rootX));assert.ok(tree.drag&&Math.abs((tree.drag.y-initialY)*tree.zoom-155)<2);await page.screenshot({path:'qa-output/v513-tree.png'});
  await page.evaluate(()=>{lmnWorkspace.insertTemplate('builtin:coordinate-plane');globalThis.vectorId=lmnWorkspace.instance.id;lmnWorkspace.openPanel('structure',vectorId,'settings')});
