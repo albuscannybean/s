@@ -130,7 +130,7 @@ try {
   await page.evaluate(()=>lmnWorkspace.openNewTab());
   await page.waitForFunction(()=>document.querySelector('#navigator').inert);
   await page.evaluate(()=>{lmnWorkspace.preferences.language='en';lmnWorkspace.applyPreferences();lmnWorkspace.openMathHome()});
-  assert.match(await page.locator('#welcome .math-home-intro h1').textContent(),/理论学习/);
+  assert.equal(await page.locator('#welcome .math-home-intro h1').textContent(),'富有成果的严格性');
   result.errors=errors;assert.deepEqual(errors,[]);
   await writeFile('qa-output/design-system.json',JSON.stringify(result,null,2));console.log(JSON.stringify(result,null,2));
 } finally {await browser.close()}
