@@ -1,0 +1,51 @@
+import assert from 'node:assert/strict';
+
+export async function checkConnectedMathPath(page){
+  const nav=page.locator('.math-main-nav');
+  await nav.locator('[data-math-nav="home"]').click();
+  await page.locator('#pathQuery').fill('柯西');
+  await page.locator('#pathLookup button').click();
+  assert.ok(await page.locator('#mathArchiveResults [data-id="ANA-UC-K05"]').isVisible());
+  await page.locator('#mathArchiveResults [data-id="ANA-UC-K05"]').click();
+  await page.locator('#mathArchive .route-heading [data-path-action="course"]').click();
+  assert.equal(await page.locator('.math-chapter-card .chapter-stage').count(),4);
+  assert.equal(await page.locator('.math-chapter-card [data-archive-kind="knowledge"]').count(),10);
+  assert.equal(await page.locator('.math-chapter-card [data-archive-kind="problem"]').count(),20);
+  await page.locator('.math-chapter-card [data-id="ANA-UC-K07"]').click();
+  const route=page.locator('#mathArchive .concept-route');
+  assert.match(await route.innerText(),/一致收敛与逐项积分/);
+  await route.locator('[data-path-action="discovery"]').click();
+  await page.locator('[data-discovery-preset="25"]').click();
+  assert.equal(await page.locator('#discoveryAreaOrTerm').innerText(),'1');
+  const plot=page.locator('#discoveryPlotPrimary svg');
+  const before=await page.locator('#discoveryX').inputValue();
+  await plot.click({position:{x:85,y:30}});
+  assert.notEqual(await page.locator('#discoveryX').inputValue(),before);
+  await route.locator('[data-path-action="method"]').click();
+  assert.match(await route.innerText(),/一致收敛与逐项积分/);
+  assert.equal(await page.locator('#mathMethodBoundary').isVisible(),true);
+  await route.locator('[data-path-action="problem"]').click();
+  assert.match(page.url(),/ANA-UC-P17$/);
+  await page.locator('[data-math-archive-action="start"]').click();
+  await page.locator('#studyDraft').fill('先控制区间上的上确界，再乘以区间长度，就能控制积分误差。');
+  await page.locator('[data-study-action="submit"]').click();
+  await page.locator('[data-study-action="finish"]').click();
+  await page.locator('#studyWorkbench [data-path-action="applied"]').click();
+  const lab=page.locator('#pathApplication');
+  assert.match(await lab.locator('[data-lab-uniform]').innerText(),/1 · 超出预算/);
+  await lab.locator('[name=terms]').fill('25');
+  assert.match(await lab.locator('[data-lab-integral]').innerText(),/达标/);
+  await lab.locator('[name=endpoint]').selectOption('0.8');
+  assert.match(await lab.locator('[data-lab-uniform]').innerText(),/达标/);
+  await lab.locator('textarea').fill('缩短区间能恢复统一估计。');
+  await lab.locator('.power-lab [data-path-action="knowledge"]').click();
+  assert.ok(await page.getByText('缩短区间能恢复统一估计。',{exact:true}).isVisible());
+  await route.locator('[data-path-action="records"]').click();
+  assert.equal(await nav.locator('[aria-current="page"]').innerText(),'首页');
+  assert.ok(await page.locator('#studySessionsHome').getByText(/积分/).count()>0);
+  await page.reload();await page.waitForFunction(()=>!!globalThis.lmnWorkspace);
+  await page.locator('#pathContinue').click();
+  assert.match(page.url(),/knowledge\/ANA-UC-K07$/);
+  assert.ok(await page.getByText('缩短区间能恢复统一估计。',{exact:true}).isVisible());
+}
+

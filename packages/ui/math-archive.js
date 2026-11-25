@@ -1,3 +1,4 @@
+import {groupedConcepts} from './math-path.js';
 import {list,put} from '../../apps/web/db.js';
 import {MATH_CONTENT_VERSION,MATH_COURSES,MATH_KNOWLEDGE,MATH_METHODS,MATH_PROBLEMS,mathCourseById,mathKnowledgeById,mathMethodById,mathProblemById,mathProblemsForKnowledge,mathProblemsForMethod,searchMathContent} from '../learning/math-content.js';
 import {appendInlineContent,renderStudyMarkdown} from './math-markup.js';
@@ -19,6 +20,15 @@ export class MathArchive{
   constructor(controller){this.controller=controller;this.annotations=new Map();this.search={problems:'',knowledge:'',methods:'',search:''};this.filters={difficulty:'',type:''};this.timers=new Map();this.notice='';this.discoverySelectedId=RIGOR_SAMPLE_ID;this.rigorDate=null;}
   async load(){for(const note of await list('mathAnnotations'))this.annotations.set(note.id,note);this.bind()}
   bind(){const root=$('#mathArchive');root.addEventListener('click',event=>{
+    const plot=event.target.closest('#discoveryPlotPrimary svg');
+    if(plot){
+      const matrix=plot.getScreenCTM();if(!matrix)return;
+      const point=new DOMPoint(event.clientX,event.clientY).matrixTransform(matrix.inverse());
+      const range=$('#discoveryX');
+      range.value=Math.round(100*(point.x-Number(plot.dataset.plotLeft))/Number(plot.dataset.plotWidth));
+      range.dispatchEvent(new Event('input',{bubbles:true}));
+      return;
+    }
     const button=event.target.closest('[data-archive-kind], [data-math-archive-action], [data-discovery-case], [data-discovery-action], [data-discovery-preset], #rigorDailyReset');if(!button)return;
     if(button.dataset.discoveryCase){this.controller.openMathArchive('discovery',button.dataset.discoveryCase);return}
     if(button.dataset.discoveryPreset){
@@ -114,6 +124,8 @@ export class MathArchive{
       new Date(item.updatedAt).toISOString()!==item.updatedAt)return false;
     if(rigorDateFromSubject(item.subjectId))return validDailyRigorTasks(item.rigorTasks);
     if(item.rigorTasks!==undefined)return false;
+    if(!boundedInteger(item.applicationN,1,64)||item.applicationB!==undefined&&![0.5,0.8,0.95,1].includes(item.applicationB))return false;
+    if(item.applicationNote!==undefined&&(typeof item.applicationNote!=='string'||item.applicationNote.length>5000))return false;
     for(const field of Object.keys(RIGOR_NOTE_FIELDS)){
       if(item[field]!==undefined&&(typeof item[field]!=='string'||item[field].length>100000))return false;
     }
@@ -131,11 +143,15 @@ export class MathArchive{
     const title=rigor?'富有成果的严格性':viewNames[view]??'数学档案';
     root.innerHTML=`<div class="math-archive-shell"><header class="math-archive-page-head"><button type="button" class="math-archive-back" data-math-archive-action="home">← 学习首页</button><span class="math-kicker">MATHEMATICS · LMN ARCHIVE</span><h1>${h(title)}</h1><p>${view==='discovery'?'从具体样本出发，观察变化、比较差异、记录猜想与反例；没有必须遵循的固定步骤。':'让知识、问题、方法与个人理解彼此关联，保留每一次探索的过程。'}</p></header><div id="mathArchiveContent"></div><footer class="math-archive-footer"><button type="button" data-math-archive-action="export">导出我的全部批注 JSON</button><button type="button" data-math-archive-action="import">导入个人批注</button><input type="file" class="hidden" id="mathAnnotationsImport" accept=".json,application/json"><button type="button" data-math-archive-action="toolbox">打开知识工具箱</button><p id="mathArchiveStatus" role="status" aria-live="polite">${h(this.notice||'公开教材随网站版本更新；个人批注仅保存在本浏览器，请定期备份。')}</p></footer></div>`;
     if(view==='courses')this.renderCourses();else if(view==='course')this.renderCourse(id);else if(view==='discovery')this.renderDiscoveries(id);else if(view==='search'||view==='problems'||view==='knowledge'&&!id||view==='methods')this.renderList(view);else if(view==='problem')this.renderProblem(id);else if(view==='method')this.renderMethod(id);else if(view==='about')this.renderAbout();else this.renderKnowledge(id);
+    if(['discovery','knowledge','method','problem'].includes(view)&&(id||view==='discovery')){
+      const route=this.controller.mathPath.forPage(view,id||this.discoverySelectedId);
+      $('#mathArchiveContent').insertAdjacentHTML('afterbegin',route);
+    }
     renderInlineTitles(root);
   }
   renderCourses(){const root=$('#mathArchiveContent');root.innerHTML=`<section class="math-archive-intro"><h2>公开课程</h2><p>以下教学内容可直接阅读，无需导入。个人课程仍在原工作区中独立保存。</p></section><div class="math-catalog-list">${MATH_COURSES.map(course=>archiveButton('course',course.id,course.title,`${course.chapters.length} 个完整专题 · ${course.description}`)).join('')}</div><section class="math-archive-note"><h3>我的课程与知识</h3><p>已有 Knowledge/LKL3 工作区仍然可用。通过首页的“我的课程”管理私人内容，不会与公开课程混合覆盖。</p><button type="button" data-math-archive-action="home">返回我的课程入口</button></section>`}
   renderCourse(id){const course=mathCourseById(id);const root=$('#mathArchiveContent');if(!course){this.notFound();return}
-    root.innerHTML=`<section class="math-archive-intro"><h2>${h(course.title)}</h2><p>${h(course.description)}</p></section>${course.chapters.map(chapter=>`<section class="math-chapter-card"><div class="math-chapter-head"><span class="math-kicker">已发布教学单元</span><h2>${h(chapter.title)}</h2><p>${h(chapter.description)}</p></div><h3>知识路线</h3><div class="math-compact-grid">${chapter.knowledgeIds.map(shortId=>{const item=mathKnowledgeById(`ANA-UC-${shortId}`);return archiveButton('knowledge',item.id,item.title,item.kind)}).join('')}</div><h3>习题训练</h3><div class="math-compact-grid">${chapter.problemIds.map(shortId=>{const item=mathProblemById(`ANA-UC-${shortId}`);return archiveButton('problem',item.id,item.title,`${item.type} · 难度 ${item.difficulty}`)}).join('')}</div></section>`).join('')}`}
+    root.innerHTML=`<section class="math-archive-intro"><h2>${h(course.title)}</h2><p>${h(course.description)}</p></section>${course.chapters.map(chapter=>`<section class="math-chapter-card"><div class="math-chapter-head"><span class="math-kicker">已发布教学单元</span><h2>${h(chapter.title)}</h2><p>${h(chapter.description)}</p></div><h3>知识路线</h3>${groupedConcepts(chapter.knowledgeIds.map(short=>mathKnowledgeById('ANA-UC-'+short)),(item,n)=>archiveButton('knowledge',item.id,item.title,n+' · '+item.kind))}<h3>习题训练</h3><div class="math-compact-grid">${chapter.problemIds.map(shortId=>{const item=mathProblemById(`ANA-UC-${shortId}`);return archiveButton('problem',item.id,item.title,`${item.type} · 难度 ${item.difficulty}`)}).join('')}</div></section>`).join('')}`}
   renderList(section){const root=$('#mathArchiveContent'),items=section==='problems'?MATH_PROBLEMS:section==='knowledge'?MATH_KNOWLEDGE:section==='methods'?MATH_METHODS:[...MATH_PROBLEMS,...MATH_KNOWLEDGE,...MATH_METHODS];
     const label=section==='problems'?'题目':section==='knowledge'?'知识档案':section==='methods'?'方法档案':'公开数学档案';
     root.innerHTML=`<section class="math-archive-intro"><h2>${label}检索</h2><p>已经发布 ${items.length} 个真实内容条目。题目与知识可以相互追溯，所有正文均可阅读。</p></section><div class="math-archive-filters"><label>关键词搜索<input type="search" id="mathSearch" data-section="${section}" value="${h(this.search[section]??'')}" placeholder="搜索概念、题目或方法…"></label>${section==='problems'?`<label>难度<select id="mathDifficulty"><option value="">全部难度</option>${[1,2,3,4].map(level=>`<option value="${level}" ${this.filters.difficulty===String(level)?'selected':''}>${level}</option>`).join('')}</select></label><label>题型<select id="mathType"><option value="">全部题型</option>${[...new Set(MATH_PROBLEMS.map(p=>p.type))].map(type=>`<option value="${h(type)}" ${this.filters.type===type?'selected':''}>${h(type)}</option>`).join('')}</select></label>`:''}</div><p id="mathArchiveCount" class="math-archive-count"></p><div id="mathArchiveResults" class="math-catalog-list"></div>`;
@@ -144,11 +160,18 @@ export class MathArchive{
   renderListResults(section){const root=$('#mathArchiveResults'),count=$('#mathArchiveCount');if(!root||!count)return;
     const items=section==='problems'?MATH_PROBLEMS:section==='knowledge'?MATH_KNOWLEDGE:section==='methods'?MATH_METHODS:[...MATH_PROBLEMS,...MATH_KNOWLEDGE,...MATH_METHODS],results=searchMathContent(items,{text:this.search[section],...(section==='problems'?this.filters:{})});
     count.textContent=`${results.length} / ${items.length} 个条目`;
+    if(section==='knowledge'&&results.length){
+      root.innerHTML=groupedConcepts(results,(item,n)=>archiveButton('knowledge',item.id,item.title,n+' · '+item.summary));renderInlineTitles(root);return;
+    }
     root.innerHTML=results.map(item=>archiveButton(item.id.includes('-P')?'problem':item.id.includes('-K')?'knowledge':'method',item.id,item.title,item.prompt?`${item.id} · ${item.type} · 难度 ${item.difficulty}`:item.summary??item.trigger)).join('')||'<p class="math-archive-empty">没有找到匹配条目。可以尝试其他关键词。</p>';renderInlineTitles(root);
   }
   renderKnowledge(id){const knowledge=mathKnowledgeById(id);if(!knowledge){this.notFound();return}const related=mathProblemsForKnowledge(id);
     $('#mathArchiveContent').innerHTML=`<article class="math-reading-layout"><div class="math-reading-main"><div class="math-reading-paper"><span class="math-kicker">知识档案 · ${h(knowledge.id)} · ${h(knowledge.kind)}</span><h2>${h(knowledge.title)}</h2><p class="math-reading-summary">${h(knowledge.summary)}</p><div class="math-reading-body" id="mathReadingBody"></div></div><section class="math-reading-paper"><h3>关联习题</h3><div class="math-compact-grid">${related.map(item=>archiveButton('problem',item.id,item.title,`难度 ${item.difficulty} · ${item.type}`)).join('')}</div></section></div><aside class="math-reading-side"><section class="math-reading-paper"><h3>前置知识</h3>${knowledge.prerequisites.length?knowledge.prerequisites.map(x=>archiveButton('knowledge',x,mathKnowledgeById(x)?.title??x)).join(''):'<p>本专题的基础入口。</p>'}<h3>学习证据</h3><p>${h(this.evidence(knowledge.id))}</p></section>${this.annotationSection(knowledge.id)}</aside></article>`;
     renderStudyMarkdown($('#mathReadingBody'),knowledge.body);
+    const reflection=this.annotations.get(annotationId(id))?.applicationNote;
+    if(reflection){const section=document.createElement('section');section.className='math-reading-paper';
+      const title=document.createElement('h3');title.textContent='我在应用实验中的解释';
+      const note=document.createElement('p');note.textContent=reflection;section.append(title,note);$('#mathArchiveContent .math-reading-main').append(section)}
   }
   renderProblem(id){const problem=mathProblemById(id);if(!problem){this.notFound();return}
     $('#mathArchiveContent').innerHTML=`<article class="math-reading-layout"><div class="math-reading-main"><div class="math-reading-paper"><span class="math-kicker">习题档案 · ${h(problem.id)} · 难度 ${problem.difficulty}</span><h2>${h(problem.title)}</h2><p class="math-reading-summary">${h(problem.type)} · 原创习题 · 数学分析（二）</p><div class="math-reading-body" id="mathReadingBody"></div><div class="math-problem-actions"><button type="button" class="primary" data-math-archive-action="start" data-id="${h(problem.id)}">开始独立解题 →</button><button type="button" data-math-archive-action="copy" data-id="${h(problem.id)}">复制题目给 AI</button></div></div><section class="math-reading-paper"><h3>分层提示</h3><p>解题工作台会在你提交首次尝试后逐步解锁提示。这里的参考解答默认折叠。</p><details class="math-optional-solution"><summary>查看题目提示与参考解答</summary><div id="mathReadingHints"></div><h4>参考解答</h4><div id="mathReadingSolution"></div></details></section><section class="math-reading-paper"><h3>迁移训练</h3><div id="mathReadingTransfer" class="math-reading-body"></div></section></div><aside class="math-reading-side"><section class="math-reading-paper"><h3>解题需要哪些知识？</h3>${problem.knowledgeIds.map(x=>archiveButton('knowledge',x,mathKnowledgeById(x)?.title??x)).join('')}<h3>可能使用的方法</h3>${problem.methodIds.map(x=>archiveButton('method',x,mathMethodById(x)?.title??x)).join('')}<h3>我的学习证据</h3><p>${h(this.evidence(problem.id))}</p></section>${this.annotationSection(problem.id)}</aside></article>`;

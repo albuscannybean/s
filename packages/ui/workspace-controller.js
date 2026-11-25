@@ -1,3 +1,4 @@
+import {MathPath} from './math-path.js';
 import {bindWorkspaceChrome,syncNavigatorState,focusMenu} from './workspace-chrome.js';
 import {installKnowledgeReading} from './knowledge-reading.js';
 import {installStructureMap} from './structure-map.js';
@@ -100,6 +101,7 @@ class WorkspaceController{
   observeSize(){this.resizeObserver=new ResizeObserver(()=>this.scheduler.request('resize'));this.resizeObserver.observe($('#canvasViewport'))}
 
   bindUI(){
+    this.mathPath=new MathPath(this);this.mathPath.bind();
     this.transient=new TransientOverlayManager(document).register('quickCreate',$('#quickCreate'),{emptyInput:$('#quickCreateInput')}).register('contextMenu',$('#contextMenu'));
     $('#toggleNavigator').onclick=()=>this.toggleNavigator();$('#navigatorMenu').onclick=event=>this.openNavigatorMenu(event);this.bindNavigatorResizer();all('[data-welcome]').forEach(button=>button.onclick=()=>button.dataset.welcome==='knowledge'?this.openQuickCreate():button.dataset.welcome==='library'?this.openLibrary():this.openImport());all('[data-template]').forEach(button=>button.onclick=()=>this.openStructureConfiguration(button.dataset.template));all('[data-empty-template]').forEach(button=>button.onclick=()=>this.openStructureConfiguration(button.dataset.emptyTemplate));
     all('[data-math-nav]').forEach(button=>button.onclick=()=>this.navigateMathSection(button.dataset.mathNav));
@@ -115,7 +117,9 @@ class WorkspaceController{
       if(target)this.openMathArchive('problem',target.dataset.featuredProblem);
     });
     $('#mathToolboxToggle').onclick=event=>{event.preventDefault();this.openMathToolbox()};
-    $('#appearanceButton').onclick=()=>this.openGlobalSettings('theme');
+    $('#appearanceButton').onclick=()=>{this.openMathToolbox(false);this.openGlobalSettings('theme')};
+    document.addEventListener('pointerdown',event=>{if($('#mathToolbox').open&&!event.target.closest('#mathToolbox'))this.openMathToolbox(false)});
+    $('#mathToolbox').addEventListener('keydown',event=>{if(event.key==='Escape'){event.stopPropagation();this.openMathToolbox(false);$('#mathToolboxToggle').focus()}});
     all('[data-platform-module]').forEach(button=>button.onclick=()=>button.dataset.platformModule==='applied'?this.openAppliedHome():this.openMathHome());
     all('[data-platform-action]').forEach(button=>button.onclick=()=>{this.openMathToolbox(false);const action=button.dataset.platformAction;if(action==='structures')this.openLibrary();else if(action==='library')this.toggleNavigator();else if(action==='search')this.openSearchWorkbench();else if(action==='export')this.openExport()});
     $('#contentLibraryDialog').addEventListener('close',()=>syncNavigatorState(this));
@@ -205,13 +209,13 @@ class WorkspaceController{
     const applied=this.document==='applied-home'||(!home&&!isStudy&&!isArchive&&!!this.currentInstanceId)||['search-workbench'].includes(this.document);
     const shell=$('#appShell');shell.dataset.view=home||isArchive||this.document==='applied-home'?'home':isStudy?'study':'workbench';shell.dataset.module=applied?'applied':'theory';
     all('[data-platform-module]').forEach(button=>{const active=button.dataset.platformModule===shell.dataset.module;button.classList.toggle('active',active);if(active)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current')});
-    let activeSection=applied?'applied':isStudy?'sessions':home?(this.mathHomeSection==='studySessionsHomeTitle'?'sessions':'home'):'';
+    let activeSection=applied?'applied':isStudy?'problems':home?'home':'';
     if(isArchive){const view=this.document.slice('math-archive:'.length).split(':')[0];activeSection=({course:'courses',problem:'problems',method:'methods',search:'discovery',about:'about'})[view]||view}
     all('[data-math-nav]').forEach(button=>{const active=button.dataset.mathNav===activeSection;button.classList.toggle('active',active);if(active)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current')});
     syncNavigatorState(this);$('#breadcrumbs').classList.toggle('hidden',home||isArchive||isStudy||this.document==='applied-home');
   }
   openAppliedHome(){this.closeTransientOverlays();this.closePanel();this.openMathToolbox(false);this.activeTabKey=null;this.currentKnowledgeId=null;this.currentInstanceId=null;this.currentBoardId=null;this.document='applied-home';this.path=[];this.pushLocation();this.renderAll()}
-  renderAppliedHome(){const root=$('#appliedSavedStructures');root.replaceChildren();const instances=this.state.structureInstances;
+  renderAppliedHome(){this.mathPath.application();const root=$('#appliedSavedStructures');root.replaceChildren();const instances=this.state.structureInstances;
     if(!instances.length){const p=document.createElement('p');p.className='study-empty';p.textContent='还没有保存的构造。从左侧的计算工具开始，或导入已有 LKL3 知识包。';root.append(p)}
     for(const instance of instances){const button=document.createElement('button');button.type='button';button.className='learning-recent-row';button.textContent=this.structureDisplayTitle(instance,this.state.structureTemplates.find(t=>t.id===instance.templateId));button.onclick=()=>this.openInstance(instance.id);root.append(button)}
   }
@@ -223,6 +227,7 @@ class WorkspaceController{
     this.quickBind=null;return this.createKnowledge(title,{initialContent:content,studyKind:kind,parentKnowledgeId,stayOnHome:overview});
   }
   renderLearningHome(){
+    this.mathPath.home();
     const discovery=$('#mathDiscoveryFeatured');if(discovery){const items=MATH_DISCOVERY_CASES.filter(item=>!item.integral).slice(0,4);discovery.innerHTML=items.map(item=>`<button type="button" data-discovery-open="${escapeHtml(item.id)}"><span>${escapeHtml(item.group)}</span><b>${escapeHtml(item.title)}</b><small>${escapeHtml(item.expression)} · 打开样本</small></button>`).join('')}
     const featured=$('#mathFeaturedProblems');if(featured){const items=MATH_PROBLEMS.filter(item=>['ANA-UC-P02','ANA-UC-P03','ANA-UC-P07'].includes(item.id));featured.innerHTML=items.map(item=>`<button type="button" data-featured-problem="${escapeHtml(item.id)}"><span>${escapeHtml(item.type)} · 难度 ${item.difficulty}</span><b data-featured-title="${escapeHtml(item.id)}"></b><small>${escapeHtml(item.id)} · 进入题目档案 →</small></button>`).join('');for(const element of featured.querySelectorAll('[data-featured-title]'))appendInlineContent(element,items.find(item=>item.id===element.dataset.featuredTitle)?.title??'')}
     this.renderStudyCatalog();
