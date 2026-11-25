@@ -182,21 +182,22 @@ export class MathArchive{
       </form></details>`;
   }
   renderCourses(){
-    const catalog=(courses)=>courses.map(course=>`<button type="button" class="course-tile" data-archive-kind="course" data-id="${course.id}">${icon(course.icon||'book')}<span><b>${h(course.title)}</b><small>${h(course.chapters[0].title)}</small></span><span aria-hidden="true">›</span></button>`).join('');
-    $('#mathArchiveContent').innerHTML=`<h2 class="catalog-heading">本学期 · 入门章节</h2><div class="course-grid">${catalog(MATH_COURSES.filter(course=>course.semester))}</div><h2 class="catalog-heading">往期课程</h2><div class="course-grid">${catalog(MATH_COURSES.filter(course=>!course.semester))}</div>`;
+    const catalog=(courses)=>courses.map(course=>`<button type="button" class="course-tile" data-archive-kind="course" data-id="${course.id}">${icon(course.icon||'book')}<span><b>${h(course.title)}</b><small>${h(course.semester?course.chapters.length+' 章 · '+course.chapters.reduce((n,c)=>n+c.knowledgeIds.length,0)+' 个知识单元':course.chapters[0].title)}</small></span><span aria-hidden="true">›</span></button>`).join('');
+    $('#mathArchiveContent').innerHTML=`<h2 class="catalog-heading">本学期 · 课程教材</h2><div class="course-grid">${catalog(MATH_COURSES.filter(course=>course.semester))}</div><h2 class="catalog-heading">往期课程</h2><div class="course-grid">${catalog(MATH_COURSES.filter(course=>!course.semester))}</div>`;
   }
   renderCourse(id){
     const course=mathCourseById(id);if(!course){this.notFound();return}
-    $('#mathArchiveContent').innerHTML=`<div class="course-heading">${icon(course.icon||'book')}<h2>${h(course.title)}</h2></div>${course.chapters.map(chapter=>{
+    $('#mathArchiveContent').innerHTML=`<div class="course-heading">${icon(course.icon||'book')}<h2>${h(course.title)}</h2></div>${course.semester?`<nav class="math-surface" aria-label="章节目录"><h2>章节目录</h2><div class="chapter-directory">${course.chapters.map((chapter,i)=>`<a href="#${h(chapter.id)}" data-chapter-jump="${h(chapter.id)}">${i+1}. ${h(chapter.title)} · ${chapter.knowledgeIds.length} 单元</a>`).join('')}</div></nav>`:''}${course.chapters.map(chapter=>{
       const readings=chapter.knowledgeIds.map(key=>mathKnowledgeById(chapterItemId(key)));
       const exercises=chapter.problemIds.map(key=>mathProblemById(chapterItemId(key)));
-      const methods=MATH_METHODS.filter(method=>method.courseId===id);
+      const methods=MATH_METHODS.filter(method=>method.courseId===id&&method.knowledgeIds.some(key=>chapter.knowledgeIds.map(chapterItemId).includes(key)));
       const concepts=course.semester?readings.map(item=>archiveButton('knowledge',item.id,item.title,item.summary)).join(''):
         groupedConcepts(readings,(item,n)=>archiveButton('knowledge',item.id,item.title,n+' · '+item.kind));
-      return `<section class="math-chapter-card"><div class="math-chapter-head"><h2>${h(chapter.title)}</h2><p>${h(chapter.description)}</p></div><h3>${course.semester?'算例与概念':'知识路线'}</h3><div class="chapter-directory">${concepts}</div>
+      return `<section class="math-chapter-card" id="${h(chapter.id)}"><div class="math-chapter-head"><h2>${h(chapter.title)}</h2><p>${h(chapter.description)}</p></div><h3>${course.semester?'算例与概念':'知识路线'}</h3><div class="chapter-directory">${concepts}</div>
         ${methods.length?`<h3>证明与求解方法</h3><div class="chapter-directory">${methods.map(item=>archiveButton('method',item.id,item.title,item.trigger)).join('')}</div>`:''}
         <h3>独立练习</h3><div class="chapter-directory">${exercises.map(item=>archiveButton('problem',item.id,item.title,item.id+' · '+item.type)).join('')}</div></section>`;
     }).join('')}`;
+    for(const link of $('#mathArchiveContent').querySelectorAll('[data-chapter-jump]'))link.onclick=event=>{event.preventDefault();document.getElementById(link.dataset.chapterJump)?.scrollIntoView({block:'start'});};
   }
   catalogItems(section){
     return ({problems:MATH_PROBLEMS,knowledge:MATH_KNOWLEDGE,methods:MATH_METHODS})[section]??[...MATH_PROBLEMS,...MATH_KNOWLEDGE,...MATH_METHODS];

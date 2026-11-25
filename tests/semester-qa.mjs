@@ -9,7 +9,8 @@ export async function checkSemester(page){
   for(const [course,prefix] of courses){
     await home.click();
     await page.locator('#semesterHome [data-path-id="'+course+'"]').click();
-    const chapter=page.locator('.math-chapter-card');
+    assert.equal(await page.locator('.math-chapter-card').count(),7);
+    const chapter=page.locator('.math-chapter-card').first();
     assert.equal(await chapter.locator('[data-archive-kind="knowledge"]').count(),2);
     assert.equal(await chapter.locator('[data-archive-kind="problem"]').count(),2);
     await chapter.locator('[data-id="'+prefix+'-K01"]').click();

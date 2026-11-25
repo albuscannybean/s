@@ -104,7 +104,7 @@ class WorkspaceController{
     this.mathPath=new MathPath(this);this.mathPath.bind();
     all('[data-site-icon]').forEach(el=>el.innerHTML=icon(el.dataset.siteIcon));
     $('#semesterHome').innerHTML=MATH_COURSES.filter(course=>course.semester).map(course=>
-      `<button class="course-tile" data-path-action="course" data-path-id="${course.id}">${icon(course.icon)}<span><b>${course.title}</b><small>${course.chapters[0].title}</small></span><span aria-hidden="true">›</span></button>`).join('');
+      `<button class="course-tile" data-path-action="course" data-path-id="${course.id}">${icon(course.icon)}<span><b>${course.title}</b><small>${course.chapters.length} 章 · ${course.chapters.reduce((sum,chapter)=>sum+chapter.knowledgeIds.length,0)} 个知识单元</small></span><span aria-hidden="true">›</span></button>`).join('');
     this.transient=new TransientOverlayManager(document).register('quickCreate',$('#quickCreate'),{emptyInput:$('#quickCreateInput')}).register('contextMenu',$('#contextMenu'));
     $('#toggleNavigator').onclick=()=>this.toggleNavigator();$('#navigatorMenu').onclick=event=>this.openNavigatorMenu(event);this.bindNavigatorResizer();all('[data-welcome]').forEach(button=>button.onclick=()=>button.dataset.welcome==='knowledge'?this.openQuickCreate():button.dataset.welcome==='library'?this.openLibrary():this.openImport());all('[data-template]').forEach(button=>button.onclick=()=>this.openStructureConfiguration(button.dataset.template));all('[data-empty-template]').forEach(button=>button.onclick=()=>this.openStructureConfiguration(button.dataset.emptyTemplate));
     all('[data-math-nav]').forEach(button=>button.onclick=()=>this.navigateMathSection(button.dataset.mathNav));

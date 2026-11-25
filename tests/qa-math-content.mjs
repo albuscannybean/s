@@ -25,12 +25,12 @@ try{
   await nav('courses').click();await page.locator('[data-archive-kind="course"][data-id="course-analysis-2"]').click();
   assert.equal(await page.locator('#mathArchive [data-archive-kind="knowledge"]').count(),10);
   assert.equal(await page.locator('#mathArchive [data-archive-kind="problem"]').count(),20);
-  await nav('problems').click();assert.equal(await page.locator('#mathArchiveResults .math-item-card').count(),28);
-  await page.locator('#mathDifficulty').selectOption('4');assert.match(await page.locator('#mathArchiveCount').innerText(),/3 \/ 28/);
+  await nav('problems').click();assert.equal(await page.locator('#mathArchiveResults .math-item-card').count(),76);
+  await page.locator('#mathDifficulty').selectOption('4');assert.match(await page.locator('#mathArchiveCount').innerText(),/3 \/ 76/);
   await page.locator('#mathDifficulty').selectOption('');await page.locator('#mathSearch').fill('Cauchy');
   assert.equal(await page.locator('#mathArchiveResults .math-item-card').count(),2);
-  await nav('knowledge').click();assert.equal(await page.locator('#mathArchiveResults .math-item-card').count(),18);
-  await nav('methods').click();assert.equal(await page.locator('#mathArchiveResults .math-item-card').count(),10);
+  await nav('knowledge').click();assert.equal(await page.locator('#mathArchiveResults .math-item-card').count(),66);
+  await nav('methods').click();assert.equal(await page.locator('#mathArchiveResults .math-item-card').count(),58);
   await page.locator('#globalSearch').click();await page.locator('#mathSearch').fill('ANA-UC-P02');
   await page.locator('#mathArchiveResults [data-id="ANA-UC-P02"]').click();
   assert.match(page.url(),/#math\/problem\/ANA-UC-P02$/);

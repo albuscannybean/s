@@ -6,7 +6,14 @@ import {renderMathToString} from '../packages/ui/math-markup.js';
 
 test('published courses include complete concepts, original problems and methods with valid references',()=>{
   assert.equal(MATH_CONTENT_VERSION,'math-content/1');assert.equal(MATH_COURSES.length,5);
-  assert.equal(MATH_KNOWLEDGE.length,18);assert.equal(MATH_PROBLEMS.length,28);assert.equal(MATH_METHODS.length,10);
+  assert.equal(MATH_KNOWLEDGE.length,66);assert.equal(MATH_PROBLEMS.length,76);assert.equal(MATH_METHODS.length,58);
+  for(const course of MATH_COURSES.filter(x=>x.semester)){
+    assert.equal(course.chapters.length,7);
+    for(const chapter of course.chapters){
+      assert.equal(chapter.knowledgeIds.length,2);assert.equal(chapter.problemIds.length,2);
+      for(const id of chapter.knowledgeIds){const k=mathKnowledgeById(id);assert.equal(k.chapterId,chapter.id);assert.ok(mathProblemsForKnowledge(id).some(p=>p.chapterId===chapter.id));}
+    }
+  }
   assert.deepEqual(validateMathContent(),[]);
   assert.ok(MATH_KNOWLEDGE.every(item=>item.example||item.body.length>300));
   assert.ok(MATH_PROBLEMS.every(item=>item.solution.trim()&&item.hints.length>=1&&item.knowledgeIds.length>=1));
