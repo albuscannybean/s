@@ -46,6 +46,7 @@
 <link rel="modulepreload" href="../../packages/geometry/scene-geometry.js">
 <link rel="modulepreload" href="../../packages/learning/math-content.js">
 <link rel="modulepreload" href="../../packages/learning/math-discovery.js">
+<link rel="modulepreload" href="../../packages/learning/math-path.js">
 <link rel="modulepreload" href="../../packages/learning/math-rigor.js">
 <link rel="modulepreload" href="../../packages/learning/study-session.js">
 <link rel="modulepreload" href="../../packages/lkl/index.js">
@@ -112,6 +113,7 @@
 <link rel="modulepreload" href="../../packages/ui/math-archive.js">
 <link rel="modulepreload" href="../../packages/ui/math-discovery.js">
 <link rel="modulepreload" href="../../packages/ui/math-markup.js">
+<link rel="modulepreload" href="../../packages/ui/math-path.js">
 <link rel="modulepreload" href="../../packages/ui/math-rigor.js">
 <link rel="modulepreload" href="../../packages/ui/math-workbench.js">
 <link rel="modulepreload" href="../../packages/ui/object-interaction-contract.js">
@@ -137,13 +139,12 @@
       <button class="brand math-brand" type="button" data-math-nav="home" aria-label="数学 LMN 首页"><span class="math-brand-symbol">数</span><span class="math-brand-copy"><b>数学 <span class="brand-dot">·</span> LMN</b><small>观察 · 归纳 · 理解 · 应用</small></span><em class="math-release-tag">V5.1.4 · 内容版</em></button>
       <div class="math-header-actions">
         <button id="globalSearch" class="command-trigger" aria-label="搜索与命令行"><svg class="site-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="6.5"/><path d="m15 15 5 5"/></svg><span>检索</span><span class="math-sr-only">命令行</span><kbd>Ctrl K</kbd></button>
-        <button id="appearanceButton" type="button"><svg class="site-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18Z"/></svg><span>外观</span></button>
-        <details id="mathToolbox" class="shell-menu"><summary id="mathToolboxToggle" aria-controls="mathToolboxPanel" aria-expanded="false"><svg class="site-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14 6 4 4M3 21l6-6m3-12a6 6 0 0 0-5 8L2 16a3 3 0 0 0 4 4l5-5a6 6 0 0 0 8-5l-4 3-4-4 3-4Z"/></svg><span>资料工具</span><span aria-hidden="true">⌄</span></summary>
-          <div id="mathToolboxPanel" class="shell-menu-panel hidden"><h2>知识与学习资料</h2>
-            <button type="button" id="toggleNavigator" data-math-tool="navigator" aria-controls="navigator" aria-expanded="false" aria-label="打开内容库">内容库与私人课程</button>
-            <button type="button" data-math-tool="knowledge">新建私人 Knowledge</button><button type="button" data-math-tool="structure">浏览结构库</button><button type="button" data-math-tool="import">导入 LKL／JSON</button>
-            <button type="button" data-platform-action="export">导出知识与结构</button><button type="button" data-math-nav="sessions">学习记录与备份</button><button type="button" data-math-nav="about">关于数学 · LMN</button><button id="moreBtn" aria-label="更多工具与设置">更多工具与设置</button>
-            <p>本机资料独立保存。账户与站点管理将在后续阶段接入。</p>
+
+        <details id="mathToolbox" class="shell-menu"><summary id="mathToolboxToggle" aria-label="资料工具与外观设置" aria-controls="mathToolboxPanel" aria-expanded="false"><svg class="site-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14 6 4 4M3 21l6-6m3-12a6 6 0 0 0-5 8L2 16a3 3 0 0 0 4 4l5-5a6 6 0 0 0 8-5l-4 3-4-4 3-4Z"/></svg><span>资料工具</span></summary>
+          <div id="mathToolboxPanel" class="shell-menu-panel hidden">
+            <section><h2>我的资料</h2><button type="button" id="toggleNavigator" data-math-tool="navigator" aria-controls="navigator" aria-expanded="false" aria-label="打开内容库">内容库与私人课程</button><button type="button" data-math-tool="knowledge">新建知识笔记</button><button type="button" data-math-tool="structure">浏览结构库</button></section>
+            <section><h2>导入与备份</h2><button type="button" data-math-tool="import">导入 LKL／JSON</button><button type="button" data-platform-action="export">导出知识与结构</button><button type="button" data-math-nav="sessions">学习记录与备份</button></section>
+            <section><h2>工作区设置</h2><button id="appearanceButton" type="button">外观与显示</button><button type="button" data-math-nav="about">关于数学 · LMN</button><button id="moreBtn" aria-label="更多工具与设置">更多工具与设置</button></section>
           </div></details>
         <button id="insertStructure" class="primary hidden" aria-hidden="true" tabindex="-1">新建</button>
       </div>
@@ -155,7 +156,7 @@
       <button type="button" data-math-nav="problems"><svg class="site-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg><span>题库</span></button>
       <button type="button" data-math-nav="knowledge"><svg class="site-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5.5C6 4 9 4.3 12 6v15c-3-1.7-6-2-9-.5zM21 5.5C18 4 15 4.3 12 6v15c3-1.7 6-2 9-.5z"/></svg><span>知识</span></button>
       <button type="button" data-math-nav="methods"><svg class="site-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="5" r="2"/><circle cx="18" cy="19" r="2"/><circle cx="18" cy="5" r="2"/><path d="M8 5h8M6 7v7a5 5 0 0 0 5 5h5"/></svg><span>方法</span></button>
-      <button type="button" data-math-nav="sessions"><svg class="site-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 2.6-6.4L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg><span>记录</span></button>
+
       <button type="button" data-platform-module="applied"><svg class="site-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><path d="M14 17h7m-3.5-3.5v7"/></svg><span>应用数学</span></button>
     </nav>
   </header>
@@ -182,6 +183,7 @@
     </div>
     <section id="appliedHome" class="applied-home hidden" aria-label="应用数学">
       <div class="math-home-layout"><div class="math-home-main"><header class="math-home-intro"><span class="math-kicker">数学 · 应用工作台</span><h1>应用数学</h1><p>把数学对象写成规则，通过计算、构造与可视化检验自己的理解。</p></header>
+        <div id="pathApplication"></div>
         <section class="math-surface"><h2>计算与交互式可视化</h2><p class="math-section-description">使用已经具备的工具，从一个具体的数学对象开始。</p><div class="application-grid">
           <button data-template="builtin:coordinate-plane"><b>函数与几何</b><span>函数绘图、坐标、向量与动点</span></button><button data-template="builtin:matrix-grid"><b>矩阵与网格</b><span>矩阵录入、运算与结构观察</span></button><button data-template="builtin:mod-n"><b>模运算与有限结构</b><span>有限集合、映射与模空间</span></button><button data-template="builtin:boolean-algebra"><b>布尔代数</b><span>格结构、关系与可视化</span></button>
         </div></section><section class="math-surface"><h2>结构与算法建模</h2><p class="math-section-description">保留原有结构库、节点、关系、变量与运行规则；自主搭建用于观察和模拟的数学结构。</p><div class="study-actions"><button type="button" data-platform-action="structures">浏览全部结构工具</button><button type="button" data-platform-action="library">打开我的内容库</button><button type="button" data-platform-action="search">探索与结构检索</button></div></section>
@@ -195,6 +197,10 @@
             <h1>富有成果的严格性</h1>
             <p>从具体例子出发，用严格的检验、反例和证明修正直觉，从已经理解的结果里发现新问题。</p>
           </div>
+          <section class="math-surface path-home"><div class="math-section-head"><div><span class="math-kicker">数学分析（二） / 函数列与一致收敛</span><h2>从这里找概念</h2></div><button type="button" data-path-action="records">学习记录与复习</button></div>
+            <form id="pathLookup"><label for="pathQuery">在本章查找</label><div><input type="search" name="query" id="pathQuery" placeholder="例如：逐点收敛、上确界、柯西"><button type="submit">查找概念</button></div></form>
+            <div class="path-home-actions"><button type="button" class="primary" id="pathContinue" data-path-action="continue">从第一单元开始</button><button type="button" data-path-action="course">查看全章学习顺序</button></div>
+          </section>
           <section class="math-surface math-rigor-home" aria-labelledby="mathRigorHomeTitle">
             <div class="math-section-head"><div><span class="math-kicker">数学分析 · 一致收敛</span><h2 id="mathRigorHomeTitle">极限与积分可以交换吗？</h2></div></div>
             <p class="math-section-description">每个固定点上的函数值都趋于零。调节函数列的项数，看看整段区间上的积分会怎样变化。</p>
@@ -224,7 +230,7 @@
         <p class="learning-start-hint">先把对象或问题记下来。你可以自由决定先看例子、做比较、写猜想，或暂时搁置。</p>
       </form>
           </section>
-      <section class="study-sessions-home" aria-labelledby="studySessionsHomeTitle"><header><div><h2 id="studySessionsHomeTitle">学习会话与到期复习</h2><small>优先继续尚未验证的思考，不用重新创建同一份笔记。</small></div></header><div id="studySessionsHome"></div>
+      <section class="study-sessions-home" aria-labelledby="studySessionsHomeTitle"><header><div><h2 id="studySessionsHomeTitle">学习会话与到期复习</h2><small>优先继续尚未验证的思考，不用重新创建同一份笔记。</small></div></header><h3>最近的概念与活动</h3><div id="pathRecent"></div><h3>独立尝试与复习</h3><div id="studySessionsHome"></div>
         <details class="study-archive-tools"><summary>学习记录备份 / 恢复</summary><p>学习会话、尝试与复习独立于 LKL3 知识包。换设备时请同时备份两份数据。</p><div class="study-actions"><button id="studySessionsExport" type="button">导出学习档案 JSON</button><label for="studySessionsImport">选择学习档案文件</label><input id="studySessionsImport" type="file" accept=".json,application/json"><button id="studyArchiveCommit" type="button" disabled>确认合并导入</button></div><p id="studyArchivePreview" aria-live="polite">导入前会校验文件，并预览会话数。</p></details>
       </section>
       <section class="study-catalog" aria-labelledby="studyCatalogTitle">

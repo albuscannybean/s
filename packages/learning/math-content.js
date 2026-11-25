@@ -196,7 +196,7 @@ export const mathCourseById=id=>MATH_COURSES.find(x=>x.id===id)??null;
 export const mathProblemsForKnowledge=id=>MATH_PROBLEMS.filter(x=>x.knowledgeIds.includes(id));
 export const mathProblemsForMethod=id=>MATH_PROBLEMS.filter(x=>x.methodIds.includes(id));
 export function searchMathContent(items,{text='',difficulty='',type=''}={}){
-  const query=String(text).trim().toLowerCase();return items.filter(item=>{
+  const query=String(text).trim().toLowerCase().replaceAll('柯西','cauchy');return items.filter(item=>{
     if(difficulty&&String(item.difficulty)!==String(difficulty))return false;
     if(type&&item.type!==type)return false;
     const haystack=[item.id,item.title,item.summary,item.prompt,item.body,item.type,item.trigger,item.action,item.reason,item.boundary,...(item.tags??[])].filter(Boolean).join(' ').toLowerCase();
