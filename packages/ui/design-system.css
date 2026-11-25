@@ -361,3 +361,6 @@ html[data-theme="dark"] #appShell[data-high-clarity="true"] :is(.topbar,.documen
 #floatingPanel .coordinate-operation-section,#floatingPanel .geometry-operation-workbench { min-width:0; overflow-wrap:anywhere; }
 #floatingPanel .variable-table { min-width:0; max-width:100%; overflow:auto; }
 #floatingPanel :is(.plot-range,.geometry-point-editor,.geometry-measurement-grid) { min-width:0; max-width:100%; flex-wrap:wrap; }
+
+/* Form fields keep their layout dimensions while their contents scroll. */
+#appShell :is(input,textarea) { resize:none; }

@@ -1,5 +1,5 @@
-import {chapterStages,chapterUnits,pathUnit,resolveUnit,powerErrors} from '../learning/math-path.js';
-import {mathKnowledgeById,mathProblemById,mathMethodById} from '../learning/math-content.js';
+import {chapterStages,chapterUnits,pathUnits,pathUnit,resolveUnit,powerErrors} from '../learning/math-path.js';
+import {mathCourseById,mathKnowledgeById,mathProblemById,mathMethodById} from '../learning/math-content.js';
 import {mathDiscoveryById} from '../learning/math-discovery.js';
 
 const stages={discovery:'观察样本',knowledge:'读概念',method:'学方法',problem:'独立练习',applied:'应用检验'};
@@ -37,9 +37,9 @@ export class MathPath{
       if(action==='continue'){
         const visit=this.trail[0];
         if(visit)this.unit=pathUnit(visit.unit);
-        return this.go(visit?.stage||'knowledge',visit?.id);
+        return this.go(visit?.stage||'knowledge',visit?.id||'ALG-K01');
       }
-      if(action==='course')return this.controller.openMathArchive('course',sectionId);
+      if(action==='course')return this.controller.openMathArchive('course',id||sectionId);
       if(action==='records')return this.controller.openMathHome('studySessionsHomeTitle');
       this.go(action,id);
     });
@@ -47,11 +47,12 @@ export class MathPath{
     form.onsubmit=event=>{
       event.preventDefault();
       this.controller.mathArchive.search.knowledge=form.elements.query.value.trim();
+      this.controller.mathArchive.catalogFilters.knowledge={};
       this.controller.openMathArchive('knowledge');
     };
   }
   go(action,id){
-    if(action==='applied')return this.controller.openAppliedHome();
+    if(action==='applied')return this.controller.openAppliedHome(this.unit.knowledge.id);
     if(Object.hasOwn(stages,action))this.controller.openMathArchive(action,id||stageId(this.unit,action));
   }
   record(stage,id,unit){
@@ -75,13 +76,17 @@ export class MathPath{
   }
   route(stage){
     const unit=this.unit;
-    const steps=Object.entries(stages).map(([key,label])=>key===stage?`<span aria-current="step">${label}</span>`:button(key,label,stageId(unit,key))).join('');
-    const next=chapterUnits[chapterUnits.indexOf(unit)+1];
-    return `<nav class="concept-route" aria-label="当前概念的学习路径"><div class="route-heading">${button('course','数学分析（二） · 一致收敛')}<span>${groupOf(unit).title} / ${order(unit)} ${unit.knowledge.title}</span></div><p>${unit.question}</p><div class="route-steps">${steps}${button('records','回首页复习')}</div><div class="route-next">${next?button('knowledge','下一单元 · '+next.knowledge.title,next.knowledge.id):button('course','回看全章目录')}</div></nav>`;
+    const course=mathCourseById(unit.knowledge.courseId);
+    const linkedStages=Object.entries(stages).filter(([key])=>key==='applied'?!course.semester:stageId(unit,key));
+    const steps=linkedStages.map(([key,label])=>key===stage?`<span aria-current="step">${label}</span>`:button(key,label,stageId(unit,key))).join('');
+    const units=pathUnits.filter(candidate=>candidate.knowledge.courseId===course.id);
+    const next=units[units.indexOf(unit)+1];
+    const location=course.semester?course.chapters[0].title:groupOf(unit).title+' / '+order(unit);
+    return `<nav class="concept-route" aria-label="当前概念的学习路径"><div class="route-heading">${button('course',course.title,course.id)}<span>${location} · ${unit.knowledge.title}</span></div><p>${unit.question}</p><div class="route-steps">${steps}${button('records','回首页复习')}</div><div class="route-next">${next?button('knowledge','下一单元 · '+next.knowledge.title,next.knowledge.id):button('course','回看全章目录',course.id)}</div></nav>`;
   }
   home(){
     const visit=this.trail[0];
-    document.querySelector('#pathContinue').textContent=visit?'继续上次 · '+stages[visit.stage]+' · '+this.unit.knowledge.title:'从第一单元开始 · 函数列与逐点收敛';
+    document.querySelector('#pathContinue').textContent=visit?'继续上次 · '+stages[visit.stage]+' · '+this.unit.knowledge.title:'从近世代数开始 · 群与单位元';
     const root=document.querySelector('#pathRecent');
     root.replaceChildren();
     for(const v of this.trail.slice(0,5)){
@@ -92,7 +97,8 @@ export class MathPath{
     }
     if(!root.childElementCount)root.textContent='打开章节里的概念或样本后，可以从这里接着学。';
   }
-  application(){
+  application(id){
+    this.unit=pathUnit(id)||chapterUnits.at(-1);
     this.record('applied','',this.unit);
     const root=document.querySelector('#pathApplication');
     root.innerHTML=this.route('applied')+`<section class="math-surface power-lab"><h2>误差实验 · 近似积分需要多准？</h2><p>用 xⁿ 在 [0, b] 上的积分近似其逐点极限的积分。先把允许误差定为 0.05，预测哪一种误差会先达标。</p><div class="lab-controls"><label>项数 n <input type="range" min="1" max="64" value="8" name="terms"><output data-lab-n></output></label><label>右端点 b <select name="endpoint"><option value="1">1</option><option value="0.95">0.95</option><option value="0.8">0.8</option><option value="0.5">0.5</option></select></label></div><dl class="lab-results" aria-live="polite"><div><dt>区间误差上确界 · bⁿ</dt><dd data-lab-uniform></dd></div><div><dt>积分误差 · bⁿ⁺¹ / (n+1)</dt><dd data-lab-integral></dd></div></dl><p>当 b = 1 时，极限在端点等于 1，在其余各点为 0。误差在端点为 0，却能从左侧任意接近 1。</p><label class="lab-note">改变 b 后，哪一种误差仍能控制积分？把你的解释记入本单元。<textarea rows="2" maxlength="5000"></textarea></label><p class="lab-save" role="status"></p>${button('knowledge','带着实验结论回看 · '+this.unit.knowledge.title,this.unit.knowledge.id)}</section>`;

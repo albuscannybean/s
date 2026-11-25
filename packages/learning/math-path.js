@@ -1,3 +1,4 @@
+import {semesterKnowledge,semesterMethods,semesterProblems} from './semester-content.js';
 import {mathKnowledgeById, mathProblemById, mathMethodById} from './math-content.js';
 
 export const chapterStages = [
@@ -26,14 +27,20 @@ export const chapterUnits = chapterStages.flatMap(group=>group.units).map(short=
   return {knowledge:mathKnowledgeById('ANA-UC-'+short), discovery:'SEQ-'+sample,
     method:mathMethodById('ANA-UC-'+method), problem:mathProblemById('ANA-UC-'+problem), question};
 });
-export const pathUnit = id=>chapterUnits.find(u=>u.knowledge.id===id);
+const semesterUnits=semesterKnowledge.map(knowledge=>({
+  knowledge, method:semesterMethods.find(item=>item.knowledgeIds.includes(knowledge.id)),
+  problem:semesterProblems.find(item=>item.knowledgeIds.includes(knowledge.id)),
+  question:knowledge.summary
+}));
+export const pathUnits=[...chapterUnits,...semesterUnits];
+export const pathUnit = id=>pathUnits.find(u=>u.knowledge.id===id);
 export function resolveUnit(view,id,previous){
   if(view==='knowledge')return pathUnit(id);
   const matches=u=>view==='discovery'?u.discovery===id:view==='problem'?mathProblemById(id)?.knowledgeIds.includes(u.knowledge.id):view==='method'?mathMethodById(id)?.knowledgeIds.includes(u.knowledge.id):false;
   const prior=pathUnit(previous);
   if(prior&&(prior[view]?.id===id||matches(prior)))return prior;
-  if(view==='method')return chapterUnits.find(matches);
-  return chapterUnits.find(u=>u[view]?.id===id)||chapterUnits.find(matches);
+  if(view==='method')return pathUnits.find(matches);
+  return pathUnits.find(u=>u[view]?.id===id)||pathUnits.find(matches);
 }
 
 export function powerErrors(n,b){

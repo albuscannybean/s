@@ -1,10 +1,12 @@
+import {semesterCourses,semesterKnowledge,semesterMethods,semesterProblems} from './semester-content.js';
+
 // Versioned, original, publicly readable teaching content. These IDs must remain stable.
 // User Knowledge records and study sessions are deliberately stored separately.
 export const MATH_CONTENT_VERSION='math-content/1';
 export const MATH_COURSES=Object.freeze([{
   id:'course-analysis-2',title:'数学分析（二）',description:'从函数列与函数项级数出发，理解极限运算为何需要额外的统一控制。',
   chapters:[{id:'chapter-uniform',title:'函数列：逐点收敛与一致收敛',description:'10 篇知识档案、20 道原创习题、5 个解题方法',status:'published',knowledgeIds:['K01','K02','K03','K04','K05','K06','K07','K08','K09','K10'],problemIds:Array.from({length:20},(_,i)=>`P${String(i+1).padStart(2,'0')}`)}]
-}]);
+},...semesterCourses]);
 
 const k=(id,title,kind,summary,body,prerequisites=[],tags=[])=>({id:`ANA-UC-${id}`,title,kind,summary,body,prerequisites:prerequisites.map(x=>`ANA-UC-${x}`),tags,courseId:'course-analysis-2',chapterId:'chapter-uniform'});
 export const MATH_KNOWLEDGE=Object.freeze([
@@ -150,7 +152,8 @@ $|\sin(nx)/n|\le1/n$ 对所有实数 $x$ 成立，所以 $\sin(nx)/n$ 在整个 
 
 对非紧的定义域，还经常研究“在每一个紧子集上一致收敛”，这是**局部一致收敛**；它通常弱于在整个定义域上一致收敛。
 
-**边界**：不能让定义域本身随 $n$ 改变，却不交代比较规则。标准的一致收敛定义要求所有 $f_n$ 在同一集合上讨论。`,['K02','K09'],['定义域','局部一致'])
+**边界**：不能让定义域本身随 $n$ 改变，却不交代比较规则。标准的一致收敛定义要求所有 $f_n$ 在同一集合上讨论。`,['K02','K09'],['定义域','局部一致']),
+  ...semesterKnowledge
 ]);
 
 const m=(id,title,trigger,action,reason,boundary,knowledgeIds)=>({id:`ANA-UC-${id}`,title,trigger,action,reason,boundary,knowledgeIds:knowledgeIds.map(x=>`ANA-UC-${x}`)});
@@ -159,7 +162,8 @@ export const MATH_METHODS=Object.freeze([
   m('M02','上确界转化','全定义域的误差可直接求上界或上确界。',String.raw`计算或估计 $e_n=\sup_{x\in E}|f_n-f|$，检查 $e_n\to0$。`,'把无穷多个点的误差转化为一个数列。','上确界可能不取到，也可能为无穷大。',['K04']),
   m('M03','移动点与尖峰反例','逐点极限成立，但误差集中在随 $n$ 移动的位置。',String.raw`构造 $x_n\in E$，使 $|f_n(x_n)-f(x_n)|\ge\varepsilon_0>0$。`,'它直接实现了一致收敛定义的逻辑否定。','必须先弄清真正的极限函数，不能让 $x_n$ 替代固定点的逐点检验。',['K03','K08']),
   m('M04','统一估计与夹逼','存在简单的与位置无关的上界。',String.raw`找 $|f_n(x)-f(x)|\le a_n$，其中 $a_n\to0$；从 $a_n$ 选择共同 $N$。`,'一个误差界同时控制整个定义域。','一个不趋零的上界不足以证明不一致收敛。',['K09']),
-  m('M05','一致 Cauchy 尾项检验','极限函数难以直接写出，但函数列相邻或远端项便于比较。',String.raw`估计 $\sup_{x\in E}|f_n(x)-f_m(x)|$，使所有 $m,n\ge N$ 时足够小。`,'在完备值域中，一致 Cauchy 性等价于一致收敛。','需要同时控制任意两个尾项，不是只控制 $|f_{n+1}-f_n|$。',['K05'])
+  m('M05','一致 Cauchy 尾项检验','极限函数难以直接写出，但函数列相邻或远端项便于比较。',String.raw`估计 $\sup_{x\in E}|f_n(x)-f_m(x)|$，使所有 $m,n\ge N$ 时足够小。`,'在完备值域中，一致 Cauchy 性等价于一致收敛。','需要同时控制任意两个尾项，不是只控制 $|f_{n+1}-f_n|$。',['K05']),
+  ...semesterMethods
 ]);
 
 const p=(number,title,type,difficulty,prompt,knowledge,methods,hints,solution,transfer)=>({
@@ -186,9 +190,11 @@ export const MATH_PROBLEMS=Object.freeze([
   p(17,'从一致收敛推导积分交换','定理应用',3,String.raw`假定 $f_n$ 在 $[a,b]$ Riemann 可积，一致收敛到 $f$。在已知 $f$ 可积的前提下，证明积分与极限可以交换，并说明该前提如何由一致收敛得到。`,[4,7],[2,4],['先对积分差使用三角不等式。','用区间长度乘上误差上确界。'],String.raw`一致极限的 Riemann 可积性由一致收敛与可积函数的一致逼近定理保证。然后 $|\int_a^b f_n-\int_a^b f|\le (b-a)\sup_{[a,b]}|f_n-f|\to0$，故积分交换。此估计是结论最直接的原因。`,String.raw`为什么把有界区间改为 $[0,+\infty)$ 后不能直接使用这一估计？`),
   p(18,'积分收敛不推出一致收敛','逆命题反例',2,String.raw`计算 $\int_0^1x^n\,dx$ 的极限。它能证明 $x^n$ 在 $[0,1]$ 上一致收敛吗？`,[4,6,7],[1,2],['积分是多少？','仍需考虑在 $x=1$ 的逐点极限。'],String.raw`$\int_0^1x^n\,dx=1/(n+1)\to0$，但 $x^n$ 在 $[0,1]$ 上并不一致收敛到逐点极限（后者在 $1$ 不连续）。所以积分收敛只说明某种平均累计误差很小，不能推出全域上确界误差趋零。`,String.raw`若 $f_n\ge0$ 且积分趋零，是否能保证逐点收敛？尝试构造反例。`),
   p(19,'一致收敛下的实际积分','计算与证明',2,String.raw`设 $f_n(x)=\sin x/n$，$x\in[0,\pi]$。先证明一致收敛，再计算 $\lim_n\int_0^{\pi}f_n(x)\,dx$。`,[7,9],[4],['统一估计 $|f_n|\le1/n$。','积分为 $2/n$。'],String.raw`$\sup_{x\in[0,\pi]}|f_n(x)|\le1/n\to0$，因此一致收敛于零。直接积分得 $\int_0^{\pi}\sin x/n\,dx=2/n\to0$，与逐项积分定理一致。`,String.raw`改用 $\cos x/n$ 是否仍然一致收敛？`),
-  p(20,'综合比较：三种不同的统一控制','综合迁移',4,String.raw`分别判断函数列 $a_n(x)=x^n$（$E=[0,1)$）、$b_n(x)=x^n/n$（$E=[0,1)$）、$c_n(x)=x^n$（$E=[0,a]$，固定 $0<a<1$）是否一致趋零。为每个结论写出不同的有效原因。`,[1,2,3,4,8,9,10],[1,2,3,4],['分别计算三个误差上确界。','对 $a_n$ 的上确界为 $1$；另两者分别受 $1/n$ 和 $a^n$ 控制。'],String.raw`$a_n$ 逐点趋零但 $\sup_{[0,1)}|a_n|=1$，所以不一致；$b_n$ 满足 $\sup_{[0,1)}|b_n|=1/n\to0$，所以一致；$c_n$ 满足 $\sup_{[0,a]}|c_n|=a^n\to0$，所以一致。这表明函数列的增长方式和定义域的边界都会影响是否存在统一控制。`,String.raw`自己构造第四个函数列，在无界定义域上一致收敛。`)
+  p(20,'综合比较：三种不同的统一控制','综合迁移',4,String.raw`分别判断函数列 $a_n(x)=x^n$（$E=[0,1)$）、$b_n(x)=x^n/n$（$E=[0,1)$）、$c_n(x)=x^n$（$E=[0,a]$，固定 $0<a<1$）是否一致趋零。为每个结论写出不同的有效原因。`,[1,2,3,4,8,9,10],[1,2,3,4],['分别计算三个误差上确界。','对 $a_n$ 的上确界为 $1$；另两者分别受 $1/n$ 和 $a^n$ 控制。'],String.raw`$a_n$ 逐点趋零但 $\sup_{[0,1)}|a_n|=1$，所以不一致；$b_n$ 满足 $\sup_{[0,1)}|b_n|=1/n\to0$，所以一致；$c_n$ 满足 $\sup_{[0,a]}|c_n|=a^n\to0$，所以一致。这表明函数列的增长方式和定义域的边界都会影响是否存在统一控制。`,String.raw`自己构造第四个函数列，在无界定义域上一致收敛。`),
+  ...semesterProblems
 ]);
 
+export const chapterItemId=id=>id.includes('-')?id:`ANA-UC-${id}`;
 export const mathKnowledgeById=id=>MATH_KNOWLEDGE.find(x=>x.id===id)??null;
 export const mathProblemById=id=>MATH_PROBLEMS.find(x=>x.id===id)??null;
 export const mathMethodById=id=>MATH_METHODS.find(x=>x.id===id)??null;
@@ -199,7 +205,7 @@ export function searchMathContent(items,{text='',difficulty='',type=''}={}){
   const query=String(text).trim().toLowerCase().replaceAll('柯西','cauchy');return items.filter(item=>{
     if(difficulty&&String(item.difficulty)!==String(difficulty))return false;
     if(type&&item.type!==type)return false;
-    const haystack=[item.id,item.title,item.summary,item.prompt,item.body,item.type,item.trigger,item.action,item.reason,item.boundary,...(item.tags??[])].filter(Boolean).join(' ').toLowerCase();
+    const haystack=[item.id,item.title,item.summary,item.prompt,item.body,item.type,item.trigger,item.category,mathCourseById(item.courseId??'course-analysis-2')?.title,item.action,item.reason,item.boundary,...(item.tags??[])].filter(Boolean).join(' ').toLowerCase();
     return !query||haystack.includes(query);
   });
 }
@@ -209,7 +215,7 @@ export function validateMathContent(){
   for(const item of MATH_KNOWLEDGE){if(!item.body?.includes(':::')||!item.summary)issues.push(`${item.id} 正文不完整`);for(const id of item.prerequisites)if(!mathKnowledgeById(id))issues.push(`${item.id} 未知前置知识 ${id}`)}
   for(const item of MATH_PROBLEMS){if(!item.solution||!item.prompt||item.hints.length<1||!item.transfer)issues.push(`${item.id} 教学字段不完整`);for(const id of item.knowledgeIds)if(!mathKnowledgeById(id))issues.push(`${item.id} 未知知识 ${id}`);for(const id of item.methodIds)if(!mathMethodById(id))issues.push(`${item.id} 未知方法 ${id}`)}
   for(const item of MATH_METHODS)for(const id of item.knowledgeIds)if(!mathKnowledgeById(id))issues.push(`${item.id} 未知知识 ${id}`);
-  for(const course of MATH_COURSES)for(const chapter of course.chapters){for(const id of chapter.knowledgeIds.map(x=>`ANA-UC-${x}`))if(!mathKnowledgeById(id))issues.push(`${chapter.id} 未知知识 ${id}`);for(const id of chapter.problemIds.map(x=>`ANA-UC-${x}`))if(!mathProblemById(id))issues.push(`${chapter.id} 未知题目 ${id}`)}
+  for(const course of MATH_COURSES)for(const chapter of course.chapters){for(const id of chapter.knowledgeIds.map(chapterItemId))if(!mathKnowledgeById(id))issues.push(`${chapter.id} 未知知识 ${id}`);for(const id of chapter.problemIds.map(chapterItemId))if(!mathProblemById(id))issues.push(`${chapter.id} 未知题目 ${id}`)}
   const visited=new Set(),visiting=new Set();function walk(id){if(visiting.has(id)){issues.push(`${id} 前置知识成环`);return}if(visited.has(id))return;visiting.add(id);for(const dependency of mathKnowledgeById(id)?.prerequisites??[])walk(dependency);visiting.delete(id);visited.add(id)}for(const item of MATH_KNOWLEDGE)walk(item.id);
   return issues;
 }

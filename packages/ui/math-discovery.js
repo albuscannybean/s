@@ -19,11 +19,9 @@ export function renderDiscoveryPage({selectedId='',compareId='',annotations=new 
   const compare=mathDiscoveryById(compareId)&&compareId!==selected.id?mathDiscoveryById(compareId):MATH_DISCOVERY_CASES.find(item=>item.id!==selected.id);
   const note=annotations.get('math-note:'+selected.id)||{};
   const rigor=selected.id===RIGOR_SAMPLE_ID;
-  const cards=MATH_DISCOVERY_CASES.map(item=>'<button type="button" class="math-discovery-sample '+(item.id===selected.id?'active':'')+'" data-discovery-case="'+h(item.id)+'" aria-pressed="'+String(item.id===selected.id)+'"><span>'+h(item.group)+'</span><b>'+h(item.title)+'</b><small>'+h(item.expression)+'</small></button>').join('');
   const options=MATH_DISCOVERY_CASES.filter(item=>item.id!==selected.id).map(item=>'<option value="'+h(item.id)+'" '+(item.id===compare?.id?'selected':'')+'>'+h(item.title)+'</option>').join('');
   const knowledge=selected.knowledgeIds.map(id=>{const item=mathKnowledgeById(id);return item?linkCard('knowledge',id,item.title,item.kind):''}).join('');
   const problems=selected.problemIds.map(id=>{const item=mathProblemById(id);return item?linkCard('problem',id,item.title,item.type+' · 难度 '+item.difficulty):''}).join('');
-  const materials='<section class="math-discovery-materials"><header><div><h3>函数列样本</h3><p>用不同的函数列检验同一个猜想。</p></div><span class="math-discovery-count">'+MATH_DISCOVERY_CASES.length+' 个样本</span></header><div class="math-discovery-sample-grid">'+cards+'</div></section>';
   const presets=rigor?'<div class="math-rigor-presets" role="group" aria-label="选择示例项数">'+RIGOR_TERMS.map(n=>'<button type="button" data-discovery-preset="'+n+'" aria-pressed="false">n = '+n+'</button>').join('')+'</div>':'';
   const noteFields=(rigor?Object.keys(RIGOR_NOTE_FIELDS):['observation','conjecture','counterexample']).map(field=>{
     const [label,prompt]=RIGOR_NOTE_FIELDS[field];
@@ -49,7 +47,7 @@ export function renderDiscoveryPage({selectedId='',compareId='',annotations=new 
         noteFields+
         '<div class="math-discovery-note-actions"><button type="button" class="primary" data-discovery-action="copy">复制当前探索上下文给 AI</button><small id="discoveryStatus" role="status" aria-live="polite">观察记录会自动保存在本机，并可随个人批注一起导出。</small></div>'+
       '</section>'+
-    '</aside></div>'+materials+'</div>';
+    '</aside></div></div>';
 }
 
 const plotTerms=(sample,n)=>[...new Set([...(sample.integral?RIGOR_TERMS:[1,2,4,8]).filter(term=>term!==n),n])];
