@@ -43,7 +43,7 @@ try{
   await page.locator('#welcome [data-path-action="records"]').click();
   assert.equal(await page.locator('.math-main-nav [data-math-nav="home"]').getAttribute('aria-current'),'page');
   await page.locator('.math-main-nav [data-math-nav="courses"]').click();
-  await page.locator('[data-archive-kind="course"]').waitFor({state:'visible'});
+  await page.locator('[data-archive-kind="course"][data-id="course-analysis-2"]').waitFor({state:'visible'});
   await page.locator('#mathToolboxToggle').click();await page.locator('[data-math-tool="structure"]').click();await page.locator('#structureLibrary').waitFor({state:'visible'});await page.keyboard.press('Escape');
   await page.locator('#globalSearch').click();await page.locator('#mathSearch').waitFor({state:'visible'});
   await page.locator('#mathToolboxToggle').click();await page.locator('[data-math-tool="import"]').click();await page.locator('#importDialog').waitFor({state:'visible'});await page.keyboard.press('Escape');

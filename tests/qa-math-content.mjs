@@ -22,15 +22,15 @@ try{
   page.on('pageerror',error=>errors.push(error.message));assert.equal((await page.goto(url,{waitUntil:'networkidle'})).status(),200);
   await page.waitForFunction(()=>!!globalThis.lmnWorkspace);
   const nav=kind=>page.locator(`.math-main-nav [data-math-nav="${kind}"]`);
-  await nav('courses').click();await page.locator('[data-archive-kind="course"]').click();
+  await nav('courses').click();await page.locator('[data-archive-kind="course"][data-id="course-analysis-2"]').click();
   assert.equal(await page.locator('#mathArchive [data-archive-kind="knowledge"]').count(),10);
   assert.equal(await page.locator('#mathArchive [data-archive-kind="problem"]').count(),20);
-  await nav('problems').click();assert.equal(await page.locator('#mathArchiveResults .math-item-card').count(),20);
-  await page.locator('#mathDifficulty').selectOption('4');assert.match(await page.locator('#mathArchiveCount').innerText(),/3 \/ 20/);
+  await nav('problems').click();assert.equal(await page.locator('#mathArchiveResults .math-item-card').count(),28);
+  await page.locator('#mathDifficulty').selectOption('4');assert.match(await page.locator('#mathArchiveCount').innerText(),/3 \/ 28/);
   await page.locator('#mathDifficulty').selectOption('');await page.locator('#mathSearch').fill('Cauchy');
   assert.equal(await page.locator('#mathArchiveResults .math-item-card').count(),2);
-  await nav('knowledge').click();assert.equal(await page.locator('#mathArchiveResults .math-item-card').count(),10);
-  await nav('methods').click();assert.equal(await page.locator('#mathArchiveResults .math-item-card').count(),5);
+  await nav('knowledge').click();assert.equal(await page.locator('#mathArchiveResults .math-item-card').count(),18);
+  await nav('methods').click();assert.equal(await page.locator('#mathArchiveResults .math-item-card').count(),10);
   await page.locator('#globalSearch').click();await page.locator('#mathSearch').fill('ANA-UC-P02');
   await page.locator('#mathArchiveResults [data-id="ANA-UC-P02"]').click();
   assert.match(page.url(),/#math\/problem\/ANA-UC-P02$/);
@@ -155,7 +155,7 @@ try{
   await page.setViewportSize({width:390,height:844});
   for(const [kind,id]of result.documents){await page.evaluate(([kind,id])=>lmnWorkspace.openMathArchive(kind,id),[kind,id]);assert.ok(await page.locator('#mathPrivateNote').count(),`Missing body: ${id}`);assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`Page overflow: ${id}`)}
   result.documents=result.documents.length;
-  await page.evaluate(()=>lmnWorkspace.openMathArchive('discovery','SEQ-POWER'));assert.equal(await page.locator('.math-discovery-sample').count(),8);assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'Discovery studio must not overflow on mobile');await page.screenshot({path:'qa-output/discovery-studio-mobile.png'});
+  await page.evaluate(()=>lmnWorkspace.openMathArchive('discovery'));assert.equal(await page.locator('.math-discovery-sample').count(),8);await page.locator('[data-discovery-case="SEQ-POWER"]').click();assert.ok(await page.locator('#discoveryPlotPrimary svg').isVisible());assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'Discovery studio must not overflow on mobile');await page.screenshot({path:'qa-output/discovery-studio-mobile.png'});
   await page.evaluate(()=>lmnWorkspace.openMathArchive('problem','ANA-UC-P02'));await page.screenshot({path:'qa-output/content-v2-mobile.png'});
   await page.evaluate(()=>{lmnWorkspace.preferences.theme='dark';lmnWorkspace.applyPreferences()});await page.screenshot({path:'qa-output/content-v2-dark.png'});
   assert.deepEqual(errors,[]);result.errors=errors;result.annotationRoundTrip=true;result.pendingSaveImport=true;

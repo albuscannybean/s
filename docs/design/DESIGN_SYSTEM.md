@@ -40,7 +40,7 @@ LMN 是本地优先的知识与数学工作区。用户导入/创建知识，书
 | 组件 | 必须遵循 |
 | --- | --- |
 | Button | 原生 button；每个局部操作组最多一个主动作；次要按钮描边，危险按钮使用语义色；保留 disabled 行为 |
-| Input / textarea | 原生标签或明确 aria-label；占位符不能替代名称；边框和 focus 可见；错误同时提供恢复提示 |
+| Input / textarea | 原生标签或明确 aria-label；占位符不能替代名称；文本框尺寸由布局决定，较长内容在框内滚动；边框和 focus 可见；错误同时提供恢复提示 |
 | Select | 直接使用已有原生 select；不得用非语义 div 模拟下拉 |
 | Dialog | 原生 showModal；命名标题；明确取消；提交前验证；破坏性操作沿用影响预览与撤销 |
 | Dropdown / context menu | 现有共享 transient manager；方向键/Home/End 导航；Escape 关闭并回焦 |

@@ -1,3 +1,4 @@
+import {icon} from './math-library.js';
 import {MathPath} from './math-path.js';
 import {bindWorkspaceChrome,syncNavigatorState,focusMenu} from './workspace-chrome.js';
 import {installKnowledgeReading} from './knowledge-reading.js';
@@ -48,7 +49,6 @@ import {learningNoteBody} from './learning-notes.js';
 import {StudyWorkbench} from './study-workbench.js';
 import {MathArchive} from './math-archive.js';
 import {MATH_PROBLEMS,MATH_KNOWLEDGE,MATH_METHODS,MATH_COURSES} from '../learning/math-content.js';
-import {MATH_DISCOVERY_CASES} from '../learning/math-discovery.js';
 import {canPlaceInStudyChapter,placeStudyKnowledge,studyCatalog,studyKind,studyOverviewBody,studyParentId,studyTag} from './study-catalog.js';
 import {resultSpaceLabel} from '../structure-engine/variable-result-normalizer.js';
 import {RELATION_STYLE_FIELDS,resetRelationStyle,resolveRelationStyle,setRelationStyle} from '../structure-engine/relation-style-resolver.js';
@@ -102,6 +102,9 @@ class WorkspaceController{
 
   bindUI(){
     this.mathPath=new MathPath(this);this.mathPath.bind();
+    all('[data-site-icon]').forEach(el=>el.innerHTML=icon(el.dataset.siteIcon));
+    $('#semesterHome').innerHTML=MATH_COURSES.filter(course=>course.semester).map(course=>
+      `<button class="course-tile" data-path-action="course" data-path-id="${course.id}">${icon(course.icon)}<span><b>${course.title}</b><small>${course.chapters[0].title}</small></span><span aria-hidden="true">›</span></button>`).join('');
     this.transient=new TransientOverlayManager(document).register('quickCreate',$('#quickCreate'),{emptyInput:$('#quickCreateInput')}).register('contextMenu',$('#contextMenu'));
     $('#toggleNavigator').onclick=()=>this.toggleNavigator();$('#navigatorMenu').onclick=event=>this.openNavigatorMenu(event);this.bindNavigatorResizer();all('[data-welcome]').forEach(button=>button.onclick=()=>button.dataset.welcome==='knowledge'?this.openQuickCreate():button.dataset.welcome==='library'?this.openLibrary():this.openImport());all('[data-template]').forEach(button=>button.onclick=()=>this.openStructureConfiguration(button.dataset.template));all('[data-empty-template]').forEach(button=>button.onclick=()=>this.openStructureConfiguration(button.dataset.emptyTemplate));
     all('[data-math-nav]').forEach(button=>button.onclick=()=>this.navigateMathSection(button.dataset.mathNav));
@@ -206,18 +209,24 @@ class WorkspaceController{
   }
   updateMathSiteChrome(){
     const home=this.document==='welcome',isStudy=this.document.startsWith('study-workbench:'),isArchive=this.document.startsWith('math-archive:');
-    const applied=this.document==='applied-home'||(!home&&!isStudy&&!isArchive&&!!this.currentInstanceId)||['search-workbench'].includes(this.document);
-    const shell=$('#appShell');shell.dataset.view=home||isArchive||this.document==='applied-home'?'home':isStudy?'study':'workbench';shell.dataset.module=applied?'applied':'theory';
+    const applied=this.isAppliedPage()||(!home&&!isStudy&&!isArchive&&!!this.currentInstanceId)||['search-workbench'].includes(this.document);
+    const shell=$('#appShell');shell.dataset.view=home||isArchive||this.isAppliedPage()?'home':isStudy?'study':'workbench';shell.dataset.module=applied?'applied':'theory';
     all('[data-platform-module]').forEach(button=>{const active=button.dataset.platformModule===shell.dataset.module;button.classList.toggle('active',active);if(active)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current')});
     let activeSection=applied?'applied':isStudy?'problems':home?'home':'';
-    if(isArchive){const view=this.document.slice('math-archive:'.length).split(':')[0];activeSection=({course:'courses',problem:'problems',method:'methods',search:'discovery',about:'about'})[view]||view}
+    if(isArchive){const view=this.document.slice('math-archive:'.length).split(':')[0];activeSection=({course:'courses',problem:'problems',method:'methods',search:'search',about:'about'})[view]||view}
     all('[data-math-nav]').forEach(button=>{const active=button.dataset.mathNav===activeSection;button.classList.toggle('active',active);if(active)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current')});
-    syncNavigatorState(this);$('#breadcrumbs').classList.toggle('hidden',home||isArchive||isStudy||this.document==='applied-home');
+    syncNavigatorState(this);$('#breadcrumbs').classList.toggle('hidden',home||isArchive||isStudy||this.isAppliedPage());
   }
-  openAppliedHome(){this.closeTransientOverlays();this.closePanel();this.openMathToolbox(false);this.activeTabKey=null;this.currentKnowledgeId=null;this.currentInstanceId=null;this.currentBoardId=null;this.document='applied-home';this.path=[];this.pushLocation();this.renderAll()}
-  renderAppliedHome(){this.mathPath.application();const root=$('#appliedSavedStructures');root.replaceChildren();const instances=this.state.structureInstances;
+  isAppliedPage(){return this.document==='applied-home'||this.document.startsWith('applied-lab:')}
+  openAppliedHome(subjectId=''){this.closeTransientOverlays();this.closePanel();this.openMathToolbox(false);this.activeTabKey=null;this.currentKnowledgeId=null;this.currentInstanceId=null;this.currentBoardId=null;this.document=subjectId?'applied-lab:'+subjectId:'applied-home';this.path=[];this.pushLocation();this.renderAll()}
+  renderAppliedHome(){
+    const subjectId=this.document.startsWith('applied-lab:')?this.document.slice('applied-lab:'.length):'',lab=$('#pathApplication');
+    lab.classList.toggle('hidden',!subjectId);$('#appliedDirectory').classList.toggle('hidden',Boolean(subjectId));
+    if(subjectId){this.mathPath.application(subjectId);return}
+    lab.replaceChildren();
+    const root=$('#appliedSavedStructures');root.replaceChildren();const instances=this.state.structureInstances;
     if(!instances.length){const p=document.createElement('p');p.className='study-empty';p.textContent='还没有保存的构造。从左侧的计算工具开始，或导入已有 LKL3 知识包。';root.append(p)}
-    for(const instance of instances){const button=document.createElement('button');button.type='button';button.className='learning-recent-row';button.textContent=this.structureDisplayTitle(instance,this.state.structureTemplates.find(t=>t.id===instance.templateId));button.onclick=()=>this.openInstance(instance.id);root.append(button)}
+    for(const instance of instances){const button=document.createElement('button');button.type='button';button.className='course-tile';button.textContent=this.structureDisplayTitle(instance,this.state.structureTemplates.find(t=>t.id===instance.templateId));button.onclick=()=>this.openInstance(instance.id);root.append(button)}
   }
   goUp(){if(this.path.length<=1){this.activateHome();return}const index=this.path.length-2,segment=this.path[index];this.navigatePath(index,segment)}
   runNewTabAction(action){if(action==='learn')return this.activateHome();if(action==='knowledge')return this.openQuickCreate(null,'blank');if(action==='lmn')return this.openQuickCreate(null,'lmn');if(action==='structure')return this.openLibrary();if(action==='notes')return this.knowledge?this.activateDocument('notes',true,this.currentKnowledgeId):this.openQuickCreate();if(action==='import')return this.openImport();if(action==='search')return this.openCommand()}
@@ -228,7 +237,6 @@ class WorkspaceController{
   }
   renderLearningHome(){
     this.mathPath.home();
-    const discovery=$('#mathDiscoveryFeatured');if(discovery){const items=MATH_DISCOVERY_CASES.filter(item=>!item.integral).slice(0,4);discovery.innerHTML=items.map(item=>`<button type="button" data-discovery-open="${escapeHtml(item.id)}"><span>${escapeHtml(item.group)}</span><b>${escapeHtml(item.title)}</b><small>${escapeHtml(item.expression)} · 打开样本</small></button>`).join('')}
     const featured=$('#mathFeaturedProblems');if(featured){const items=MATH_PROBLEMS.filter(item=>['ANA-UC-P02','ANA-UC-P03','ANA-UC-P07'].includes(item.id));featured.innerHTML=items.map(item=>`<button type="button" data-featured-problem="${escapeHtml(item.id)}"><span>${escapeHtml(item.type)} · 难度 ${item.difficulty}</span><b data-featured-title="${escapeHtml(item.id)}"></b><small>${escapeHtml(item.id)} · 进入题目档案 →</small></button>`).join('');for(const element of featured.querySelectorAll('[data-featured-title]'))appendInlineContent(element,items.find(item=>item.id===element.dataset.featuredTitle)?.title??'')}
     this.renderStudyCatalog();
     this.studyWorkbench?.renderHome();
@@ -337,7 +345,7 @@ class WorkspaceController{
   applyLocation(location,{remember=true,render=true}={}){if(!location)return;this.navigatorDetailTarget=location.navigatorDetailTarget;this.currentKnowledgeId=location.knowledgeId;this.currentInstanceId=location.instanceId;this.currentBoardId=null;const requested=String(location.document??'');this.document=requested.startsWith('board:')?'notes':this.canonicalDocumentId(requested);if(remember)this.rememberDocument(this.currentKnowledgeId,this.document);this.path=this.navigationIndex().pathFor(this.currentNavigatorTarget()??{})??(location.path??[]);this.selection.clear();this.fitPending=true;if(render)this.renderAll();requestAnimationFrame(()=>{if($('#navigatorContent'))$('#navigatorContent').scrollTop=Number(location.navigatorScrollTop??0)})}
   initializeBrowserHistory(){const location=this.location();history.replaceState({lmnLocation:structuredClone(location),tabKey:this.activeTabKey,home:!this.activeTabKey},'');this.browserHistoryReady=true}
   pushLocation(){const current=this.location(),tab=this.openTabs.find(item=>item.key===this.activeTabKey);if(tab){tab.id=this.canonicalDocumentId(this.document);tab.knowledgeId=this.currentKnowledgeId;pushTabLocation(tab,current)}if(this.browserHistoryReady){const archive=this.document.startsWith('math-archive:')?this.document.slice('math-archive:'.length).split(':'):null;const hash=archive?`#math/${archive.join('/')}`:'';history.pushState({lmnLocation:structuredClone(current),tabKey:this.activeTabKey,tabHistoryIndex:tab?.historyIndex,home:!tab},'',window.location.pathname+window.location.search+hash)}return current}
-  onBrowserPopState(event){const key=event.state?.tabKey;if(key&&this.openTabs.some(tab=>tab.key===key)){this.activeTabKey=key;const tab=this.openTabs.find(item=>item.key===key),index=Number(event.state?.tabHistoryIndex);if(Number.isInteger(index)&&index>=0&&index<tab.history.length)tab.historyIndex=index;this.applyLocation(event.state?.lmnLocation??currentTabLocation(tab),{remember:false})}else if(event.state?.lmnLocation?.document?.startsWith('math-archive:')||event.state?.lmnLocation?.document==='applied-home'){this.activeTabKey=null;this.applyLocation(event.state.lmnLocation,{remember:false})}else this.activateHome(false)}
+  onBrowserPopState(event){const key=event.state?.tabKey;if(key&&this.openTabs.some(tab=>tab.key===key)){this.activeTabKey=key;const tab=this.openTabs.find(item=>item.key===key),index=Number(event.state?.tabHistoryIndex);if(Number.isInteger(index)&&index>=0&&index<tab.history.length)tab.historyIndex=index;this.applyLocation(event.state?.lmnLocation??currentTabLocation(tab),{remember:false})}else if(event.state?.lmnLocation?.document?.startsWith('math-archive:')||event.state?.lmnLocation?.document==='applied-home'||event.state?.lmnLocation?.document?.startsWith('applied-lab:')){this.activeTabKey=null;this.applyLocation(event.state.lmnLocation,{remember:false})}else this.activateHome(false)}
   goHistory(direction){const tab=this.openTabs.find(item=>item.key===this.activeTabKey);if(!tabCanMove(tab,direction))return;const location=moveTabHistory(tab,direction);this.applyLocation(location,{remember:false});if(this.browserHistoryReady)history.replaceState({lmnLocation:structuredClone(location),tabKey:tab.key,tabHistoryIndex:tab.historyIndex},'')}
 
   navGroup(title,key){const element=document.createElement('section');element.className='nav-group';const expanded=this.navigatorGroupState.get(key)!==false,heading=document.createElement('button');heading.className='nav-group-title';heading.innerHTML=`<span>${escapeHtml(title)}</span><small>${expanded?'▾':'▸'}</small>`;const body=document.createElement('div');body.className='nav-group-body';element.classList.toggle('collapsed',!expanded);heading.onclick=()=>{this.navigatorGroupState.set(key,!expanded);this.renderNavigator()};element.append(heading,body);return{element,body}}
@@ -423,7 +431,7 @@ class WorkspaceController{
     if(knowledgeId&&this.state.knowledge.some(item=>item.id===knowledgeId))this.currentKnowledgeId=knowledgeId;
     if(id.startsWith('navigator-object:')){const index=this.navigationIndex(),entry=index.find(decodeURIComponent(id.slice(17)));if(entry)return this.openNavigatorObject(entry,index);return}
     if(id.startsWith('math-archive:')){const [,view,target='']=id.split(':');this.openMathArchive(view,target);return}
-    if(id==='applied-home'){this.openAppliedHome();return}
+    if(id==='applied-home'||id.startsWith('applied-lab:')){this.openAppliedHome(id.split(':')[1]);return}
     if(id.startsWith('study-workbench:')){this.studyWorkbench.open(id.slice('study-workbench:'.length));return}
     if(id.startsWith('new-tab')){this.document=id;this.rememberDocument(this.currentKnowledgeId,id);this.path=this.knowledge?[...(this.knowledge?[knowledgeSegment(this.knowledge)]:[]),{kind:'document',id,label:t('新标签页'),document:id}]:[{kind:'document',id,label:t('新标签页'),document:id}];if(push)this.pushLocation();this.renderAll();return}
     if(id==='notes'){
@@ -450,7 +458,7 @@ class WorkspaceController{
     const root=$('#documentTabs');root.replaceChildren();
     const visible=[...new Map(this.openTabs.filter(tab=>this.validOpenTab(tab)).map(tab=>[tab.key,tab])).values()];
     for(const tab of visible){const descriptor=this.describeOpenTab(tab);if(descriptor)root.append(this.browserTabButton(tab,descriptor))}
-    const add=document.createElement('button');add.className='document-tab add';add.type='button';add.title=t('新建标签页');add.setAttribute('aria-label','新建标签页');add.textContent='+';add.onclick=()=>this.openNewTab();root.append(add);
+    const add=document.createElement('button');add.className='document-tab add';add.type='button';add.title=t('新建标签页');add.setAttribute('aria-label','新建标签页');add.textContent='+';add.onclick=()=>this.openNewTab();$('#documentAddSlot').replaceChildren(add);
     $('#openDocumentsButton').classList.toggle('hidden',visible.length<2)
   }
   browserTabButton(tab,descriptor){const button=document.createElement('button');button.type='button';button.className='document-tab browser-tab';button.classList.toggle('active',this.activeTabKey===tab.key);button.title=descriptor.label;button.draggable=true;button.dataset.tabKey=tab.key;button.innerHTML=ui`<i>${escapeHtml(descriptor.icon)}</i><span>${escapeHtml(descriptor.label)}</span><b class="tab-close" title="关闭标签页">×</b>`;button.onclick=event=>{if(event.target.closest('.tab-close'))return;this.activateTab(tab.key)};button.querySelector('.tab-close').onclick=event=>{event.stopPropagation();this.closeDocument(tab.key)};button.ondragstart=event=>{event.dataTransfer.effectAllowed='move';event.dataTransfer.setData('application/x-lmn-tab',tab.key)};button.ondragover=event=>{if(event.dataTransfer.types.includes('application/x-lmn-tab'))event.preventDefault()};button.ondrop=event=>{event.preventDefault();const sourceKey=event.dataTransfer.getData('application/x-lmn-tab'),from=this.openTabs.findIndex(item=>item.key===sourceKey),to=this.openTabs.findIndex(item=>item.key===tab.key);if(from<0||to<0||from===to)return;const[moved]=this.openTabs.splice(from,1);this.openTabs.splice(to,0,moved);this.renderBrowserTabs()};button.oncontextmenu=event=>{event.preventDefault();this.openBrowserTabMenu(tab,event)};return button}
@@ -1023,7 +1031,7 @@ class WorkspaceController{
 
   renderWorkspace(){
     this.updateMathSiteChrome();
-    const applied=this.document==='applied-home';$('#appliedHome').classList.toggle('hidden',!applied);
+    const applied=this.isAppliedPage();$('#appliedHome').classList.toggle('hidden',!applied);
     if(applied){for(const selector of ['#welcome','#mathArchive','#studyWorkbench','#newTabPage','#searchWorkbench','#globalSettingsPage','#lklManualPage','#canvasViewport','#notesDocument','#containerDocument','#contentDocument','#sourceWorkbench'])$(selector).classList.add('hidden');this.renderAppliedHome();return}
     const isStudy=this.document.startsWith('study-workbench:'),isArchive=this.document.startsWith('math-archive:');
     $('#studyWorkbench').classList.toggle('hidden',!isStudy);

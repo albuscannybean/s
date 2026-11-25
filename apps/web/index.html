@@ -48,6 +48,7 @@
 <link rel="modulepreload" href="../../packages/learning/math-discovery.js">
 <link rel="modulepreload" href="../../packages/learning/math-path.js">
 <link rel="modulepreload" href="../../packages/learning/math-rigor.js">
+<link rel="modulepreload" href="../../packages/learning/semester-content.js">
 <link rel="modulepreload" href="../../packages/learning/study-session.js">
 <link rel="modulepreload" href="../../packages/lkl/index.js">
 <link rel="modulepreload" href="../../packages/lkl/lexer.js">
@@ -112,6 +113,7 @@
 <link rel="modulepreload" href="../../packages/ui/localization.js">
 <link rel="modulepreload" href="../../packages/ui/math-archive.js">
 <link rel="modulepreload" href="../../packages/ui/math-discovery.js">
+<link rel="modulepreload" href="../../packages/ui/math-library.js">
 <link rel="modulepreload" href="../../packages/ui/math-markup.js">
 <link rel="modulepreload" href="../../packages/ui/math-path.js">
 <link rel="modulepreload" href="../../packages/ui/math-rigor.js">
@@ -140,18 +142,18 @@
       <div class="math-header-actions">
         <button id="globalSearch" class="command-trigger" aria-label="搜索与命令行"><svg class="site-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="6.5"/><path d="m15 15 5 5"/></svg><span>检索</span><span class="math-sr-only">命令行</span><kbd>Ctrl K</kbd></button>
 
-        <details id="mathToolbox" class="shell-menu"><summary id="mathToolboxToggle" aria-label="资料工具与外观设置" aria-controls="mathToolboxPanel" aria-expanded="false"><svg class="site-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14 6 4 4M3 21l6-6m3-12a6 6 0 0 0-5 8L2 16a3 3 0 0 0 4 4l5-5a6 6 0 0 0 8-5l-4 3-4-4 3-4Z"/></svg><span>资料工具</span></summary>
+        <details id="mathToolbox" class="shell-menu"><summary id="mathToolboxToggle" aria-label="资料工具与外观设置" aria-controls="mathToolboxPanel" aria-expanded="false"><svg class="site-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14 6 4 4M3 21l6-6m3-12a6 6 0 0 0-5 8L2 16a3 3 0 0 0 4 4l5-5a6 6 0 0 0 8-5l-4 3-4-4 3-4Z"/></svg><span>资料工具</span><span data-site-icon="chevron"></span></summary>
           <div id="mathToolboxPanel" class="shell-menu-panel hidden">
-            <section><h2>我的资料</h2><button type="button" id="toggleNavigator" data-math-tool="navigator" aria-controls="navigator" aria-expanded="false" aria-label="打开内容库">内容库与私人课程</button><button type="button" data-math-tool="knowledge">新建知识笔记</button><button type="button" data-math-tool="structure">浏览结构库</button></section>
-            <section><h2>导入与备份</h2><button type="button" data-math-tool="import">导入 LKL／JSON</button><button type="button" data-platform-action="export">导出知识与结构</button><button type="button" data-math-nav="sessions">学习记录与备份</button></section>
-            <section><h2>工作区设置</h2><button id="appearanceButton" type="button">外观与显示</button><button type="button" data-math-nav="about">关于数学 · LMN</button><button id="moreBtn" aria-label="更多工具与设置">更多工具与设置</button></section>
+            <section><h2>我的资料</h2><button type="button" id="toggleNavigator" data-math-tool="navigator" aria-controls="navigator" aria-expanded="false" aria-label="打开内容库"><span data-site-icon="folder"></span><span>内容库与私人课程</span></button><button type="button" data-math-tool="knowledge"><span data-site-icon="pen"></span><span>新建知识笔记</span></button><button type="button" data-math-tool="structure"><span data-site-icon="nodes"></span><span>浏览结构库</span></button></section>
+            <section><h2>导入与备份</h2><button type="button" data-math-tool="import"><span data-site-icon="upload"></span><span>导入 LKL／JSON</span></button><button type="button" data-platform-action="export"><span data-site-icon="download"></span><span>导出知识与结构</span></button><button type="button" data-math-nav="sessions"><span data-site-icon="clock"></span><span>学习记录与备份</span></button></section>
+            <section><h2>工作区设置</h2><button id="appearanceButton" type="button"><span data-site-icon="theme"></span><span>外观与显示</span></button><button type="button" data-math-nav="about"><span data-site-icon="info"></span><span>关于数学 · LMN</span></button><button id="moreBtn" aria-label="更多工具与设置"><span data-site-icon="more"></span><span>更多工具与设置</span></button></section>
           </div></details>
         <button id="insertStructure" class="primary hidden" aria-hidden="true" tabindex="-1">新建</button>
       </div>
     </div>
     <nav class="math-main-nav" aria-label="数学板块">
       <button type="button" data-math-nav="home"><svg class="site-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-6v-7h-4v7H4a1 1 0 0 1-1-1z"/></svg><span>首页</span></button>
-      <button type="button" data-math-nav="discovery"><svg class="site-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m15.8 8.2-2.4 5.2-5.2 2.4 2.4-5.2z"/></svg><span>发现</span></button>
+      <button type="button" data-math-nav="discovery"><svg class="site-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m15.8 8.2-2.4 5.2-5.2 2.4 2.4-5.2z"/></svg><span>例子与实验</span></button>
       <button type="button" data-math-nav="courses"><svg class="site-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 4.5v17M8 6h8M8 10h8"/></svg><span>课程</span></button>
       <button type="button" data-math-nav="problems"><svg class="site-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg><span>题库</span></button>
       <button type="button" data-math-nav="knowledge"><svg class="site-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5.5C6 4 9 4.3 12 6v15c-3-1.7-6-2-9-.5zM21 5.5C18 4 15 4.3 12 6v15c3-1.7 6-2 9-.5z"/></svg><span>知识</span></button>
@@ -178,28 +180,36 @@
   <main id="workspace" tabindex="-1" aria-label="知识工作区" class="workspace">
     <div class="document-bar">
       <div class="document-navigation" aria-label="文档导航" data-i18n-aria-label="文档导航"><button id="homeBtn" title="主页" data-i18n-title="主页">⌂</button><button id="backBtn" title="返回 (Alt+←)" data-i18n-title="返回 (Alt+←)">‹</button><button id="forwardBtn" title="前进 (Alt+→)" data-i18n-title="前进 (Alt+→)">›</button><button id="upBtn" title="返回上层" data-i18n-title="返回上层">↑</button></div>
-      <div class="document-tab-shell"><div id="documentTabs" class="document-tabs"></div><button id="openDocumentsButton" class="open-documents" title="打开的文档" data-i18n-title="打开的文档">▾</button></div>
+      <div class="document-tab-shell"><div id="documentTabs" class="document-tabs"></div><div id="documentAddSlot"></div><button id="openDocumentsButton" class="open-documents" title="打开的文档" data-i18n-title="打开的文档">▾</button></div>
       <div class="canvas-actions"><button id="structureSettingsButton" class="structure-settings hidden" data-i18n="⚙ 结构设置">⚙ 结构设置</button><button id="undoBtn" title="撤销 (Ctrl+Z)" data-i18n-title="撤销 (Ctrl+Z)">↶</button><button id="redoBtn" title="重做 (Ctrl+Shift+Z)" data-i18n-title="重做 (Ctrl+Shift+Z)">↷</button><button id="fitBtn" data-i18n="适合窗口">适合窗口</button><button id="focusBtn">专注</button></div>
     </div>
     <section id="appliedHome" class="applied-home hidden" aria-label="应用数学">
-      <div class="math-home-layout"><div class="math-home-main"><header class="math-home-intro"><span class="math-kicker">数学 · 应用工作台</span><h1>应用数学</h1><p>把数学对象写成规则，通过计算、构造与可视化检验自己的理解。</p></header>
-        <div id="pathApplication"></div>
-        <section class="math-surface"><h2>计算与交互式可视化</h2><p class="math-section-description">使用已经具备的工具，从一个具体的数学对象开始。</p><div class="application-grid">
-          <button data-template="builtin:coordinate-plane"><b>函数与几何</b><span>函数绘图、坐标、向量与动点</span></button><button data-template="builtin:matrix-grid"><b>矩阵与网格</b><span>矩阵录入、运算与结构观察</span></button><button data-template="builtin:mod-n"><b>模运算与有限结构</b><span>有限集合、映射与模空间</span></button><button data-template="builtin:boolean-algebra"><b>布尔代数</b><span>格结构、关系与可视化</span></button>
-        </div></section><section class="math-surface"><h2>结构与算法建模</h2><p class="math-section-description">保留原有结构库、节点、关系、变量与运行规则；自主搭建用于观察和模拟的数学结构。</p><div class="study-actions"><button type="button" data-platform-action="structures">浏览全部结构工具</button><button type="button" data-platform-action="library">打开我的内容库</button><button type="button" data-platform-action="search">探索与结构检索</button></div></section>
-      </div><aside class="math-home-rail"><header class="math-reference-heading"><span class="math-kicker">本机 · 应用档案</span><h2>我的构造</h2><p>已有数学对象与保存的结构</p></header><div id="appliedSavedStructures"></div><section class="math-reference-note"><h2>从理解到使用</h2><p>应用与理论相互关联，计算结果可以帮助观察、寻找反例和检验边界。</p><button type="button" data-math-nav="courses">返回理论课程 →</button></section></aside></div>
+      <header class="math-home-intro"><h1>应用数学</h1></header>
+      <div id="pathApplication" class="hidden"></div>
+      <div id="appliedDirectory">
+        <section><h2>计算与可视化</h2><div class="course-grid tool-grid">
+          <button class="course-tile" data-template="builtin:coordinate-plane"><span data-site-icon="axes"></span><span><b>函数与几何</b><small>绘制函数、向量与动点</small></span></button>
+          <button class="course-tile" data-template="builtin:matrix-grid"><span data-site-icon="matrix"></span><span><b>矩阵与网格</b><small>录入与计算矩阵</small></span></button>
+        </div></section>
+        <section><h2>特殊结构与模型</h2><div class="course-grid tool-grid">
+          <button class="course-tile" data-template="builtin:mod-n"><span data-site-icon="circle"></span><span><b>模运算</b><small>构造剩余类与有限运算</small></span></button>
+          <button class="course-tile" data-template="builtin:boolean-algebra"><span data-site-icon="nodes"></span><span><b>布尔代数</b><small>查看格、关系与运算</small></span></button>
+        </div><div class="study-actions"><button type="button" data-platform-action="structures"><span data-site-icon="folder"></span> 浏览全部结构模板</button></div></section>
+        <section><h2>我的构造</h2><div id="appliedSavedStructures" class="saved-structures"></div></section>
+      </div>
     </section>
     <section id="welcome" class="welcome math-home">
-      <div class="math-home-layout">
+      <div class="math-home-layout math-home-single">
         <div class="math-home-main">
           <div class="math-home-intro">
             <span class="math-kicker">数学 · 发现与研究</span>
             <h1>富有成果的严格性</h1>
             <p>从具体例子出发，用严格的检验、反例和证明修正直觉，从已经理解的结果里发现新问题。</p>
           </div>
-          <section class="math-surface path-home"><div class="math-section-head"><div><span class="math-kicker">数学分析（二） / 函数列与一致收敛</span><h2>从这里找概念</h2></div><button type="button" data-path-action="records">学习记录与复习</button></div>
-            <form id="pathLookup"><label for="pathQuery">在本章查找</label><div><input type="search" name="query" id="pathQuery" placeholder="例如：逐点收敛、上确界、柯西"><button type="submit">查找概念</button></div></form>
-            <div class="path-home-actions"><button type="button" class="primary" id="pathContinue" data-path-action="continue">从第一单元开始</button><button type="button" data-path-action="course">查看全章学习顺序</button></div>
+          <section class="math-surface semester-home"><div class="math-section-head"><h2>本学期课程</h2><button type="button" data-math-nav="courses">全部课程</button></div><div id="semesterHome" class="course-grid"></div></section>
+          <section class="math-surface path-home"><div class="math-section-head"><div><h2>从这里找概念</h2></div><button type="button" data-path-action="records">学习记录与复习</button></div>
+            <form id="pathLookup"><label for="pathQuery">按概念查找</label><div><input type="search" name="query" id="pathQuery" placeholder="例如：子群、积分因子、贝叶斯公式"><button type="submit">查找概念</button></div></form>
+            <div class="path-home-actions"><button type="button" class="primary" id="pathContinue" data-path-action="continue">从第一单元开始</button><button type="button" data-path-action="course">往期专题 · 一致收敛</button></div>
           </section>
           <section class="math-surface math-rigor-home" aria-labelledby="mathRigorHomeTitle">
             <div class="math-section-head"><div><span class="math-kicker">数学分析 · 一致收敛</span><h2 id="mathRigorHomeTitle">极限与积分可以交换吗？</h2></div></div>
@@ -209,16 +219,11 @@
               <button type="button" data-discovery-open="SEQ-INTEGRAL" data-rigor-focus>每日数学发现训练</button>
             </div>
           </section>
-          <section class="math-surface math-discovery-home" aria-labelledby="mathDiscoveryTitle">
-            <div class="math-section-head"><div><span class="math-kicker">OBSERVE · COMPARE · CONJECTURE</span><h2 id="mathDiscoveryTitle">先从一组具体样本开始</h2></div><button type="button" data-math-nav="discovery">进入发现室 →</button></div>
-            <p>改变参数、观察图像、追踪固定点与移动点。这里提供可反复比较的数学材料，不要求按固定步骤完成。</p>
-            <div id="mathDiscoveryFeatured" class="math-discovery-home-grid"></div>
-          </section>
           <section class="math-surface math-featured-surface" aria-labelledby="mathFeaturedTitle">
-            <div class="math-section-head"><div><span class="math-kicker">A REAL START · 数学分析（二）</span><h2 id="mathFeaturedTitle">从观察转向练习</h2></div><button type="button" data-math-nav="problems">浏览全部 20 道题 →</button></div>
+            <div class="math-section-head"><div><span class="math-kicker">数学分析（二）</span><h2 id="mathFeaturedTitle">一致收敛练习</h2></div><button type="button" data-math-nav="problems">打开题库</button></div>
             <p>当某个现象引起你的兴趣时，可以再进入题库，用题目检验、修订或扩展自己的猜想。</p>
             <div id="mathFeaturedProblems" class="math-featured-grid"></div>
-            <div class="math-featured-footer"><button type="button" data-math-nav="knowledge">阅读 10 篇知识正文</button><button type="button" data-math-nav="methods">查看 5 个解题方法</button></div>
+            <div class="math-featured-footer"><button type="button" data-math-nav="knowledge"><span data-site-icon="pen"></span><span>打开知识库</span></button><button type="button" data-math-nav="methods">打开方法库</button></div>
           </section>
           <section class="math-surface math-start-surface" aria-labelledby="mathStartTitle">
             <div class="math-section-head"><div><span class="math-kicker">01 / START HERE</span><h2 id="mathStartTitle">随手记录一个想继续追问的问题</h2></div><span class="math-section-icon" aria-hidden="true">✎</span></div>
@@ -250,26 +255,6 @@
         <div class="welcome-suggestions"><button data-template="builtin:lmn-444"><i>4·4·4</i><b>LMN</b><small data-i18n="递归知识骨架">递归知识骨架</small></button><button data-template="builtin:boolean-algebra"><i>B₄</i><b data-i18n="布尔代数">布尔代数</b><small data-i18n="16 个格元素">16 个格元素</small></button><button data-template="builtin:mod-n"><i>ℤ/nℤ</i><b data-i18n="模结构">模结构</b><small data-i18n="参数与变量方案">参数与变量方案</small></button><button data-template="builtin:regular-polygon"><i>⬡</i><b data-i18n="正 n 边形">正 n 边形</b><small data-i18n="可参数化几何">可参数化几何</small></button></div>
       </details>
         </div>
-        <aside class="math-home-rail" aria-label="学习档案与快速入口">
-          <section class="math-surface math-archive-card">
-            <div class="math-archive-symbol" aria-hidden="true">∑</div>
-            <span class="math-kicker">LMN · 学习档案</span>
-            <h2>数学 · LMN</h2>
-            <p>让数学对象成为可观察的材料。比较它们的变化，再逐渐形成自己的概念与判断。</p>
-            <div class="math-archive-formula" aria-label="学习循环">观察 <span>·</span> 比较 <span>·</span> 猜想 <span>·</span> 修订</div>
-          </section>
-          <section class="math-surface math-quick-panel">
-            <div class="math-section-head"><div><span class="math-kicker">QUICK ACCESS</span><h2>常用入口</h2></div></div>
-            <button type="button" data-math-nav="discovery"><span class="math-quick-icon">∿</span><span><b>进入数学发现室</b><small>观察、比较并记录自己的猜想</small></span><i aria-hidden="true">↗</i></button>
-            <button type="button" data-math-action="course"><span class="math-quick-icon">▤</span><span><b>建立数学课程</b><small>课程、章节与知识单元</small></span><i aria-hidden="true">↗</i></button>
-            <button type="button" data-math-action="search"><span class="math-quick-icon">⌕</span><span><b>探索已有知识</b><small>搜索概念、正文与关系</small></span><i aria-hidden="true">↗</i></button>
-            <button type="button" data-math-action="import"><span class="math-quick-icon">⇧</span><span><b>导入已有资料</b><small>LKL、JSON 与知识包</small></span><i aria-hidden="true">↗</i></button>
-          </section>
-          <section class="math-surface math-guide-panel">
-            <span class="math-kicker">HOW IT WORKS</span><h2>探索可以从任何地方开始</h2>
-            <ol><li><b>看一个具体样本</b><span>先观察对象本身，不急着套用定义。</span></li><li><b>独立尝试</b><span>看哪些特征随之变化，哪些保持不变。</span></li><li><b>比较相似与差异</b><span>从多个例子中寻找共同模式。</span></li><li><b>保留猜想与反例</b><span>需要时再抽象、证明、修订和应用。</span></li></ol>
-          </section>
-        </aside>
       </div>
     </section>
     <section id="mathArchive" class="math-archive hidden" aria-label="数学公开课程与知识档案"></section>

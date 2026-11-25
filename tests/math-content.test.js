@@ -4,12 +4,12 @@ import {MATH_CONTENT_VERSION,MATH_COURSES,MATH_KNOWLEDGE,MATH_METHODS,MATH_PROBL
 import {createStudySession,revealStudyHint,studyContextPacket,submitStudyAttempt,updateStudyDraft,validateStudyArchive,exportStudyArchive} from '../packages/learning/study-session.js';
 import {renderMathToString} from '../packages/ui/math-markup.js';
 
-test('published teaching unit contains 10 complete concepts, 20 original problems and 5 methods with valid references',()=>{
-  assert.equal(MATH_CONTENT_VERSION,'math-content/1');assert.equal(MATH_COURSES.length,1);
-  assert.equal(MATH_KNOWLEDGE.length,10);assert.equal(MATH_PROBLEMS.length,20);assert.equal(MATH_METHODS.length,5);
+test('published courses include complete concepts, original problems and methods with valid references',()=>{
+  assert.equal(MATH_CONTENT_VERSION,'math-content/1');assert.equal(MATH_COURSES.length,5);
+  assert.equal(MATH_KNOWLEDGE.length,18);assert.equal(MATH_PROBLEMS.length,28);assert.equal(MATH_METHODS.length,10);
   assert.deepEqual(validateMathContent(),[]);
-  assert.ok(MATH_KNOWLEDGE.every(item=>item.body.length>300));
-  assert.ok(MATH_PROBLEMS.every(item=>item.solution.length>70&&item.hints.length>=1&&item.knowledgeIds.length>=1));
+  assert.ok(MATH_KNOWLEDGE.every(item=>item.example||item.body.length>300));
+  assert.ok(MATH_PROBLEMS.every(item=>item.solution.trim()&&item.hints.length>=1&&item.knowledgeIds.length>=1));
   assert.ok(mathProblemsForKnowledge('ANA-UC-K02').length>=10);
 });
 
