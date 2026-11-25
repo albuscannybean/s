@@ -35,3 +35,10 @@ test('archive design supports desktop, mobile, dark theme and focused learning',
   const sharedCss=readFileSync(new URL('../packages/ui/design-system.css',import.meta.url),'utf8');
   assert.match(sharedCss,/:focus-visible/);
 });
+
+
+test('problem-first launch links to all four semester courses',()=>{
+  assert.match(html,/id="learningLaunchTitle"/);
+  for(const id of ['ALG-P02','ODE-P01','PROB-P01','AN3-P01'])assert.ok(html.includes('data-path-action="problem" data-path-id="'+id+'"'));
+  assert.match(css,/\.learning-challenges/);
+});

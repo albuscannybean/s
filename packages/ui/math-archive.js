@@ -1,5 +1,6 @@
 import {MathCollections,icon} from './math-library.js';
 import {groupedConcepts} from './math-path.js';
+import {semesterPredictions} from '../learning/semester-content.js';
 import {list,put} from '../../apps/web/db.js';
 import {chapterItemId,MATH_CONTENT_VERSION,MATH_COURSES,MATH_KNOWLEDGE,MATH_METHODS,MATH_PROBLEMS,mathCourseById,mathKnowledgeById,mathMethodById,mathProblemById,mathProblemsForKnowledge,mathProblemsForMethod,searchMathContent} from '../learning/math-content.js';
 import {appendInlineContent,renderStudyMarkdown} from './math-markup.js';
@@ -240,6 +241,20 @@ export class MathArchive{
   renderKnowledge(id){const knowledge=mathKnowledgeById(id);if(!knowledge){this.notFound();return}const related=mathProblemsForKnowledge(id);
     $('#mathArchiveContent').innerHTML=`<article class="math-reading-layout"><div class="math-reading-main"><div class="math-reading-paper"><span class="math-kicker">知识档案 · ${h(knowledge.id)} · ${h(knowledge.kind)}</span><h2>${h(knowledge.title)}</h2><p class="math-reading-summary">${h(knowledge.summary)}</p><div class="math-reading-body" id="mathReadingBody"></div></div><section class="math-reading-paper"><h3>关联习题</h3><div class="math-compact-grid">${related.map(item=>archiveButton('problem',item.id,item.title,`难度 ${item.difficulty} · ${item.type}`)).join('')}</div></section></div><aside class="math-reading-side"><section class="math-reading-paper"><h3>前置知识</h3>${knowledge.prerequisites.length?knowledge.prerequisites.map(x=>archiveButton('knowledge',x,mathKnowledgeById(x)?.title??x)).join(''):'<p>本专题的基础入口。</p>'}<h3>学习证据</h3><p>${h(this.evidence(knowledge.id))}</p></section>${this.annotationSection(knowledge.id)}</aside></article>`;
     renderStudyMarkdown($('#mathReadingBody'),knowledge.body);
+    const prediction=semesterPredictions[id];
+    if(prediction){
+      const [question,options,correct,explanation]=prediction;
+      const form=document.createElement('form');
+      form.className='discovery-check';
+      form.innerHTML='<h3>先做一个预测</h3><fieldset><legend>'+h(question)+'</legend>'+options.map((option,i)=>'<label><input type="radio" name="prediction" value="'+i+'" required>'+h(option)+'</label>').join('')+'</fieldset><button class="primary" type="submit">检验我的判断</button><p role="status" aria-live="polite"></p>';
+      form.onsubmit=event=>{
+        event.preventDefault();
+        const value=form.elements.prediction.value;
+        if(value==='')return;
+        form.querySelector('[role=status]').textContent=(Number(value)===correct?'判断正确。':'这个判断需要修正。')+explanation+' 接着阅读下面的算例，并用关联习题独立验证。';
+      };
+      $('#mathReadingBody').before(form);
+    }
     const reflection=this.annotations.get(annotationId(id))?.applicationNote;
     if(reflection){const section=document.createElement('section');section.className='math-reading-paper';
       const title=document.createElement('h3');title.textContent='我在应用实验中的解释';
