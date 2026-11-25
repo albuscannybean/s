@@ -40,8 +40,8 @@ try{
     const overflow=await page.evaluate(()=>[...document.querySelectorAll('body *')].map(el=>({tag:el.tagName,cls:typeof el.className==='string'?el.className:'',left:Math.round(el.getBoundingClientRect().left),right:Math.round(el.getBoundingClientRect().right),width:Math.round(el.getBoundingClientRect().width)})).filter(item=>item.right>innerWidth+1||item.left< -1).slice(0,18));assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`page overflow at ${width}: ${JSON.stringify(overflow)}`);
     const bounds=await page.locator('#globalSearch').boundingBox();assert.ok(bounds.x+bounds.width<=width+1);
   }
-  await page.locator('#welcome [data-path-action="records"]').click();
-  assert.equal(await page.locator('.math-main-nav [data-math-nav="home"]').getAttribute('aria-current'),'page');
+  await page.locator('#mathToolboxToggle').click();await page.locator('#mathToolboxPanel [data-math-nav="sessions"]').click();
+  assert.equal(await page.locator('#welcome').isVisible(),true);
   await page.locator('.math-main-nav [data-math-nav="courses"]').click();
   await page.locator('[data-archive-kind="course"][data-id="course-analysis-2"]').waitFor({state:'visible'});
   await page.locator('#mathToolboxToggle').click();await page.locator('[data-math-tool="structure"]').click();await page.locator('#structureLibrary').waitFor({state:'visible'});await page.keyboard.press('Escape');
@@ -51,7 +51,7 @@ try{
   await page.screenshot({path:'qa-output/math-release-desktop.png'});
   await page.setViewportSize({width:390,height:844});
   await page.screenshot({path:'qa-output/math-release-mobile.png'});
-  await page.locator('[data-featured-problem="ANA-UC-P02"]').click();
+  await page.locator('.math-main-nav [data-math-nav="problems"]').click();await page.locator('#mathSearch').fill('ANA-UC-P02');await page.locator('#mathArchiveResults [data-id="ANA-UC-P02"]').click();
   await page.locator('[data-math-archive-action="start"]').click();
   await page.locator('#studyWorkbench').waitFor({state:'visible'});
   assert.ok(await page.locator('#studyQuestion .katex').count()>0);
@@ -60,7 +60,7 @@ try{
   await page.evaluate(()=>lmnWorkspace.studyWorkbench.saving);
   result.knowledge=await page.evaluate(()=>lmnWorkspace.state.knowledge.length);assert.equal(result.knowledge,0);
   await context.setOffline(true);await page.reload();await page.waitForFunction(()=>!!globalThis.lmnWorkspace);
-  await page.locator('#studySessionsHome .learning-recent-row').click();
+  await page.locator('#mathToolboxToggle').click();await page.locator('#mathToolboxPanel [data-math-nav="sessions"]').click();await page.locator('#studySessionsHome .learning-recent-row').click();
   assert.match(await page.locator('.study-records').textContent(),/离线保留的独立尝试/);
   await page.locator('[data-study-action="hint"]').click();assert.match(await page.locator('#studyHints').textContent(),/固定/);
   await page.screenshot({path:'qa-output/math-release-offline-study.png'});

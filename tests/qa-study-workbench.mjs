@@ -9,6 +9,7 @@ await mkdir('qa-output',{recursive:true});
 try{
   await page.goto(process.env.LMN_QA_URL||'http://127.0.0.1:4174/apps/web/',{waitUntil:'networkidle'});
   await page.waitForFunction(()=>!!globalThis.lmnWorkspace);
+  await page.locator('#mathToolboxToggle').click();await page.locator('#mathToolboxPanel [data-math-nav="sessions"]').click();
   await page.locator('#learningTopic').fill('一致收敛为何要求统一的 N？');
   await page.locator('#learningStartForm button[type=submit]').click();
   await page.locator('#studyWorkbench').waitFor({state:'visible'});
@@ -18,7 +19,7 @@ try{
   await page.waitForTimeout(450);
   await page.reload({waitUntil:'networkidle'});
   await page.waitForFunction(()=>!!globalThis.lmnWorkspace);
-  await page.locator('#studySessionsHome .learning-recent-row').click();
+  await page.locator('#mathToolboxToggle').click();await page.locator('#mathToolboxPanel [data-math-nav="sessions"]').click();await page.locator('#studySessionsHome .learning-recent-row').click();
   assert.match(await page.locator('#studyDraft').inputValue(),/选取不应该依赖 x/);
   await page.locator('[data-study-action="submit"]').click();
   assert.equal(await page.locator('[data-study-action="hint"]').isEnabled(),true);

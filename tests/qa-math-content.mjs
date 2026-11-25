@@ -75,8 +75,7 @@ try{
   assert.equal(await page.evaluate(()=>lmnWorkspace.state.knowledge.length),0,'Public content must not populate private Knowledge');
   const archive=await page.evaluate(async()=>{const {exportStudyArchive,validateStudyArchive}=await import('../../packages/learning/study-session.js');return validateStudyArchive(exportStudyArchive(lmnWorkspace.studyWorkbench.sessions))});
   assert.equal(archive[0].problemId,'ANA-UC-P02');
-  await nav('home').click();
-  await page.getByRole('button',{name:'每日数学发现训练',exact:true}).click();
+  await nav('discovery').click();await page.locator('[data-discovery-case="SEQ-INTEGRAL"]').click();await page.locator('#rigorDailyDate').focus();
   assert.match(page.url(),/#math\/discovery\/SEQ-INTEGRAL$/);
   assert.equal(await page.locator('#rigorDailyDate').evaluate(input=>input===document.activeElement),true);
   const today=await page.locator('#rigorDailyDate').inputValue();
@@ -150,7 +149,7 @@ try{
   assert.equal(await page.locator('#discoveryDomain').inputValue(),'0.2:1');
   assert.equal(await page.locator('#discoveryN').inputValue(),'16');
   assert.equal(await page.locator('#discoveryCompare').inputValue(),'SEQ-RECIPROCAL');
-  await nav('home').click();await page.screenshot({path:'qa-output/content-v2-home.png'});
+  await nav('courses').click();await page.screenshot({path:'qa-output/content-v2-home.png'});
   result.documents=await page.evaluate(async()=>{const {MATH_KNOWLEDGE,MATH_PROBLEMS,MATH_METHODS}=await import('../../packages/learning/math-content.js');return [...MATH_KNOWLEDGE.map(x=>['knowledge',x.id]),...MATH_PROBLEMS.map(x=>['problem',x.id]),...MATH_METHODS.map(x=>['method',x.id])]});
   await page.setViewportSize({width:390,height:844});
   for(const [kind,id]of result.documents){await page.evaluate(([kind,id])=>lmnWorkspace.openMathArchive(kind,id),[kind,id]);assert.ok(await page.locator('#mathPrivateNote').count(),`Missing body: ${id}`);assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`Page overflow: ${id}`)}

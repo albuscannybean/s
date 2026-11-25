@@ -1,14 +1,14 @@
 import assert from 'node:assert/strict';
 
 export async function checkSemester(page){
-  const nav=page.locator('.math-main-nav'),home=nav.locator('[data-math-nav="home"]');
+  const nav=page.locator('.math-main-nav'),home=nav.locator('[data-math-nav="courses"]');
   const courses=[
     ['course-algebra','ALG'],['course-ode','ODE'],
     ['course-probability','PROB'],['course-analysis-3','AN3']
   ];
   for(const [course,prefix] of courses){
     await home.click();
-    await page.locator('#semesterHome [data-path-id="'+course+'"]').click();
+    await page.locator('#mathArchive [data-archive-kind="course"][data-id="'+course+'"]').click();
     assert.equal(await page.locator('.math-chapter-card').count(),7);
     const chapter=page.locator('.math-chapter-card').first();
     assert.equal(await chapter.locator('[data-archive-kind="knowledge"]').count(),2);
@@ -44,12 +44,12 @@ export async function checkSemester(page){
   await page.locator('#mathSearch').fill('ODE-P02');
   assert.equal(await page.locator('#mathArchiveResults .catalog-row').count(),1);
   assert.match(await page.locator('#mathArchiveResults').innerText(),/积分因子/);
-  await nav.locator('[data-platform-module="applied"]').click();
+  await nav.locator('[data-math-nav="discovery"]').click();await page.locator('[data-math-archive-action="lab"]').click();
   assert.ok(await page.locator('#appliedDirectory').isVisible());
   assert.equal(await page.locator('#pathApplication').isVisible(),false);
   assert.equal(await page.locator('#appliedDirectory [data-template] svg').count(),4);
   await page.locator('#mathToolboxToggle').click();
-  assert.equal(await page.locator('#mathToolboxPanel button svg').count(),9);
+  assert.equal(await page.locator('#mathToolboxPanel button svg').count(),10);
   await page.keyboard.press('Escape');
   const tabs=await page.locator('.document-bar').boundingBox();
   const add=await page.locator('#documentAddSlot button').boundingBox();

@@ -130,7 +130,7 @@ try {
   await page.evaluate(()=>lmnWorkspace.openNewTab());
   await page.waitForFunction(()=>document.querySelector('#navigator').inert);
   await page.evaluate(()=>{lmnWorkspace.preferences.language='en';lmnWorkspace.applyPreferences();lmnWorkspace.openMathHome()});
-  assert.equal(await page.locator('#welcome .math-home-intro h1').textContent(),'今天想弄懂什么？');
+  assert.equal(await page.locator('#welcome .math-home-intro h1').textContent(),'我的学习');
   result.errors=errors;assert.deepEqual(errors,[]);
   await writeFile('qa-output/design-system.json',JSON.stringify(result,null,2));console.log(JSON.stringify(result,null,2));
 } finally {await browser.close()}

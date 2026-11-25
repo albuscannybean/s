@@ -84,7 +84,7 @@ export class MathPath{
     const units=pathUnits.filter(candidate=>candidate.knowledge.courseId===course.id);
     const next=units[units.indexOf(unit)+1];
     const location=course.semester?(course.chapters.find(chapter=>chapter.id===unit.knowledge.chapterId)?.title||course.title):groupOf(unit).title+' / '+order(unit);
-    return `<nav class="concept-route" aria-label="当前概念的学习路径"><div class="route-heading">${button('course',course.title,course.id)}<span>${location} · ${unit.knowledge.title}</span></div><p>${unit.question}</p><div class="route-steps">${steps}${button('records','回首页复习')}</div><div class="route-next">${next?button('knowledge','下一单元 · '+next.knowledge.title,next.knowledge.id):button('course','回看全章目录',course.id)}</div></nav>`;
+    return `<nav class="concept-route" aria-label="当前概念的学习路径"><div class="route-heading">${button('course',course.title,course.id)}<span>${location} · ${unit.knowledge.title}</span></div><p>${unit.question}</p><div class="route-steps">${steps}${button('records','我的学习与复习')}</div><div class="route-next">${next?button('knowledge','下一单元 · '+next.knowledge.title,next.knowledge.id):button('course','回看全章目录',course.id)}</div></nav>`;
   }
   home(){
     const visit=this.trail[0];

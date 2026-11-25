@@ -219,3 +219,517 @@ export function validateMathContent(){
   const visited=new Set(),visiting=new Set();function walk(id){if(visiting.has(id)){issues.push(`${id} 前置知识成环`);return}if(visited.has(id))return;visiting.add(id);for(const dependency of mathKnowledgeById(id)?.prerequisites??[])walk(dependency);visiting.delete(id);visited.add(id)}for(const item of MATH_KNOWLEDGE)walk(item.id);
   return issues;
 }
+
+// Explicit editorial classification of existing teaching units; facets overlap intentionally.
+export const KNOWLEDGE_FORMS = Object.freeze({
+  "concept": [
+    "概念与定义",
+    "说明对象是什么、如何辨认、满足哪些定义条件。"
+  ],
+  "proposition": [
+    "命题与定理",
+    "说明在什么假设下，哪些数学结论成立；包括性质、判别准则、公式与定理。"
+  ],
+  "reasoning": [
+    "逻辑与论证",
+    "说明命题为何成立，或如何否定、证明及组织推理。"
+  ],
+  "procedure": [
+    "方法性知识",
+    "说明一个数学动作如何构造、为什么有效、在何种条件下使用。方法库另提供独立可调用的方法。"
+  ]
+});
+export const CONCEPT_FACETS = Object.freeze({
+  "object": [
+    "对象与集合",
+    "研究对象、元素、集合、函数、方程、随机变量等。"
+  ],
+  "structure": [
+    "结构与空间",
+    "对象附加运算、关系或公理后形成的整体，如群、环、域、概率空间。"
+  ],
+  "relation": [
+    "关系与映射",
+    "对象之间的联系与对应，如同态、独立性、等价、极限关系。"
+  ],
+  "property": [
+    "性质与条件",
+    "描述对象具有或不具有的特征，如连续、可微、正规、收敛。"
+  ],
+  "operation": [
+    "运算与变换",
+    "由对象产生对象的动作或映射，如复合、求导、积分、变量替换。"
+  ],
+  "quantity": [
+    "数量与度量",
+    "刻画大小、距离、概率、次数、误差等可度量特征。"
+  ]
+});
+export const KNOWLEDGE_CLASSIFICATION = Object.freeze({
+  "ANA-UC-K01": {
+    "form": "concept",
+    "facets": [
+      "object",
+      "relation"
+    ]
+  },
+  "ANA-UC-K02": {
+    "form": "concept",
+    "facets": [
+      "property",
+      "relation"
+    ]
+  },
+  "ANA-UC-K03": {
+    "form": "reasoning",
+    "facets": [
+      "relation"
+    ]
+  },
+  "ANA-UC-K04": {
+    "form": "proposition",
+    "facets": [
+      "quantity"
+    ]
+  },
+  "ANA-UC-K05": {
+    "form": "proposition",
+    "facets": [
+      "property",
+      "relation"
+    ]
+  },
+  "ANA-UC-K06": {
+    "form": "proposition",
+    "facets": [
+      "property"
+    ]
+  },
+  "ANA-UC-K07": {
+    "form": "proposition",
+    "facets": [
+      "object",
+      "operation"
+    ]
+  },
+  "ANA-UC-K08": {
+    "form": "procedure",
+    "facets": [
+      "property"
+    ]
+  },
+  "ANA-UC-K09": {
+    "form": "procedure",
+    "facets": [
+      "quantity"
+    ]
+  },
+  "ANA-UC-K10": {
+    "form": "concept",
+    "facets": [
+      "object",
+      "property",
+      "relation"
+    ]
+  },
+  "ALG-K01": {
+    "form": "concept",
+    "facets": [
+      "structure",
+      "object"
+    ]
+  },
+  "ALG-K02": {
+    "form": "concept",
+    "facets": [
+      "structure",
+      "operation"
+    ]
+  },
+  "ALG-K03": {
+    "form": "concept",
+    "facets": [
+      "object",
+      "operation",
+      "relation"
+    ]
+  },
+  "ALG-K04": {
+    "form": "proposition",
+    "facets": [
+      "quantity",
+      "relation"
+    ]
+  },
+  "ALG-K05": {
+    "form": "concept",
+    "facets": [
+      "structure",
+      "relation",
+      "operation"
+    ]
+  },
+  "ALG-K06": {
+    "form": "proposition",
+    "facets": [
+      "relation",
+      "structure"
+    ]
+  },
+  "ALG-K07": {
+    "form": "proposition",
+    "facets": [
+      "relation",
+      "quantity"
+    ]
+  },
+  "ALG-K08": {
+    "form": "proposition",
+    "facets": [
+      "structure"
+    ]
+  },
+  "ALG-K09": {
+    "form": "concept",
+    "facets": [
+      "structure",
+      "property"
+    ]
+  },
+  "ALG-K10": {
+    "form": "concept",
+    "facets": [
+      "structure",
+      "relation",
+      "object"
+    ]
+  },
+  "ALG-K11": {
+    "form": "proposition",
+    "facets": [
+      "structure",
+      "property",
+      "operation"
+    ]
+  },
+  "ALG-K12": {
+    "form": "proposition",
+    "facets": [
+      "property"
+    ]
+  },
+  "ALG-K13": {
+    "form": "concept",
+    "facets": [
+      "structure",
+      "object",
+      "relation",
+      "quantity"
+    ]
+  },
+  "ALG-K14": {
+    "form": "proposition",
+    "facets": [
+      "structure",
+      "relation"
+    ]
+  },
+  "ODE-K01": {
+    "form": "concept",
+    "facets": [
+      "object",
+      "property"
+    ]
+  },
+  "ODE-K02": {
+    "form": "procedure",
+    "facets": [
+      "object",
+      "operation"
+    ]
+  },
+  "ODE-K03": {
+    "form": "procedure",
+    "facets": [
+      "operation"
+    ]
+  },
+  "ODE-K04": {
+    "form": "procedure",
+    "facets": [
+      "relation",
+      "operation"
+    ]
+  },
+  "ODE-K05": {
+    "form": "proposition",
+    "facets": [
+      "property",
+      "relation"
+    ]
+  },
+  "ODE-K06": {
+    "form": "proposition",
+    "facets": [
+      "property",
+      "quantity"
+    ]
+  },
+  "ODE-K07": {
+    "form": "proposition",
+    "facets": [
+      "structure",
+      "quantity"
+    ]
+  },
+  "ODE-K08": {
+    "form": "procedure",
+    "facets": [
+      "object",
+      "operation"
+    ]
+  },
+  "ODE-K09": {
+    "form": "procedure",
+    "facets": [
+      "object",
+      "operation"
+    ]
+  },
+  "ODE-K10": {
+    "form": "procedure",
+    "facets": [
+      "object",
+      "operation"
+    ]
+  },
+  "ODE-K11": {
+    "form": "concept",
+    "facets": [
+      "object",
+      "operation"
+    ]
+  },
+  "ODE-K12": {
+    "form": "procedure",
+    "facets": [
+      "operation"
+    ]
+  },
+  "ODE-K13": {
+    "form": "proposition",
+    "facets": [
+      "property"
+    ]
+  },
+  "ODE-K14": {
+    "form": "proposition",
+    "facets": [
+      "object",
+      "relation",
+      "quantity"
+    ]
+  },
+  "PROB-K01": {
+    "form": "concept",
+    "facets": [
+      "relation",
+      "quantity"
+    ]
+  },
+  "PROB-K02": {
+    "form": "proposition",
+    "facets": [
+      "relation",
+      "quantity"
+    ]
+  },
+  "PROB-K03": {
+    "form": "concept",
+    "facets": [
+      "object",
+      "structure",
+      "relation"
+    ]
+  },
+  "PROB-K04": {
+    "form": "procedure",
+    "facets": [
+      "quantity"
+    ]
+  },
+  "PROB-K05": {
+    "form": "concept",
+    "facets": [
+      "object",
+      "relation"
+    ]
+  },
+  "PROB-K06": {
+    "form": "concept",
+    "facets": [
+      "object",
+      "quantity"
+    ]
+  },
+  "PROB-K07": {
+    "form": "concept",
+    "facets": [
+      "relation",
+      "quantity"
+    ]
+  },
+  "PROB-K08": {
+    "form": "procedure",
+    "facets": [
+      "operation"
+    ]
+  },
+  "PROB-K09": {
+    "form": "concept",
+    "facets": [
+      "quantity"
+    ]
+  },
+  "PROB-K10": {
+    "form": "concept",
+    "facets": [
+      "relation",
+      "quantity"
+    ]
+  },
+  "PROB-K11": {
+    "form": "proposition",
+    "facets": [
+      "property",
+      "quantity"
+    ]
+  },
+  "PROB-K12": {
+    "form": "proposition",
+    "facets": [
+      "property",
+      "relation"
+    ]
+  },
+  "PROB-K13": {
+    "form": "procedure",
+    "facets": [
+      "object",
+      "quantity",
+      "operation"
+    ]
+  },
+  "PROB-K14": {
+    "form": "procedure",
+    "facets": [
+      "object",
+      "quantity",
+      "relation"
+    ]
+  },
+  "AN3-K01": {
+    "form": "concept",
+    "facets": [
+      "property",
+      "relation"
+    ]
+  },
+  "AN3-K02": {
+    "form": "concept",
+    "facets": [
+      "property",
+      "operation"
+    ]
+  },
+  "AN3-K03": {
+    "form": "concept",
+    "facets": [
+      "operation",
+      "relation"
+    ]
+  },
+  "AN3-K04": {
+    "form": "proposition",
+    "facets": [
+      "relation",
+      "operation"
+    ]
+  },
+  "AN3-K05": {
+    "form": "proposition",
+    "facets": [
+      "operation"
+    ]
+  },
+  "AN3-K06": {
+    "form": "proposition",
+    "facets": [
+      "property",
+      "quantity"
+    ]
+  },
+  "AN3-K07": {
+    "form": "concept",
+    "facets": [
+      "object",
+      "operation",
+      "quantity"
+    ]
+  },
+  "AN3-K08": {
+    "form": "proposition",
+    "facets": [
+      "operation",
+      "quantity"
+    ]
+  },
+  "AN3-K09": {
+    "form": "proposition",
+    "facets": [
+      "object",
+      "operation",
+      "relation"
+    ]
+  },
+  "AN3-K10": {
+    "form": "proposition",
+    "facets": [
+      "object",
+      "operation",
+      "relation"
+    ]
+  },
+  "AN3-K11": {
+    "form": "proposition",
+    "facets": [
+      "property",
+      "operation"
+    ]
+  },
+  "AN3-K12": {
+    "form": "proposition",
+    "facets": [
+      "object",
+      "property",
+      "quantity"
+    ]
+  },
+  "AN3-K13": {
+    "form": "proposition",
+    "facets": [
+      "object",
+      "property",
+      "operation"
+    ]
+  },
+  "AN3-K14": {
+    "form": "proposition",
+    "facets": [
+      "object",
+      "relation",
+      "operation"
+    ]
+  }
+});
+export const knowledgeClassification = item => KNOWLEDGE_CLASSIFICATION[typeof item==='string'?item:item.id]??null;

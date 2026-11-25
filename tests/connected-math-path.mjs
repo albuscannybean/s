@@ -2,9 +2,8 @@ import assert from 'node:assert/strict';
 
 export async function checkConnectedMathPath(page){
   const nav=page.locator('.math-main-nav');
-  await nav.locator('[data-math-nav="home"]').click();
-  await page.locator('#pathQuery').fill('柯西');
-  await page.locator('#pathLookup button').click();
+  await nav.locator('[data-math-nav="knowledge"]').click();
+  await page.locator('#mathSearch').fill('柯西');
   assert.ok(await page.locator('#mathArchiveResults [data-id="ANA-UC-K05"]').isVisible());
   await page.locator('#mathArchiveResults [data-id="ANA-UC-K05"]').click();
   await page.locator('#mathArchive .route-heading [data-path-action="course"]').click();
@@ -41,9 +40,10 @@ export async function checkConnectedMathPath(page){
   await lab.locator('.power-lab [data-path-action="knowledge"]').click();
   assert.ok(await page.getByText('缩短区间能恢复统一估计。',{exact:true}).isVisible());
   await route.locator('[data-path-action="records"]').click();
-  assert.equal(await nav.locator('[aria-current="page"]').innerText(),'首页');
+  assert.equal(await page.locator('#welcome').isVisible(),true);
   assert.ok(await page.locator('#studySessionsHome').getByText(/积分/).count()>0);
   await page.reload();await page.waitForFunction(()=>!!globalThis.lmnWorkspace);
+  await page.locator('#mathToolboxToggle').click();await page.locator('#mathToolboxPanel [data-math-nav="sessions"]').click();
   await page.locator('#pathContinue').click();
   assert.match(page.url(),/knowledge\/ANA-UC-K07$/);
   assert.ok(await page.getByText('缩短区间能恢复统一估计。',{exact:true}).isVisible());

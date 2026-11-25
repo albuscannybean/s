@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {MATH_CONTENT_VERSION,MATH_COURSES,MATH_KNOWLEDGE,MATH_METHODS,MATH_PROBLEMS,mathKnowledgeById,mathProblemById,mathProblemsForKnowledge,searchMathContent,validateMathContent} from '../packages/learning/math-content.js';
+import {KNOWLEDGE_FORMS,CONCEPT_FACETS,knowledgeClassification,MATH_CONTENT_VERSION,MATH_COURSES,MATH_KNOWLEDGE,MATH_METHODS,MATH_PROBLEMS,mathKnowledgeById,mathProblemById,mathProblemsForKnowledge,searchMathContent,validateMathContent} from '../packages/learning/math-content.js';
 import {createStudySession,revealStudyHint,studyContextPacket,submitStudyAttempt,updateStudyDraft,validateStudyArchive,exportStudyArchive} from '../packages/learning/study-session.js';
 import {renderMathToString} from '../packages/ui/math-markup.js';
 
@@ -51,4 +51,10 @@ test('a real problem becomes a resumable session with progressive hints and answ
   assert.ok(!('solution' in packet));
   assert.equal(validateStudyArchive(exportStudyArchive([hinted]))[0].problemId,'ANA-UC-P02');
   assert.throws(()=>createStudySession({title:'不存在',problemId:'ANA-UC-UNKNOWN'}),/不存在/);
+});
+
+
+test('every published knowledge unit has a reviewed content form and concept facets',()=>{
+  for(const k of MATH_KNOWLEDGE){const c=knowledgeClassification(k);assert.ok(c,k.id);assert.ok(KNOWLEDGE_FORMS[c.form],k.id);assert.ok(c.facets.length&&c.facets.every(f=>CONCEPT_FACETS[f]),k.id);}
+  assert.equal(knowledgeClassification('ALG-K01').form,'concept');assert.ok(knowledgeClassification('ALG-K01').facets.includes('structure'));assert.equal(knowledgeClassification('ANA-UC-K04').form,'proposition');
 });
