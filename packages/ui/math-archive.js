@@ -52,6 +52,7 @@ export class MathArchive{
     else if(action==='copy')this.copyProblem(id);
     else if(action==='home')this.controller.openMathArchive('courses');
     else if(action==='lab')this.controller.openAppliedHome();
+    else if(action==='reset-filters'){const section=button.dataset.section;if(['knowledge','methods','problems','search'].includes(section)){this.catalogFilters[section]={};this.search[section]='';if(section==='problems')this.filters={difficulty:'',type:''};this.renderList(section);}}
     else if(action==='export')download('LMN-数学个人批注.json',{format:'lmn-math-annotations/1',contentVersion:MATH_CONTENT_VERSION,exportedAt:new Date().toISOString(),annotations:[...this.annotations.values()]});
     else if(action==='import')$('#mathAnnotationsImport')?.click();
     else if(action==='toolbox')this.controller.openMathToolbox();
@@ -217,7 +218,7 @@ export class MathArchive{
     const folders=select('收藏夹','folder',this.collections.read().map(folder=>[folder.name,folder.name]));
     const formTabs=section==='knowledge'?`<fieldset class="knowledge-form-tabs"><legend class="math-sr-only">知识主类</legend>${[['','全部知识'],...Object.entries(KNOWLEDGE_FORMS).map(([key,[label]])=>[key,label])].map(([key,label])=>`<label><input type="radio" name="knowledge-form" data-section="knowledge" data-catalog-filter="form" value="${key}" ${key===(state.form??'')?'checked':''}><span>${h(label)}</span></label>`).join('')}</fieldset>`:'';
     const problems=section==='problems'?`<label>难度<select id="mathDifficulty"><option value="">全部</option>${[1,2,3,4].map(level=>`<option value="${level}" ${this.filters.difficulty===String(level)?'selected':''}>${level}</option>`).join('')}</select></label>${select('任务类型','task',[...new Set(MATH_PROBLEMS.map(problemTaskCategory))].map(name=>[name,name]))}`:'';
-    $('#mathArchiveContent').innerHTML=`${formTabs}<div class="catalog-search"><label>${title}<input type="search" id="mathSearch" data-section="${section}" value="${h(this.search[section]??'')}" placeholder="${section==='problems'?'题号（如 PROB-P01）、题名或关键词':'名称、关键词或编号'}"></label><div class="math-archive-filters">${courses}${classification}${categories}${problems}${folders}</div></div>${section==='knowledge'?'<div id="knowledgeClassExplanation" class="knowledge-class-explanation"></div>':''}<p id="mathArchiveCount" class="math-archive-count" role="status"></p><div id="mathArchiveResults" class="catalog-results"></div>`;
+    $('#mathArchiveContent').innerHTML=`${formTabs}<div class="catalog-search"><label>${title}<input type="search" id="mathSearch" data-section="${section}" value="${h(this.search[section]??'')}" placeholder="${section==='problems'?'题号（如 PROB-P01）、题名或关键词':'名称、关键词或编号'}"></label><div class="math-archive-filters">${courses}${classification}${categories}${problems}${folders}<button type="button" data-math-archive-action="reset-filters" data-section="${section}">重置筛选</button></div></div>${section==='knowledge'?'<div id="knowledgeClassExplanation" class="knowledge-class-explanation"></div>':''}<p id="mathArchiveCount" class="math-archive-count" role="status"></p><div id="mathArchiveResults" class="catalog-results"></div>`;
     this.renderListResults(section);
   }
   renderListResults(section){

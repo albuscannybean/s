@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 export async function checkConnectedMathPath(page){
   const nav=page.locator('.math-main-nav');
   await nav.locator('[data-math-nav="knowledge"]').click();
+  await page.locator('[data-math-archive-action="reset-filters"]').click();
   await page.locator('#mathSearch').fill('柯西');
   assert.ok(await page.locator('#mathArchiveResults [data-id="ANA-UC-K05"]').isVisible());
   await page.locator('#mathArchiveResults [data-id="ANA-UC-K05"]').click();
