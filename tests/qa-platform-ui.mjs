@@ -10,6 +10,14 @@ page.on('pageerror',error=>errors.push(error.message));await mkdir('qa-output',{
 try{
   await page.goto(process.env.LMN_QA_URL||'http://127.0.0.1:4174/apps/web/',{waitUntil:'networkidle'});await page.waitForFunction(()=>!!globalThis.lmnWorkspace);
   assert.deepEqual(await page.locator('.math-main-nav button').allTextContents(),['课程','知识库','方法库','题库','实验']);
+  assert.ok(await page.locator('#mathArchive [data-archive-kind="course"]').count()>=4);
+  await page.locator('.math-main-nav [data-math-nav="knowledge"]').click();
+  await page.locator('.knowledge-form-tabs label').filter({hasText:'概念与定义'}).click();
+  assert.match(await page.locator('#mathArchiveCount').innerText(),/23 \/ 66/);
+  await page.locator('[data-catalog-filter="facet"]').selectOption('structure');
+  assert.ok(await page.locator('#mathArchiveResults [data-id="ALG-K01"]').isVisible());
+  await page.locator('[data-catalog-filter="facet"]').selectOption('');await page.locator('.knowledge-form-tabs label').filter({hasText:'全部知识'}).click();
+  await page.locator('.math-main-nav [data-math-nav="courses"]').click();
   result.chrome=await page.evaluate(()=>{const nav=document.querySelector('.math-main-nav'),card=nav.querySelector('button');return{background:getComputedStyle(document.querySelector('#welcome')).backgroundColor,ink:getComputedStyle(document.querySelector('#welcome')).color,brand:getComputedStyle(document.querySelector('.math-brand-symbol')).backgroundColor,masthead:document.querySelector('.math-masthead').getBoundingClientRect().height,gap:getComputedStyle(nav).gap,radius:getComputedStyle(card).borderRadius,tabsTop:document.querySelector('.document-bar').getBoundingClientRect().top,navBottom:nav.getBoundingClientRect().bottom,workspaceX:document.querySelector('#workspace').getBoundingClientRect().x}});
   // Values measured from the reference Yi website's light/indigo shell.
   assert.equal(result.chrome.background,'rgb(238, 236, 231)');assert.equal(result.chrome.brand,'rgb(53, 59, 112)');assert.equal(result.chrome.masthead,94);assert.equal(result.chrome.gap,'8px');assert.equal(result.chrome.radius,'10px');assert.equal(result.chrome.workspaceX,0);assert.equal(result.chrome.tabsTop,result.chrome.navBottom);
