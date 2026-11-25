@@ -13,13 +13,13 @@ permissions:
   pull-requests: read
 
 concurrency:
-  group: pages
+  group: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_branch != 'feature/discovery-math-v3' && 'pages-skipped' || 'pages' }}
   cancel-in-progress: false
 
 jobs:
   build:
     if: >-
-      github.event_name != 'workflow_run' ||
+      (github.event_name != 'workflow_run' && github.ref == 'refs/heads/master') ||
       (
         github.event.workflow_run.conclusion == 'success' &&
         github.event.workflow_run.event == 'pull_request' &&
@@ -33,7 +33,7 @@ jobs:
       - name: Checkout production master
         uses: actions/checkout@v4
         with:
-          ref: master
+          ref: ${{ github.sha }}
           persist-credentials: false
 
       - uses: actions/setup-node@v4
@@ -47,6 +47,7 @@ jobs:
           mkdir -p site/apps
           cp -r apps/web site/apps/
           cp -r packages site/
+          printf '{"commit":"%s"}\n' "$(git rev-parse HEAD)" > site/apps/web/release.json
 
       - name: Resolve PR #17 preview revision
         id: preview
@@ -97,11 +98,7 @@ jobs:
           sed -i 's/lmn-v4\./lmn-preview-v4./g' preview-src/packages/ui/workspace-controller.js
           sed -i 's/lmn-v4\.3\.1-task-context/lmn-preview-v4.3.1-task-context/g' preview-src/packages/cognitive-runtime/task-context.js
 
-          # Service-worker caches share an origin; use a dedicated preview namespace.
-          sed -i \
-            -e "s/const CACHE='lmn-v/const CACHE='lmn-preview-v/" \
-            -e "s/key.startsWith('lmn-v')/key.startsWith('lmn-preview-v')/" \
-            preview-src/apps/web/sw.js
+          # Service-worker caches are isolated by their registration scope.
 
           node --input-type=module <<'NODE'
           import { readFileSync, writeFileSync } from 'node:fs';

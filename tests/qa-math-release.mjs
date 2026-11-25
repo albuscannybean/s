@@ -30,7 +30,7 @@ try{
   await page.evaluate(()=>navigator.serviceWorker.ready);
   await page.waitForFunction(()=>!!navigator.serviceWorker.controller);
   // Cache installation must include the actual lesson modules and theme resources.
-  result.cached=await page.evaluate(async()=>{const keys=await caches.keys(),cache=await caches.open(keys.find(key=>key.startsWith('lmn-v')));return(await cache.keys()).map(request=>new URL(request.url).pathname)});
+  result.cached=await page.evaluate(async()=>{const {scope}=await navigator.serviceWorker.ready;const keys=await caches.keys(),cache=await caches.open(keys.find(key=>key.startsWith('lmn-web:' + scope + ':')));return(await cache.keys()).map(request=>new URL(request.url).pathname)});
   for(const suffix of ['/math-site.css','/study-session.js','/study-workbench.js','/math-content.js','/math-archive.js','/math-discovery.js','/learning/math-rigor.js','/ui/math-rigor.js'])assert.ok(result.cached.some(path=>path.endsWith(suffix)));
   result.cached=result.cached.length;
   for(const width of [320,390,768,1024,1440]){
