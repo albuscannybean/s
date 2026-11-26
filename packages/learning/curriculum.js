@@ -1,5 +1,6 @@
 import {TEXTBOOK_CHAPTERS} from './textbook-lessons.js';
 import {LEGACY_SECTION} from './curriculum-links.js';
+import {AMANN_READING} from './amann-reading.js';
 
 const layout = {
   algebra:{course:'course-algebra',prefix:'ALG'},
@@ -79,8 +80,10 @@ export function buildCurriculum(existingCourses,existingKnowledge,existingProble
       const code=prefix+'-'+pad(chapterNumber)+'.'+pad(index+1);
       const source={book:sourceChapter.source,section:section.number,page:section.page};
       const [prompt,solution]=section.practice;
+      const prose=AMANN_READING[key];
       const body=[
-        '::: definition',section.lesson,':::',
+        ...(prose?[prose]:[]),
+        '::: definition\n'+section.lesson+'\n:::',
         ...(section.topics?['### 本节概念',section.topics]:[]),
         '### 推导与检验',section.guide,
         ...(primaryUnit?['### 延伸阅读',primaryUnit.body]:[])

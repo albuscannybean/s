@@ -1,3 +1,4 @@
+import {mountParagraphNotes,mountReadingEditor} from './reading-editor.js';
 import {inlineMathHtml} from './math-markup.js';
 import {MathCollections,icon} from './math-library.js';
 import {semesterPredictions} from '../learning/semester-content.js';
@@ -75,7 +76,7 @@ export class MathArchive{
     });
     root.addEventListener('input',event=>{
       if(event.target.id==='mathSearch'){const section=event.target.dataset.section;this.search[section]=event.target.value;this.renderListResults(section)}
-      if(event.target.id==='mathPrivateNote'){this.updateAnnotation(event.target.dataset.id,{body:event.target.value})}
+      
       if(event.target.matches('[data-discovery-note]'))this.updateAnnotation(this.discoverySelectedId,{[event.target.dataset.discoveryNote]:event.target.value});
       if(event.target.id==='discoveryN'){this.updateAnnotation(this.discoverySelectedId,{discoveryN:Number(event.target.value)});updateDiscoveryFigures(root)}
       if(event.target.id==='discoveryX'){this.updateAnnotation(this.discoverySelectedId,{discoveryX:Number(event.target.value)});updateDiscoveryFigures(root)}
@@ -135,7 +136,7 @@ export class MathArchive{
   }
   showNotice(value){this.notice=value;const target=$('#mathArchiveStatus');if(target)target.textContent=value}
   async importAnnotations(input){const file=input.files?.[0];input.value='';if(!file)return;
-    try{if(file.size>5*1024*1024)throw new Error('文件不能超过 5MB');const data=JSON.parse(await file.text());
+    try{if(file.size>32*1024*1024)throw new Error('文件不能超过 32 MB');const data=JSON.parse(await file.text());
       if(data?.format!=='lmn-math-annotations/1'||!Array.isArray(data.annotations)||data.annotations.length>20000)throw new Error('不是受支持的个人批注文件');
       const seen=new Set(),incoming=[];
       for(const item of data.annotations){
@@ -153,6 +154,17 @@ export class MathArchive{
     const boundedInteger=(value,min,max)=>value===undefined||(Number.isInteger(value)&&value>=min&&value<=max);
     if(!item||!this.validAnnotationTarget(item.subjectId)||item.id!==annotationId(item.subjectId))return false;
     if(typeof item.body!=='string'||item.body.length>100000||!masteryLabels.includes(item.mastery))return false;
+    for(const field of ['readingBody','sourceText'])if(item[field]!==undefined&&
+      (typeof item[field]!=='string'||item[field].length>100000))return false;
+    if(item.paragraphs!==undefined){
+      if(!Array.isArray(item.paragraphs)||item.paragraphs.length>1000)return false;
+      const anchors=new Set();
+      for(const note of item.paragraphs){
+        if(!note||typeof note.anchor!=='string'||!/^\w+-\d+$/.test(note.anchor)||anchors.has(note.anchor)||
+          typeof note.quote!=='string'||note.quote.length>240||typeof note.text!=='string'||note.text.length>12000)return false;
+        anchors.add(note.anchor);
+      }
+    }
     if(typeof item.updatedAt!=='string'||!Number.isFinite(Date.parse(item.updatedAt))||
       new Date(item.updatedAt).toISOString()!==item.updatedAt)return false;
     if(rigorDateFromSubject(item.subjectId))return validDailyRigorTasks(item.rigorTasks);
@@ -187,6 +199,22 @@ export class MathArchive{
       $('.math-reading-main .math-reading-paper')?.insertAdjacentHTML('beforeend',this.collectionForm(id));
     }
     renderInlineTitles(root);
+    const field=$('#mathPrivateNote');
+    if(field){
+      const parent=document.createElement('div');
+      const {id}=field.dataset;
+      const editor=mountReadingEditor(parent,{text:field.value,label:'我的笔记',onChange:value=>this.updateAnnotation(id,{body:value})});
+      editor.input.id=field.id;
+      field.replaceWith(parent);
+      const toolbox=document.createElement('button');
+      toolbox.type='button';toolbox.className='reading-floating-toolbox';toolbox.textContent='笔记工具箱';
+      toolbox.onclick=()=>{
+        editor.toolbox.open=true;
+        editor.toolbox.scrollIntoView({block:'nearest'});
+        editor.toolbox.querySelector('summary').focus({preventScroll:true});
+      };
+      root.append(toolbox);
+    }
   }
   collectionForm(id,selected=''){
     const folders=this.collections.read();
@@ -213,22 +241,118 @@ export class MathArchive{
           const item=mathKnowledgeById(key);
           return archiveButton('knowledge',item.id,item.title,item.code);
         });
-        const learn=archiveButton('knowledge',unit.id,unit.title,unit.code+' · '+unit.summary);
+        const learn=`<button type="button" class="course-lesson-open" data-archive-kind="knowledge" data-id="${h(unit.id)}" aria-label="打开单节 ${h(unit.title)}">单节阅读与编辑</button>`;
         const practice=group.problemIds.map(key=>{
           const item=mathProblemById(key);
           return archiveButton('problem',item.id,item.title,item.code);
         });
-        return `<div class="course-lesson">${learn}<details class="chapter-related"><summary>本节练习（${practice.length}）</summary><div class="chapter-directory">${practice.join('')}</div></details>${topics.length?`<details class="chapter-related"><summary>本节专题（${topics.length}）</summary><div class="chapter-directory">${topics.join('')}</div></details>`:''}</div>`;
+        return `<section class="course-lesson"><div class="chapter-reading" data-course-reading="${h(unit.id)}"></div>${learn}<details class="chapter-related"><summary>本节练习（${practice.length}）</summary><div class="chapter-directory">${practice.join('')}</div></details>${topics.length?`<details class="chapter-related"><summary>本节专题（${topics.length}）</summary><div class="chapter-directory">${topics.join('')}</div></details>`:''}</section>`;
       }).join('');
       return `<details class="math-chapter-card" id="${h(chapter.id)}" ${active===chapter.id||!active&&index===0?'open':''}><summary class="math-chapter-head"><b>${chapter.number}. <span data-math-inline="${h(chapter.title)}"></span></b><small>${chapter.knowledgeIds.length} 知识 · ${chapter.problemIds.length} 练习</small></summary>${groups}</details>`;
     }).join('');
     const choices=course.chapters.map(chapter=>`<option value="${h(chapter.id)}">${chapter.number}. ${h(chapter.title.replace(/\$([^$]+)\$/g,'$1'))}</option>`).join('');
     $('#mathArchiveContent').innerHTML=`<div class="course-heading">${icon(course.icon||'book')}<h1>${h(course.title)}</h1><label class="course-chapter-jump">跳到章节 <select id="courseChapterJump"><option value="">选择章节</option>${choices}</select></label></div>${chapters}`;
+    for(const chapter of $('#mathArchiveContent').querySelectorAll('.math-chapter-card')){
+      const load=()=>{
+        if(!chapter.open||chapter.dataset.readingMounted)return;
+        chapter.dataset.readingMounted='true';
+        for(const content of chapter.querySelectorAll('[data-course-reading]')){
+          const unit=mathKnowledgeById(content.dataset.courseReading);
+          const heading=document.createElement('h3');
+          appendInlineContent(heading,unit.title);
+          content.append(heading);
+          const source=document.createElement('p');source.className='chapter-reading-reference';
+          source.textContent=[unit.code,unit.source?.book,unit.source?.section?'§'+unit.source.section:''].filter(Boolean).join(' · ');
+          content.append(source);
+          const paper=document.createElement('div');
+          paper.className='math-reading-body';
+          content.append(paper);
+          this.mountReading(paper,unit);
+          const group=course.chapters.find(item=>item.id===chapter.id).groups.find(item=>item.id===unit.id);
+          const exercise=mathProblemById(group.problemIds[0]);
+          const practice=document.createElement('details');practice.className='chapter-check';
+          const prompt=document.createElement('summary');prompt.textContent='随堂练习';
+          const task=document.createElement('div');task.className='math-reading-body';
+          renderStudyMarkdown(task,exercise.prompt);
+          const action=document.createElement('button');action.type='button';action.textContent='作答与核对';
+          action.dataset.archiveKind='problem';action.dataset.id=exercise.id;
+          practice.append(prompt,task,action);
+          content.append(practice);
+        }
+      };
+      chapter.addEventListener('toggle',load);load();
+    }
     $('#courseChapterJump').onchange=event=>{
       const chapter=document.getElementById(event.target.value);
       if(chapter){chapter.open=true;chapter.scrollIntoView({block:'start'});}
     };
     if(active)requestAnimationFrame(()=>document.getElementById(active)?.scrollIntoView({block:'start'}));
+  }
+  mountReading(body,unit,{editable=false}={}){
+    const note=()=>this.annotations.get(annotationId(unit.id));
+    const render=()=>{
+      renderStudyMarkdown(body,note()?.readingBody??unit.body);
+      mountParagraphNotes(body,{
+        readNotes:()=>note()?.paragraphs??[],
+        saveNotes:paragraphs=>this.updateAnnotation(unit.id,{paragraphs})
+      });
+    };
+    render();
+    if(!editable){
+      if(note()?.sourceText){
+        const original=document.createElement('details');original.className='course-original';
+        const toggle=document.createElement('summary');toggle.textContent='原书文字提取稿';
+        const text=document.createElement('div');text.className='math-reading-body';
+        original.append(toggle,text);body.after(original);
+        original.addEventListener('toggle',()=>{
+          if(original.open&&!text.firstChild)renderStudyMarkdown(text,note().sourceText);
+        });
+      }
+      return;
+    }
+    const panel=document.createElement('details');panel.className='reading-source-panel';
+    const toggle=document.createElement('summary');toggle.textContent='讲解源码与本机原文';
+    panel.append(toggle);
+    body.before(panel);
+    panel.addEventListener('toggle',()=>{
+      if(!panel.open||panel.dataset.mounted)return;
+      panel.dataset.mounted='true';
+      const editor=document.createElement('div');panel.append(editor);
+      mountReadingEditor(editor,{text:note()?.readingBody??unit.body,label:'讲解源码',mode:'split',onChange:value=>{
+        this.updateAnnotation(unit.id,{readingBody:value});
+        render();
+      }});
+      const label=document.createElement('label');label.className='reading-source-import';
+      label.textContent='导入本机原文包';
+      const input=document.createElement('input');input.type='file';input.accept='.json,application/json';
+      label.append(input);panel.append(label);
+      const status=document.createElement('p');status.setAttribute('role','status');panel.append(status);
+      input.onchange=async()=>{
+        const file=input.files?.[0];input.value='';
+        if(!file)return;
+        try{
+          if(file.size>32*1024*1024)throw Error('原文包超过 32 MB');
+          const pack=JSON.parse(await file.text());
+          if(pack.format!=='lmn-course-source/1'||!Array.isArray(pack.sections)||pack.sections.length>1000)throw Error('请选择课程原文包');
+          const sections=pack.sections.filter(item=>item&&mathKnowledgeById(item.id)&&typeof item.text==='string'&&item.text.length<=100000);
+          if(!sections.length)throw Error('文件中没有匹配课程的原文');
+          for(const {id,text} of sections)if(!this.annotations.get(annotationId(id))?.sourceText)this.updateAnnotation(id,{sourceText:text});
+          await this.flushAnnotations();
+          status.textContent='已连接 '+sections.length+' 节原文。';
+          renderSource();
+        }catch(error){status.textContent=error.message;}
+      };
+      const original=document.createElement('div');panel.append(original);
+      const renderSource=()=>{
+        original.replaceChildren();
+        const text=note()?.sourceText;
+        if(!text)return;
+        const label=document.createElement('p');label.textContent='教材原文提取稿 · 公式与识别错字请对照原页校订。';
+        original.append(label);
+        mountReadingEditor(original,{text,label:'教材原文校订',mode:'read',onChange:value=>this.updateAnnotation(unit.id,{sourceText:value})});
+      };
+      renderSource();
+    });
   }
   sectionLinks(item){
     const course=mathCourseById(item.courseId);
@@ -290,7 +414,7 @@ export class MathArchive{
   }
   renderKnowledge(id){const knowledge=mathKnowledgeById(id);if(!knowledge){this.notFound();return}const related=mathProblemsForKnowledge(id),classification=knowledgeClassification(knowledge);
     $('#mathArchiveContent').innerHTML=`<article class="math-reading-layout"><div class="math-reading-main"><div class="math-reading-paper"><span class="math-kicker">知识 · ${h(knowledge.code??knowledge.id)} · ${h(classification?KNOWLEDGE_FORMS[classification.form][0]:knowledge.kind)}</span><h2 data-math-inline="${h(knowledge.title)}"></h2><p class="math-reading-summary"><span data-math-inline="${h(knowledge.summary)}"></span>${classification?`<span class="knowledge-facets">${classification.facets.map(key=>`<span>${h(CONCEPT_FACETS[key][0])}</span>`).join('')}</span>`:''}</p><div class="math-reading-body" id="mathReadingBody"></div></div><section class="math-reading-paper"><h3>关联习题</h3><div class="math-compact-grid">${related.map(item=>archiveButton('problem',item.id,item.title,`难度 ${item.difficulty} · ${item.type}`)).join('')}</div></section></div><aside class="math-reading-side"><section class="math-reading-paper"><h3>前置知识</h3>${knowledge.prerequisites.length?knowledge.prerequisites.map(x=>archiveButton('knowledge',x,mathKnowledgeById(x)?.title??x)).join(''):'<p>本专题的基础入口。</p>'}<h3>学习证据</h3><p>${h(this.evidence(knowledge.id))}</p></section>${this.annotationSection(knowledge.id)}</aside></article>`;
-    renderStudyMarkdown($('#mathReadingBody'),knowledge.body);
+    this.mountReading($('#mathReadingBody'),knowledge,{editable:true});
     $('#mathReadingBody').insertAdjacentHTML('beforebegin',this.sectionLinks(knowledge));
     $('#mathReadingBody').insertAdjacentHTML('afterend',this.sourceNote(knowledge));
     if(knowledge.relatedIds?.length){

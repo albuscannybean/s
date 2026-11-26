@@ -11,7 +11,7 @@ export async function checkConnectedMathPath(page){
   await page.locator('#courseChapterJump').selectOption('course-analysis-13');
   const chapter=page.locator('#course-analysis-13');
   assert.equal(await chapter.locator('[data-archive-kind="knowledge"]').count(),10);
-  assert.equal(await chapter.locator('[data-archive-kind="problem"]').count(),22);
+  assert.equal(await chapter.locator('.chapter-related [data-archive-kind="problem"]').count(),22);
   const integration=chapter.locator('.course-lesson').filter({has:page.locator('[data-id="ANA-UC-K07"]')});
   await integration.getByText(/本节专题/).click();
   await integration.locator('[data-id="ANA-UC-K07"]').click();

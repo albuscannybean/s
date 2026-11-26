@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import {createRequire} from 'node:module';
+import {checkReadingMode} from './reading-mode-qa.mjs';
 const {chromium}=createRequire(import.meta.url)(process.env.PLAYWRIGHT_MODULE||'playwright');
 const browser=await chromium.launch({headless:true,executablePath:process.env.LMN_BROWSER_EXECUTABLE||undefined,args:['--no-proxy-server']});
 const url=process.env.LMN_QA_URL||'http://127.0.0.1:4174/apps/web/';
@@ -23,6 +24,7 @@ try {
   for(let i=0;i<12;i++)await add.click();
   assert.ok(Math.abs((await strip.boundingBox()).width-initial)<=1);
   assert.ok((await first.boundingBox()).width<tabWidth);
+  await checkReadingMode(page);
 
   await nav('knowledge').click();
   await page.locator('[data-catalog-filter=course]').selectOption('course-analysis-3');
