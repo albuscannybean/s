@@ -31,7 +31,7 @@ try{
   assert.equal(await page.locator('#mathArchiveResults .math-item-card').count(),2);
   await nav('knowledge').click();assert.equal(await page.locator('#mathArchiveResults .math-item-card').count(),66);
   await nav('methods').click();assert.equal(await page.locator('#mathArchiveResults .math-item-card').count(),58);
-  await page.locator('#globalSearch').click();await page.locator('#mathSearch').fill('ANA-UC-P02');
+  await nav('problems').click();await page.locator('#mathSearch').fill('ANA-UC-P02');
   await page.locator('#mathArchiveResults [data-id="ANA-UC-P02"]').click();
   assert.match(page.url(),/#math\/problem\/ANA-UC-P02$/);
   await page.locator('[data-math-archive-action="start"]').click();await page.locator('#studyWorkbench').waitFor({state:'visible'});

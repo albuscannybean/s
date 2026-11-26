@@ -17,6 +17,16 @@ export function createMathElement(documentRef,source,{display=false}={}){
 
 export function renderMath(root,source,options={}){root.replaceChildren(createMathElement(root.ownerDocument,source,options));return root}
 
+// Templates also carry short, authored captions with inline equations.
+export function inlineMathHtml(text){
+  const escape=value=>value.replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+  return String(text??'').split(/(\$[^$\n]+\$)/g).map(part=>{
+    if(!part.startsWith('$')||part.length<3)return escape(part);
+    const result=renderMathToString(part.slice(1,-1));
+    return result.ok?result.html:escape(part);
+  }).join('');
+}
+
 // V4.1.x compatibility exports. KaTeX remains the sole renderer.
 export function tokenizeMath(source){return[{type:'latex',value:String(source??'')}]}
 export function parseMathExpression(source){const value=String(source??''),children=[];if(/\\frac\s*\{/.test(value))children.push({type:'fraction',source:value});children.push({type:'latex',value});return{type:'sequence',source:value,renderer:MATH_RENDERER_ID,children}}

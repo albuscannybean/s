@@ -9,8 +9,9 @@ const controller=readFileSync(new URL('../packages/ui/workspace-controller.js',i
 test('mathematics archive offers content-first navigation without removing legacy workspace hooks',()=>{
   for(const section of ['sessions','courses','problems','knowledge','methods','about'])
     assert.match(html,new RegExp(`data-math-nav="${section}"`));
-  for(const id of ['navigator','breadcrumbs','globalSearch','moreBtn','learningStartForm','studySessionsHome','studyCatalogList','studyWorkbench'])
+  for(const id of ['navigator','breadcrumbs','moreBtn','learningStartForm','studySessionsHome','studyCatalogList','studyWorkbench'])
     assert.ok(html.includes(`id="${id}"`),`missing workspace hook: ${id}`);
+  assert.doesNotMatch(html,/id="globalSearch"/);
   for(const id of ['mathArchive','mathToolbox','mathToolboxPanel','mathFeaturedProblems'])assert.ok(html.includes(`id="${id}"`));
   assert.match(controller,/navigateMathSection\(section\)/);
   assert.match(controller,/updateMathSiteChrome\(\)/);

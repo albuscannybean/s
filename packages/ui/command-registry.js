@@ -44,7 +44,7 @@ export function createCommandRegistry(app){
     command('data.export','数据','导出 / 备份','Export / backup',['file'],()=>app.openExport?.()??document.querySelector('#exportDialog')?.showModal(),hasKnowledge,'请先打开知识'),
     command('settings.theme','设置','全局设计','Global design',['theme','font'],()=>app.openGlobalSettings()),
     command('settings.language','设置','界面语言','Interface language',['中文','english'],()=>app.openGlobalSettings('language')),
-    command('settings.motion','设置','动画与交互','Motion and interaction',['reduce motion'],()=>app.openGlobalSettings('motion'))
+    command('settings.grid','设置','画布网格','Canvas grid',['grid'],()=>app.openGlobalSettings('grid'))
   ];
 }
 

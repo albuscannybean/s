@@ -10,13 +10,15 @@
 .shell-menu{position:relative}.shell-menu>summary{cursor:pointer;list-style:none}.shell-menu>summary::-webkit-details-marker{display:none}.shell-menu-panel{position:absolute;right:0;top:calc(100% + 8px);width:min(300px,calc(100vw - 32px));padding:17px;background:var(--paper);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow-2);z-index:120;display:grid;gap:8px}.shell-menu-panel h2{font-size:14px;margin:0 0 7px}.shell-menu-panel button{text-align:left;min-height:36px;font-size:13px;border-radius:6px}.shell-menu-panel p{font-size:12px;color:var(--muted);line-height:1.7;margin:4px 0}
 .math-main-nav{display:grid!important;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;padding:14px 28px 18px;width:100%;height:82px;min-height:82px;border-bottom:1px solid var(--line);background:var(--canvas);overflow:visible!important}.math-main-nav button{display:flex;align-items:center;justify-content:center;gap:8px;min-width:0;min-height:50px;padding:9px 8px;background:var(--paper);border:1px solid var(--line);border-radius:10px;color:var(--ink);font-size:13px;font-weight:600;white-space:nowrap;box-shadow:0 2px 3px color-mix(in srgb,var(--ink) 2%,transparent)}.math-main-nav button .site-icon{width:18px;height:18px}.math-main-nav button.active{background:var(--green);border-color:var(--green);color:var(--ui-on-accent)}.math-main-nav button:hover:not(.active){background:var(--green-soft)}
 .workspace{background:var(--canvas)}.document-bar {
-  display:flex!important; height:48px; width:fit-content; max-width:min(880px,calc(100% - 2 * var(--page-inset)));
+  display:flex!important; height:48px; box-sizing:border-box; width:min(880px,calc(100% - 2 * var(--page-inset))); max-width:100%;
   margin-inline:var(--page-inset); padding:0 8px; gap:8px;
   border:1px solid var(--line); border-top:0; border-radius:0 0 var(--radius) var(--radius);
   background:var(--surface);
 }
-.document-bar .document-tab-shell { flex:0 1 auto; align-items:center; gap:4px; }
-.document-bar .document-tabs { flex:0 1 auto; padding-inline:4px; }
+.document-bar .document-tab-shell { flex:1 1 0; align-items:center; gap:4px; }
+.document-bar .document-tabs { flex:0 1 auto; min-width:0; gap:2px; padding-inline:4px; }
+.document-tabs .browser-tab { flex:0 1 158px; width:158px; min-width:34px; max-width:158px; padding-inline:5px; }
+.browser-tab>span { overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
 #documentAddSlot { flex:none; padding:4px; }
 #documentAddSlot .document-tab.add {
   width:30px; min-width:30px; height:30px; min-height:30px; justify-content:center; padding:0; border-radius:50%;
@@ -265,3 +267,20 @@
 @media(max-width:800px){.math-main-nav{grid-template-columns:repeat(5,minmax(0,1fr));height:66px;min-height:66px;padding:8px var(--page-inset)}#appShell{--topbar-height:148px;grid-template-rows:148px minmax(0,1fr) 28px}#appShell.status-hidden{grid-template-rows:148px minmax(0,1fr) 0}.math-site-topbar.topbar{height:148px}.math-main-nav button{height:44px;min-height:44px}.math-main-nav button .site-icon{display:none}.class-reference{grid-template-columns:minmax(0,1fr)}}
 
 .knowledge-form-tabs{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px;padding:0;border:0}.knowledge-form-tabs label{position:relative;display:flex;cursor:pointer}.knowledge-form-tabs input{position:absolute;opacity:0;width:1px;height:1px}.knowledge-form-tabs span{display:flex;align-items:center;min-height:36px;padding:6px 14px;border:1px solid var(--line);border-radius:7px;background:var(--paper);color:var(--ink);font-size:13px;line-height:1.5}.knowledge-form-tabs input:checked+span{background:var(--green);border-color:var(--green);color:var(--ui-on-accent)}.knowledge-form-tabs input:focus-visible+span{outline:2px solid var(--green);outline-offset:3px}.knowledge-form-tabs label:hover span{border-color:var(--green)}.course-heading{margin-bottom:12px}.math-chapter-card>summary b{min-width:0;overflow-wrap:anywhere}.math-archive .catalog-search .math-archive-filters label{flex:1 1 auto}
+
+.textbook-reader { margin:12px 0 20px; }
+.textbook-reader h3,.textbook-practice h4 { margin:0 0 10px; }
+.textbook-controls { display:flex; flex-wrap:wrap; gap:8px 16px; }
+.textbook-controls label { flex:1 1 200px; display:grid; gap:4px; color:var(--muted); }
+.textbook-controls select { width:100%; min-width:0; color:var(--ink); }
+.textbook-file { margin:12px 0; color:var(--muted); }
+.textbook-reader summary { cursor:pointer; padding-block:5px; }
+.textbook-sections { border-block:1px solid var(--line); }
+.textbook-sections>details+details { border-top:1px solid var(--line); }
+.textbook-sections>details>summary { padding:10px 4px; }
+.textbook-sections>details>summary small { color:var(--muted); margin-inline:7px 12px; }
+.textbook-sections>details>div { padding:0 12px 12px; }
+.textbook-reader p { line-height:1.75; overflow-wrap:anywhere; }
+.textbook-sources { display:flex; gap:4px 14px; flex-wrap:wrap; }
+.textbook-sources a { padding-block:5px; color:var(--green); }
+.textbook-practice { margin:16px 0; }

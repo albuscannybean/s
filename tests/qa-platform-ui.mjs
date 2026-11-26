@@ -19,8 +19,8 @@ try{
   await page.locator('[data-catalog-filter="facet"]').selectOption('');await page.locator('.knowledge-form-tabs label').filter({hasText:'全部知识'}).click();
   await page.locator('.math-main-nav [data-math-nav="courses"]').click();
   result.chrome=await page.evaluate(()=>{const nav=document.querySelector('.math-main-nav'),card=nav.querySelector('button');return{background:getComputedStyle(document.querySelector('#welcome')).backgroundColor,ink:getComputedStyle(document.querySelector('#welcome')).color,brand:getComputedStyle(document.querySelector('.math-brand-symbol')).backgroundColor,masthead:document.querySelector('.math-masthead').getBoundingClientRect().height,gap:getComputedStyle(nav).gap,radius:getComputedStyle(card).borderRadius,tabsTop:document.querySelector('.document-bar').getBoundingClientRect().top,navBottom:nav.getBoundingClientRect().bottom,workspaceX:document.querySelector('#workspace').getBoundingClientRect().x}});
-  // Values measured from the reference Yi website's light/indigo shell.
-  assert.equal(result.chrome.background,'rgb(238, 236, 231)');assert.equal(result.chrome.brand,'rgb(53, 59, 112)');assert.equal(result.chrome.masthead,94);assert.equal(result.chrome.gap,'8px');assert.equal(result.chrome.radius,'10px');assert.equal(result.chrome.workspaceX,0);assert.equal(result.chrome.tabsTop,result.chrome.navBottom);
+  // Neutral canvas for the white theme, with the reference site's indigo and dimensions.
+  assert.equal(result.chrome.background,'rgb(243, 244, 247)');assert.equal(result.chrome.brand,'rgb(53, 59, 112)');assert.equal(result.chrome.masthead,94);assert.equal(result.chrome.gap,'8px');assert.equal(result.chrome.radius,'10px');assert.equal(result.chrome.workspaceX,0);assert.equal(result.chrome.tabsTop,result.chrome.navBottom);
   await page.setViewportSize({width:1920,height:1000});
   const insets=await page.evaluate(()=>['.math-brand','.math-main-nav button','#mathArchive .math-archive-shell'].map(selector=>Math.round(document.querySelector(selector).getBoundingClientRect().left)));
   assert.deepEqual(insets,[248,248,248]);
