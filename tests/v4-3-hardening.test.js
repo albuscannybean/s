@@ -24,7 +24,9 @@ test('RC completion uses the native scene for query nesting and keeps camera/the
   const controller=fs.readFileSync(new URL('../packages/ui/workspace-controller.js',import.meta.url),'utf8'),renderer=fs.readFileSync(new URL('../packages/ui/structure-renderer.js',import.meta.url),'utf8'),css=fs.readFileSync(new URL('../apps/web/styles.css',import.meta.url),'utf8'),html=fs.readFileSync(new URL('../apps/web/index.html',import.meta.url),'utf8');
   assert.match(controller,/renderStructureQueryEditor[\s\S]*renderSceneGeometry/);assert.match(controller,/onDropStructure:\(templateId,slotId\)=>this\.nestTemplateAtSlot/);assert.match(renderer,/text\/lmn-template-id/);
   assert.match(controller,/ensureStructureView\(this\.instance\)\.camera\[key\]=sync/);assert.match(controller,/navigatorPathSignature===signature/);assert.match(controller,/ensureCurrentPathExpanded/);
-  for(const label of['松柏绿','湖水蓝','藤萝紫','石墨灰','夜幕黑'])assert.match(html,new RegExp(label));assert.match(css,/data-theme="dark"/);assert.match(css,/camera-angle-control/);
+  const themes=html.match(/<select data-global-pref="theme">([^<]*(?:<option[^>]*>[^<]*<\/option>)+)<\/select>/)[1];
+  assert.deepEqual([...themes.matchAll(/value="([^"]+)"/g)].map(match=>match[1]),['light','dark']);
+  assert.doesNotMatch(html,/data-global-pref="(?:canvas|reduceMotion)"/);assert.match(css,/data-theme="dark"/);assert.match(css,/camera-angle-control/);
   assert.match(controller,/if\(!modular\)this\.field\(grid,'显示公式'/);assert.match(controller,/if\(!modular\)\{this\.field\(grid,'图标'/);
 });
 

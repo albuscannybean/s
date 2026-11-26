@@ -30,10 +30,11 @@ try {
   await page.evaluate(()=>lmnWorkspace.openMathHome());
   await shot('home');
   result.themes=[];
-  for(const theme of ['warm','paper','violet','slate','dark']){
+  for(const theme of ['light','paper','violet','slate','dark']){
     await page.evaluate(theme=>{lmnWorkspace.preferences.theme=theme;lmnWorkspace.applyPreferences()},theme);
     await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
     const appearance=await page.locator('.content-root-target').evaluate(e=>({background:getComputedStyle(e).backgroundColor,color:getComputedStyle(e).color}));
+    assert.equal(await page.locator('html').getAttribute('data-theme'),theme==='dark'?'dark':'light');
     result.themes.push({theme,...appearance});
     if(theme==='dark')assert.notEqual(appearance.background,'rgb(255, 255, 255)');
   }
@@ -101,7 +102,7 @@ try {
   assert.ok(result.panel.workspace.right<=result.panel.inspector.left+1,'Docked inspector must not cover workspace');
   await shot('workspace');
   await page.locator('#closePanel').click();assert.equal(await page.locator(':focus').getAttribute('id'),'structureSettingsButton');
-  await page.evaluate(()=>{lmnWorkspace.preferences.theme='warm';lmnWorkspace.applyPreferences();lmnWorkspace.activateHome()});
+  await page.evaluate(()=>{lmnWorkspace.preferences.theme='light';lmnWorkspace.applyPreferences();lmnWorkspace.activateHome()});
   result.viewports=[];
   for(const width of [1024,768,390]){
     await page.setViewportSize({width,height:844});
@@ -110,7 +111,8 @@ try {
     const bounds=await page.evaluate(()=>({viewport:innerWidth,page:document.documentElement.scrollWidth,workspace:document.querySelector('#workspace').getBoundingClientRect().toJSON()}));
     assert.ok(bounds.page<=width+1,'Page must not overflow horizontally');
     if(width<=900)assert.equal(bounds.workspace.x,0);
-    assert.ok(await page.locator('#globalSearch').isVisible(),'Command entry remains reachable');
+    assert.equal(await page.locator('#globalSearch').count(),0);
+    assert.ok(await page.locator('#mathToolboxToggle').isVisible());
     assert.ok(await page.locator('.math-brand-copy b').isVisible(),'Math site title remains visible');
     for(const action of ['knowledge','library','import']){
       const box=await page.locator(`[data-welcome="${action}"]`).boundingBox();assert.ok(box.x>=0&&box.x+box.width<=width+1);

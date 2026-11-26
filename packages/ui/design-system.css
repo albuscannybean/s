@@ -284,6 +284,9 @@ html[data-theme="dark"] #appShell[data-high-clarity="true"] :is(.topbar,.documen
 #appShell.status-hidden .floating-panel, #appShell.status-hidden .navigator { bottom:0; }
 #appShell.focus-mode .workspace { margin-right:0; }
 #appShell.focus-mode .floating-panel { visibility:hidden; }
+@media(prefers-reduced-motion:no-preference) {
+  :is(button,summary,select,a) { transition:background-color 80ms ease-out,color 80ms ease-out; }
+}
 @media(prefers-reduced-motion:reduce) {
   *, *::before, *::after { animation-duration:.01ms!important; animation-iteration-count:1!important; transition-duration:.01ms!important; scroll-behavior:auto!important; }
 }

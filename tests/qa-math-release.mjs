@@ -38,14 +38,14 @@ try{
     await page.waitForFunction(width=>document.documentElement.clientWidth===width,width);
     assert.ok(await page.locator('.math-brand-copy b').isVisible());
     const overflow=await page.evaluate(()=>[...document.querySelectorAll('body *')].map(el=>({tag:el.tagName,cls:typeof el.className==='string'?el.className:'',left:Math.round(el.getBoundingClientRect().left),right:Math.round(el.getBoundingClientRect().right),width:Math.round(el.getBoundingClientRect().width)})).filter(item=>item.right>innerWidth+1||item.left< -1).slice(0,18));assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`page overflow at ${width}: ${JSON.stringify(overflow)}`);
-    const bounds=await page.locator('#globalSearch').boundingBox();assert.ok(bounds.x+bounds.width<=width+1);
+    assert.equal(await page.locator('#globalSearch').count(),0);const bounds=await page.locator('#mathToolboxToggle').boundingBox();assert.ok(bounds.x+bounds.width<=width+1);
   }
   await page.locator('#mathToolboxToggle').click();await page.locator('#mathToolboxPanel [data-math-nav="sessions"]').click();
   assert.equal(await page.locator('#welcome').isVisible(),true);
   await page.locator('.math-main-nav [data-math-nav="courses"]').click();
   await page.locator('[data-archive-kind="course"][data-id="course-analysis-2"]').waitFor({state:'visible'});
   await page.locator('#mathToolboxToggle').click();await page.locator('[data-math-tool="structure"]').click();await page.locator('#structureLibrary').waitFor({state:'visible'});await page.keyboard.press('Escape');
-  await page.locator('#globalSearch').click();await page.locator('#mathSearch').waitFor({state:'visible'});
+  await page.locator('.math-main-nav [data-math-nav="knowledge"]').click();await page.locator('#mathSearch').waitFor({state:'visible'});
   await page.locator('#mathToolboxToggle').click();await page.locator('[data-math-tool="import"]').click();await page.locator('#importDialog').waitFor({state:'visible'});await page.keyboard.press('Escape');
   await page.locator('.math-brand').click();
   await page.screenshot({path:'qa-output/math-release-desktop.png'});
