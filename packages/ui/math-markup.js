@@ -34,6 +34,10 @@ export function parseMathExpression(source){const value=String(source??''),child
 export function tokenizeInline(source){
   const result=[];let index=0,text='';const flush=()=>{if(text){result.push({type:'text',value:text});text=''}};
   while(index<source.length){
+    if(source.startsWith('\\(',index)){
+      const end=source.indexOf('\\)',index+2);
+      if(end>=0){flush();result.push({type:'math',value:source.slice(index+2,end)});index=end+2;continue;}
+    }
     if(source.startsWith('**',index)){const end=source.indexOf('**',index+2);if(end>=0){flush();result.push({type:'strong',value:source.slice(index+2,end)});index=end+2;continue}}
     if(source[index]==='`'){const end=source.indexOf('`',index+1);if(end>=0){flush();result.push({type:'code',value:source.slice(index+1,end)});index=end+1;continue}}
     if(source.startsWith('![',index)){const middle=source.indexOf('](',index+2),end=middle>=0?source.indexOf(')',middle+2):-1;if(middle>=0&&end>=0){flush();result.push({type:'image',value:source.slice(index+2,middle),href:source.slice(middle+2,end)});index=end+1;continue}}
@@ -60,6 +64,12 @@ export function parseStudyMarkdown(source){
   while(index<lines.length){const line=lines[index];
     if(/^\`\`\`/.test(line)){flush();const language=line.slice(3).trim(),body=[];index++;while(index<lines.length&&!/^\`\`\`/.test(lines[index]))body.push(lines[index++]);index++;blocks.push({type:'code',language,text:body.join('\n')});continue}
     const study=line.match(/^:::\s*(definition|theorem|example|proof)\s*$/i);if(study){flush();const body=[];index++;while(index<lines.length&&!/^:::\s*$/.test(lines[index]))body.push(lines[index++]);index++;blocks.push({type:'study',kind:study[1].toLowerCase(),text:body.join('\n').trim()});continue}
+    if(line.trim().startsWith('\\[')){
+      flush();const body=[line.trim().slice(2)];index++;
+      while(index<lines.length&&!body.at(-1).trim().endsWith('\\]'))body.push(lines[index++]);
+      const text=body.join('\n').trim().replace(/\\\]$/,'').trim();
+      blocks.push({type:'math',text});continue;
+    }
     if(line.trim().startsWith('$$')){flush();const body=[],single=line.trim().slice(2);if(single.endsWith('$$')&&single.length>2){blocks.push({type:'math',text:single.slice(0,-2).trim()});index++;continue}if(single)body.push(single);index++;while(index<lines.length&&!lines[index].trim().endsWith('$$'))body.push(lines[index++]);if(index<lines.length){body.push(lines[index].trim().slice(0,-2));index++}blocks.push({type:'math',text:body.join('\n').trim()});continue}
     const heading=line.match(/^(#{1,6})\s+(.+)$/);if(heading){flush();blocks.push({type:'heading',level:heading[1].length,text:heading[2]});index++;continue}
     if(/^>\s?/.test(line)){flush();blocks.push({type:'quote',text:line.replace(/^>\s?/, '')});index++;continue}
@@ -76,7 +86,15 @@ export function renderMarkdownDocument(root,source,documentRef=root.ownerDocumen
     else if(block.type==='paragraph'){element=documentRef.createElement('p');appendInlineContent(element,block.text,documentRef)}
     else if(block.type==='quote'){element=documentRef.createElement('blockquote');appendInlineContent(element,block.text,documentRef)}
     else if(block.type==='math'){element=documentRef.createElement('div');element.className='math-display';element.append(createMathElement(documentRef,block.text,{display:true}))}
-    else if(block.type==='code'&&['plot','lmn-plot'].includes(block.language)){element=documentRef.createElement('figure');element.className='document-plot';const figure=element;import('./inline-plot.js').then(({mountInlinePlot})=>mountInlinePlot(figure,block.text)).catch(error=>{figure.classList.add('document-plot-error');figure.textContent='绘图：'+error.message})}
+    else if(block.type==='code'&&['plot','lmn-plot','structure'].includes(block.language)){
+      element=documentRef.createElement('figure');element.className='document-plot';
+      const figure=element;
+      import('./inline-plot.js').then(({mountInlinePlot,mountInlineStructure})=>{
+        if(!figure.isConnected)return;
+        if(block.language==='structure')mountInlineStructure(figure,block.text);
+        else mountInlinePlot(figure,block.text);
+      }).catch(error=>{figure.classList.add('document-plot-error');figure.textContent=error.message;});
+    }
     else if(block.type==='code'){element=documentRef.createElement('pre');element.className='study-code';const code=documentRef.createElement('code');code.textContent=block.text;element.append(code)}
     else if(block.type==='list'){element=documentRef.createElement(block.ordered?'ol':'ul');if(block.ordered)element.start=block.start??1;for(const item of block.items){const li=documentRef.createElement('li');appendInlineContent(li,item,documentRef);element.append(li)}}
     else if(block.type==='study'){element=documentRef.createElement('section');element.className=`study-block study-${block.kind}`;const title=documentRef.createElement('strong');title.textContent=labels[block.kind]??block.kind;const body=documentRef.createElement('div');for(const line of block.text.split('\n')){const paragraph=documentRef.createElement('p');appendInlineContent(paragraph,line,documentRef);body.append(paragraph)}element.append(title,body)}

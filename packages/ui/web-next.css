@@ -8,7 +8,11 @@
 .markdown-preview img{max-width:100%;height:auto;border-radius:8px;display:block;margin:18px auto}
 .document-media-message{font-size:12px;color:var(--muted)}.document-media-message.error{color:#ac3333}
 .document-plot{margin:20px 0;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--canvas)}
-.document-plot-viewport{position:relative;height:340px;overflow:hidden}.document-plot-controls{display:flex;align-items:center;gap:6px;padding:9px;border-top:1px solid var(--line)}
+.document-plot-viewport{position:relative;width:100%;min-width:0;aspect-ratio:16/9;height:auto;min-height:210px;max-height:380px;overflow:hidden;touch-action:none;cursor:grab}
+.document-plot-viewport.is-dragging{cursor:grabbing}
+.document-plot-viewport .scene-root{transform-origin:0 0}
+.document-plot-controls{display:flex;align-items:center;gap:6px;padding:9px;border-top:1px solid var(--line)}
+.document-plot-caption{flex:1;min-width:0;overflow:auto}
 .document-plot-controls code{flex:1;overflow:auto;font-size:12px}.document-plot-error{padding:16px;color:#a33}
 .lkl-manual-content{max-width:950px;margin:auto;padding:24px 36px;background:var(--paper);border:1px solid var(--line);border-radius:14px}
 .lkl-manual-content pre{white-space:pre-wrap;overflow:auto}.lkl-manual-content table{border-collapse:collapse;width:100%}
