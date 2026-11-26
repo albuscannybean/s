@@ -1,3 +1,4 @@
+import {inlineMathHtml} from './math-markup.js';
 import {mountTextbooks,textbookMatches} from './textbook-reader.js';
 import {MathCollections,icon} from './math-library.js';
 import {groupedConcepts} from './math-path.js';
@@ -289,9 +290,9 @@ export class MathArchive{
       const worked=MATH_KNOWLEDGE.filter(item=>item.example&&item.id.endsWith('K01'));
       root.innerHTML=`<h2 class="catalog-heading">按课程看算例</h2><div class="course-grid">${worked.map(item=>{
         const course=mathCourseById(item.courseId);
-        return `<button type="button" class="course-tile" data-archive-kind="knowledge" data-id="${item.id}">${icon(course.icon)}<span><b>${h(item.title)}</b><small>${h(course.title)}</small></span><span aria-hidden="true">›</span></button>`;
+        return `<button type="button" class="course-tile" data-archive-kind="knowledge" data-id="${item.id}">${icon(course.icon)}<span><b>${inlineMathHtml(item.title)}</b><small>${h(course.title)}</small></span><span aria-hidden="true">›</span></button>`;
       }).join('')}</div><div class="experiment-heading"><h2 class="catalog-heading">交互实验 · 函数列</h2><button type="button" data-math-archive-action="lab">打开计算与结构工具</button></div><div class="course-grid">${MATH_DISCOVERY_CASES.map(item=>
-        `<button type="button" class="course-tile math-discovery-sample" data-discovery-case="${item.id}">${icon('curve')}<span><b>${h(item.title)}</b><small>${h(item.expression)}</small></span><span aria-hidden="true">›</span></button>`).join('')}</div>`;
+        `<button type="button" class="course-tile math-discovery-sample" data-discovery-case="${item.id}">${icon('curve')}<span><b>${inlineMathHtml(item.title)}</b><small>${inlineMathHtml('$'+item.latex+'$')}</small></span><span aria-hidden="true">›</span></button>`).join('')}</div>`;
       return;
     }
     const selected=mathDiscoveryById(id);

@@ -1,3 +1,4 @@
+import {inlineMathHtml} from './math-markup.js';
 import {MATH_DISCOVERY_CASES,mathDiscoveryById,mathDiscoveryDomain} from '../learning/math-discovery.js';
 import {mathKnowledgeById,mathProblemById} from '../learning/math-content.js';
 import {RIGOR_SAMPLE_ID,RIGOR_TERMS,RIGOR_NOTE_FIELDS,localRigorDate} from '../learning/math-rigor.js';
@@ -11,7 +12,7 @@ const fmt=value=>{
 };
 const clamp=(value,min,max)=>Math.min(max,Math.max(min,value));
 const linkCard=(kind,id,title,detail)=>{
-  return '<button type="button" class="math-item-card" data-archive-kind="'+h(kind)+'" data-id="'+h(id)+'"><span class="math-item-title">'+h(title)+'</span><small>'+h(detail||id)+'</small><span class="math-item-arrow" aria-hidden="true">↗</span></button>';
+  return '<button type="button" class="math-item-card" data-archive-kind="'+h(kind)+'" data-id="'+h(id)+'"><span class="math-item-title">'+inlineMathHtml(title)+'</span><small>'+inlineMathHtml(detail||id)+'</small><span class="math-item-arrow" aria-hidden="true">↗</span></button>';
 };
 
 export function renderDiscoveryPage({selectedId='',compareId='',annotations=new Map(),rigorDate=localRigorDate()}={}){
@@ -30,12 +31,12 @@ export function renderDiscoveryPage({selectedId='',compareId='',annotations=new 
   return '<div class="math-discovery-page" data-discovery-selected="'+h(selected.id)+'">'+
     
     '<div class="math-discovery-layout"><div class="math-discovery-main">'+
-      '<section class="math-discovery-paper"><header class="math-discovery-heading"><div><span class="math-kicker">'+h(selected.id)+' · '+h(selected.group)+'</span><h3>'+h(selected.title)+'</h3><p>'+h(selected.description)+'</p></div><span class="math-discovery-mark">∿</span></header>'+
-        '<div class="math-discovery-formula" id="discoveryFormula">'+h(selected.expression)+'</div><section class="math-discovery-observation-prompt"><span>先做一个预测</span><div id="discoveryPrompt"></div></section><details class="math-discovery-hint"><summary>需要时查看一条观察线索</summary><div id="discoveryPointwiseHint"></div></details>'+
-        presets+'<div class="math-discovery-controls"><label>项数 n <output id="discoveryNValue"></output><input id="discoveryN" type="range" min="1" max="32" step="1" value="'+h(note.discoveryN??(rigor?2:8))+'"></label><label>观察区间<select id="discoveryDomain"><option value="0:1" '+(note.discoveryDomain==='0:1'?'selected':'')+'>[0, 1]</option><option value="0:0.8" '+(note.discoveryDomain==='0:0.8'?'selected':'')+'>[0, 0.8]</option><option value="0.2:1" '+(note.discoveryDomain==='0.2:1'?'selected':'')+'>[0.2, 1]</option></select></label><label>固定观察点 x₀ <output id="discoveryXValue"></output><input id="discoveryX" type="range" min="0" max="100" step="1" value="'+h(note.discoveryX??50)+'"></label></div>'+
-        '<div class="math-discovery-plot-wrap"><div class="math-discovery-plot-head"><strong>图像比较</strong><small>横轴 x · 纵轴 fₙ(x)。点选图中位置或移动「固定观察点」，再改变 n。</small></div><div id="discoveryPlotPrimary" class="math-discovery-plot"></div><div id="discoveryLegend" class="math-discovery-legend"></div></div>'+
+      '<section class="math-discovery-paper"><header class="math-discovery-heading"><div><span class="math-kicker">'+h(selected.id)+' · '+h(selected.group)+'</span><h3>'+h(selected.title)+'</h3><p>'+inlineMathHtml(selected.description)+'</p></div><span class="math-discovery-mark">∿</span></header>'+
+        '<div class="math-discovery-formula" id="discoveryFormula">'+inlineMathHtml('$'+selected.latex+'$')+'</div><section class="math-discovery-observation-prompt"><span>先做一个预测</span><div id="discoveryPrompt"></div></section><details class="math-discovery-hint"><summary>需要时查看一条观察线索</summary><div id="discoveryPointwiseHint"></div></details>'+
+        presets+'<div class="math-discovery-controls"><label>'+inlineMathHtml('项数 $n$ ')+'<output id="discoveryNValue"></output><input id="discoveryN" type="range" min="1" max="32" step="1" value="'+h(note.discoveryN??(rigor?2:8))+'"></label><label>观察区间<select id="discoveryDomain"><option value="0:1" '+(note.discoveryDomain==='0:1'?'selected':'')+'>[0, 1]</option><option value="0:0.8" '+(note.discoveryDomain==='0:0.8'?'selected':'')+'>[0, 0.8]</option><option value="0.2:1" '+(note.discoveryDomain==='0.2:1'?'selected':'')+'>[0.2, 1]</option></select></label><label>固定观察点 x₀ <output id="discoveryXValue"></output><input id="discoveryX" type="range" min="0" max="100" step="1" value="'+h(note.discoveryX??50)+'"></label></div>'+
+        '<div class="math-discovery-plot-wrap"><div class="math-discovery-plot-head"><strong>图像比较</strong><small>'+inlineMathHtml('横轴 $x$ · 纵轴 $f_n(x)$。点选图中位置或移动「固定观察点」，再改变 $n$。')+'</small></div><div id="discoveryPlotPrimary" class="math-discovery-plot"></div><div id="discoveryLegend" class="math-discovery-legend"></div></div>'+
         '<div id="discoveryMetrics" class="math-discovery-metrics"></div><details class="math-discovery-reveal"><summary>完成观察后，再查看已知数学结论</summary><div id="discoveryConclusion"></div></details>'+
-        '<section class="math-discovery-table-wrap"><h4>固定点与移动点的数值</h4><p>'+h(selected.movingPointLabel)+'</p><div id="discoveryPointTable"></div></section>'+
+        '<section class="math-discovery-table-wrap"><h4>固定点与移动点的数值</h4><p>'+inlineMathHtml(selected.movingPointLabel)+'</p><div id="discoveryPointTable"></div></section>'+
         (rigor?'<details class="math-discovery-reveal"><summary>推导反例与误差估计</summary><div id="rigorProof"></div></details>':'')+
       '</section>'+
       (rigor?renderRigorReference():'')+
@@ -91,12 +92,12 @@ export function updateDiscoveryFigures(root){
   for(const button of root.querySelectorAll('[data-discovery-preset]'))button.setAttribute('aria-pressed',String(Number(button.dataset.discoveryPreset)===n));
   const plot=root.querySelector('#discoveryPlotPrimary');if(plot)plot.innerHTML=plotSvg(sample,n,lo,hi,x0);
   const legend=root.querySelector('#discoveryLegend');
-  if(legend)legend.innerHTML=plotTerms(sample,n).map((term,index)=>'<span><i style="background:'+plotColor(term,n,index)+'"></i> n = '+term+'</span>').join('')+'<span><i class="fixed"></i> 固定点</span><span><i class="moving"></i> 移动点</span>';
+  if(legend)legend.innerHTML=plotTerms(sample,n).map((term,index)=>'<span><i style="background:'+plotColor(term,n,index)+'"></i> '+inlineMathHtml('$n='+term+'$')+'</span>').join('')+'<span><i class="fixed"></i> 固定点</span><span><i class="moving"></i> 移动点</span>';
   const metrics=root.querySelector('#discoveryMetrics');
   const sup=sample.supValue(n,lo,hi),uniform=sample.uniformOnDomain(lo,hi);
-  if(metrics)metrics.innerHTML='<div><small>'+(sample.integral?'阴影面积 ∫ fₙ(x) dx':'当前项数')+'</small><strong id="discoveryAreaOrTerm">'+(sample.integral?fmt(sample.integral(n,lo,hi)):'n = '+n)+'</strong></div><div><small>'+(sample.integral?'区间内峰高':'一致误差'+(sample.supKind==='bound'?'上界':'上确界'))+'</small><strong>'+(sample.supKind==='bound'?'≤ ':'= ')+fmt(sup)+'</strong></div><div><small>固定观察点</small><strong>fₙ('+fmt(x0)+') = '+fmt(sample.evaluate(x0,n))+'</strong></div>';
+  if(metrics)metrics.innerHTML='<div><small>'+(sample.integral?inlineMathHtml('阴影面积 $\\int f_n(x)\\,dx$'):'当前项数')+'</small><strong id="discoveryAreaOrTerm">'+(sample.integral?fmt(sample.integral(n,lo,hi)):'n = '+n)+'</strong></div><div><small>'+(sample.integral?'区间内峰高':'一致误差'+(sample.supKind==='bound'?'上界':'上确界'))+'</small><strong>'+(sample.supKind==='bound'?'≤ ':'= ')+fmt(sup)+'</strong></div><div><small>固定观察点</small><strong>'+inlineMathHtml('$f_n('+fmt(x0)+')='+fmt(sample.evaluate(x0,n))+'$')+'</strong></div>';
   const conclusion=root.querySelector('#discoveryConclusion');
-  if(conclusion)conclusion.innerHTML='<p><strong>逐点极限：</strong>'+h(sample.limitDescription)+'</p><p><strong>当前区间：</strong><span class="'+(uniform?'is-uniform':'is-not-uniform')+'">'+(uniform?'一致收敛到逐点极限':'不一致收敛到逐点极限')+'</span></p>';
+  if(conclusion)conclusion.innerHTML='<p><strong>逐点极限：</strong>'+inlineMathHtml(sample.limitDescription)+'</p><p><strong>当前区间：</strong><span class="'+(uniform?'is-uniform':'is-not-uniform')+'">'+(uniform?'一致收敛到逐点极限':'不一致收敛到逐点极限')+'</span></p>';
   const table=root.querySelector('#discoveryPointTable');
   if(table){
     const ns=[...new Set([...(sample.integral?RIGOR_TERMS:[1,2,4,8,16]),n])].sort((a,b)=>a-b);
@@ -104,12 +105,14 @@ export function updateDiscoveryFigures(root){
       const moving=sample.movingPoint(m,lo,hi),fixedValue=sample.evaluate(x0,m),movingValue=sample.evaluate(moving,m);
       return '<tr><th scope="row">'+m+'</th><td>'+fmt(fixedValue)+'</td><td>'+fmt(moving)+'</td><td>'+fmt(movingValue)+'</td>'+(sample.integral?'<td>'+fmt(sample.integral(m,lo,hi))+'</td>':'')+'</tr>';
     }).join('');
-    table.innerHTML='<table class="math-discovery-value-table"><thead><tr><th>n</th><th>固定点 fₙ(x₀)</th><th>移动点 xₙ</th><th>fₙ(xₙ)</th>'+(sample.integral?'<th>区间积分</th>':'')+'</tr></thead><tbody>'+rows+'</tbody></table>';
+    const labels=['$n$','固定点 $f_n(x_0)$','移动点 $x_n$','$f_n(x_n)$'];
+    if(sample.integral)labels.push('区间积分');
+    table.innerHTML='<table class="math-discovery-value-table"><thead><tr>'+labels.map(label=>'<th>'+inlineMathHtml(label)+'</th>').join('')+'</tr></thead><tbody>'+rows+'</tbody></table>';
   }
   const comparePlot=root.querySelector('#discoveryComparePlot'),compareMetrics=root.querySelector('#discoveryCompareMetrics');
   if(compare&&compare.id!==sample.id){
     if(comparePlot)comparePlot.innerHTML='<h4>'+h(compare.title)+'</h4>'+plotSvg(compare,n,lo,hi,x0);
-    if(compareMetrics){const uniform=compare.uniformOnDomain(lo,hi),sup=compare.supValue(n,lo,hi);compareMetrics.innerHTML='<details class="math-discovery-reveal"><summary>查看对照样本的数学结论</summary><p>'+h(compare.limitDescription)+'</p><p><strong class="'+(uniform?'is-uniform':'is-not-uniform')+'">'+(uniform?'当前区间上一致收敛到逐点极限':'当前区间上不一致收敛到逐点极限')+'</strong></p><p>'+(compare.supKind==='bound'?'误差上界 ≤ ':'误差上确界 = ')+fmt(sup)+'</p></details>'}
+    if(compareMetrics){const uniform=compare.uniformOnDomain(lo,hi),sup=compare.supValue(n,lo,hi);compareMetrics.innerHTML='<details class="math-discovery-reveal"><summary>查看对照样本的数学结论</summary><p>'+inlineMathHtml(compare.limitDescription)+'</p><p><strong class="'+(uniform?'is-uniform':'is-not-uniform')+'">'+(uniform?'当前区间上一致收敛到逐点极限':'当前区间上不一致收敛到逐点极限')+'</strong></p><p>'+(compare.supKind==='bound'?'误差上界 ≤ ':'误差上确界 = ')+fmt(sup)+'</p></details>'}
   }else{if(comparePlot)comparePlot.innerHTML='<p class="math-discovery-empty">选择另一个样本，观察它与当前对象的异同。</p>';if(compareMetrics)compareMetrics.replaceChildren()}
 }
 

@@ -1,3 +1,4 @@
+import {inlineMathHtml} from './math-markup.js';
 import {chapterStages,chapterUnits,pathUnits,pathUnit,resolveUnit,powerErrors} from '../learning/math-path.js';
 import {mathCourseById,mathKnowledgeById,mathProblemById,mathMethodById} from '../learning/math-content.js';
 import {mathDiscoveryById} from '../learning/math-discovery.js';
@@ -5,7 +6,7 @@ import {mathDiscoveryById} from '../learning/math-discovery.js';
 const stages={discovery:'观察样本',knowledge:'读概念',method:'学方法',problem:'独立练习',applied:'应用检验'};
 const trailKey='lmn:math-analysis:reading-trail';
 const sectionId='course-analysis-2';
-const button=(action,text,id='')=>`<button type="button" data-path-action="${action}" data-path-id="${id}">${text}</button>`;
+const button=(action,text,id='')=>`<button type="button" data-path-action="${action}" data-path-id="${id}">${inlineMathHtml(text)}</button>`;
 const order=unit=>String(chapterUnits.indexOf(unit)+1).padStart(2,'0');
 const stageId=(unit,stage)=>stage==='discovery'?unit.discovery:unit[stage]?.id||'';
 const groupOf=unit=>chapterStages.find(group=>group.units.includes(unit.knowledge.id.slice(-3)));
@@ -19,7 +20,7 @@ export function groupedConcepts(items,card){
   const shown=new Set(items.map(item=>item.id));
   return chapterStages.map((group,i)=>{
     const units=group.units.map(short=>pathUnit('ANA-UC-'+short)).filter(unit=>shown.has(unit.knowledge.id));
-    return units.length?`<section class="chapter-stage"><header><span>第 ${i+1} 节</span><div><h3>${group.title}</h3><p>${group.question}</p></div></header><div class="chapter-units">${units.map(unit=>card(unit.knowledge,order(unit))).join('')}</div></section>`:'';
+    return units.length?`<section class="chapter-stage"><header><span>第 ${i+1} 节</span><div><h3>${group.title}</h3><p>${inlineMathHtml(group.question)}</p></div></header><div class="chapter-units">${units.map(unit=>card(unit.knowledge,order(unit))).join('')}</div></section>`:'';
   }).join('');
 }
 
@@ -84,16 +85,16 @@ export class MathPath{
     const units=pathUnits.filter(candidate=>candidate.knowledge.courseId===course.id);
     const next=units[units.indexOf(unit)+1];
     const location=course.semester?(course.chapters.find(chapter=>chapter.id===unit.knowledge.chapterId)?.title||course.title):groupOf(unit).title+' / '+order(unit);
-    return `<nav class="concept-route" aria-label="当前概念的学习路径"><div class="route-heading">${button('course',course.title,course.id)}<span>${location} · ${unit.knowledge.title}</span></div><p>${unit.question}</p><div class="route-steps">${steps}${button('records','我的学习与复习')}</div><div class="route-next">${next?button('knowledge','下一单元 · '+next.knowledge.title,next.knowledge.id):button('course','回看全章目录',course.id)}</div></nav>`;
+    return `<nav class="concept-route" aria-label="当前概念的学习路径"><div class="route-heading">${button('course',course.title,course.id)}<span>${inlineMathHtml(location)} · ${inlineMathHtml(unit.knowledge.title)}</span></div><p>${inlineMathHtml(unit.question)}</p><div class="route-steps">${steps}${button('records','我的学习与复习')}</div><div class="route-next">${next?button('knowledge','下一单元 · '+next.knowledge.title,next.knowledge.id):button('course','回看全章目录',course.id)}</div></nav>`;
   }
   home(){
     const visit=this.trail[0];
-    document.querySelector('#pathContinue').textContent=visit?'继续上次 · '+stages[visit.stage]+' · '+this.unit.knowledge.title:'从近世代数开始 · 群与单位元';
+    document.querySelector('#pathContinue').innerHTML=inlineMathHtml(visit?'继续上次 · '+stages[visit.stage]+' · '+this.unit.knowledge.title:'从近世代数开始 · 群与单位元');
     const root=document.querySelector('#pathRecent');
     root.replaceChildren();
     for(const v of this.trail.slice(0,5)){
       const link=document.createElement('button');link.type='button';
-      link.textContent=stages[v.stage]+' · '+pathUnit(v.unit).knowledge.title;
+      link.innerHTML=inlineMathHtml(stages[v.stage]+' · '+pathUnit(v.unit).knowledge.title);
       link.onclick=()=>{this.unit=pathUnit(v.unit);this.go(v.stage,v.id)};
       root.append(link);
     }
@@ -103,7 +104,7 @@ export class MathPath{
     this.unit=pathUnit(id)||chapterUnits.at(-1);
     this.record('applied','',this.unit);
     const root=document.querySelector('#pathApplication');
-    root.innerHTML=this.route('applied')+`<section class="math-surface power-lab"><h2>误差实验 · 近似积分需要多准？</h2><p>用 xⁿ 在 [0, b] 上的积分近似其逐点极限的积分。先把允许误差定为 0.05，预测哪一种误差会先达标。</p><div class="lab-controls"><label>项数 n <input type="range" min="1" max="64" value="8" name="terms"><output data-lab-n></output></label><label>右端点 b <select name="endpoint"><option value="1">1</option><option value="0.95">0.95</option><option value="0.8">0.8</option><option value="0.5">0.5</option></select></label></div><dl class="lab-results" aria-live="polite"><div><dt>区间误差上确界 · bⁿ</dt><dd data-lab-uniform></dd></div><div><dt>积分误差 · bⁿ⁺¹ / (n+1)</dt><dd data-lab-integral></dd></div></dl><p>当 b = 1 时，极限在端点等于 1，在其余各点为 0。误差在端点为 0，却能从左侧任意接近 1。</p><label class="lab-note">改变 b 后，哪一种误差仍能控制积分？把你的解释记入本单元。<textarea rows="2" maxlength="5000"></textarea></label><p class="lab-save" role="status"></p>${button('knowledge','带着实验结论回看 · '+this.unit.knowledge.title,this.unit.knowledge.id)}</section>`;
+    root.innerHTML=this.route('applied')+`<section class="math-surface power-lab"><h2>误差实验 · 近似积分需要多准？</h2><p>用 ${inlineMathHtml('$x^n$')} 在 ${inlineMathHtml('$[0,b]$')} 上的积分近似其逐点极限的积分。先把允许误差定为 0.05，预测哪一种误差会先达标。</p><div class="lab-controls"><label>${inlineMathHtml('项数 $n$')} <input type="range" min="1" max="64" value="8" name="terms"><output data-lab-n></output></label><label>${inlineMathHtml('右端点 $b$')} <select name="endpoint"><option value="1">1</option><option value="0.95">0.95</option><option value="0.8">0.8</option><option value="0.5">0.5</option></select></label></div><dl class="lab-results" aria-live="polite"><div><dt>区间误差上确界 · ${inlineMathHtml('$b^n$')}</dt><dd data-lab-uniform></dd></div><div><dt>积分误差 · ${inlineMathHtml('$b^{n+1}/(n+1)$')}</dt><dd data-lab-integral></dd></div></dl><p>当 ${inlineMathHtml('$b=1$')} 时，极限在端点等于 1，在其余各点为 0。误差在端点为 0，却能从左侧任意接近 1。</p><label class="lab-note">${inlineMathHtml('改变 $b$ 后')}，哪一种误差仍能控制积分？把你的解释记入本单元。<textarea rows="2" maxlength="5000"></textarea></label><p class="lab-save" role="status"></p>${button('knowledge','带着实验结论回看 · '+this.unit.knowledge.title,this.unit.knowledge.id)}</section>`;
     const archive=this.controller.mathArchive,subject=this.unit.knowledge.id;
     const saved=archive.annotations.get('math-note:'+subject);
     const n=root.querySelector('[name=terms]'),b=root.querySelector('[name=endpoint]'),note=root.querySelector('textarea');

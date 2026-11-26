@@ -44,6 +44,25 @@ try {
     return {sections,chapters,plots,formulas};
   });
   assert.equal(index.sections,245);assert.equal(index.chapters,47);assert.equal(index.plots,5);
+  const leaks=await page.evaluate(async()=>{
+    const {MATH_KNOWLEDGE,MATH_METHODS,MATH_PROBLEMS}=await import('../../packages/learning/math-content.js');
+    const issues=[];
+    for(const [view,items] of [['knowledge',MATH_KNOWLEDGE],['method',MATH_METHODS],['problem',MATH_PROBLEMS]]){
+      for(const {id} of items){
+        lmnWorkspace.openMathArchive(view,id);
+        const root=document.querySelector('#mathArchiveContent');
+        const text=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
+        while(text.nextNode()){
+          const node=text.currentNode;
+          if(node.parentElement.closest('.katex,select,input,textarea,code,svg'))continue;
+          if(/\$[^$]+\$/.test(node.textContent)){issues.push(id);break;}
+        }
+        if(root.querySelector('.math-render-error'))issues.push(id);
+      }
+    }
+    return issues;
+  });
+  assert.deepEqual(leaks,[]);
   for(const width of [1440,390]) {
     await page.setViewportSize({width,height:900});
     await page.locator('.math-main-nav [data-math-nav=courses]').click();

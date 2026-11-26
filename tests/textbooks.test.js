@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {TEXTBOOKS} from '../packages/learning/textbooks.js';
 import {MATH_COURSES,MATH_PROBLEMS,MATH_KNOWLEDGE,MATH_METHODS} from '../packages/learning/math-content.js';
 import {semesterPredictions} from '../packages/learning/semester-content.js';
+import {MATH_DISCOVERY_CASES} from '../packages/learning/math-discovery.js';
 import {renderMathToString} from '../packages/ui/math-markup.js';
 import {parsePlotExpression} from '../packages/structure-engine/plotting.js';
 
@@ -42,7 +43,7 @@ test('all authored textbook, archive and prediction expressions compile with the
     }
     if(value.replace(/\$\$[\s\S]*?\$\$|\$[^$\n]+\$/g,'').includes('$')) errors.push('Unpaired delimiter in '+value);
   }
-  visit([TEXTBOOKS,MATH_COURSES,MATH_KNOWLEDGE,MATH_METHODS,MATH_PROBLEMS,semesterPredictions]);
+  visit([TEXTBOOKS,MATH_COURSES,MATH_KNOWLEDGE,MATH_METHODS,MATH_PROBLEMS,semesterPredictions,MATH_DISCOVERY_CASES]);
   assert.deepEqual(errors,[]);
   assert.ok(checked.size>700);
 });
