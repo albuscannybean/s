@@ -3,16 +3,19 @@ import assert from 'node:assert/strict';
 export async function checkSemester(page){
   const nav=page.locator('.math-main-nav'),home=nav.locator('[data-math-nav="courses"]');
   const courses=[
-    ['course-algebra','ALG'],['course-ode','ODE'],
-    ['course-probability','PROB'],['course-analysis-3','AN3']
+    ['course-algebra','ALG',4,'course-algebra-1'],
+    ['course-ode','ODE',11,'course-ode-2'],
+    ['course-probability','PROB',8,'course-prob-1'],
+    ['course-analysis-3','AN3',12,'course-analysis-16']
   ];
-  for(const [course,prefix] of courses){
+  for(const [course,prefix,count,chapterId] of courses){
     await home.click();
     await page.locator('#mathArchive [data-archive-kind="course"][data-id="'+course+'"]').click();
-    assert.equal(await page.locator('.math-chapter-card').count(),7);
-    const chapter=page.locator('.math-chapter-card').first();
-    assert.equal(await chapter.locator('[data-archive-kind="knowledge"]').count(),2);
-    assert.equal(await chapter.locator('[data-archive-kind="problem"]').count(),2);
+    assert.equal(await page.locator('.math-chapter-card').count(),count);
+    await page.locator('#courseChapterJump').selectOption(chapterId);
+    const chapter=page.locator('#'+chapterId);
+    assert.ok(await chapter.locator('[data-archive-kind="knowledge"]').count()>0);
+    assert.ok(await chapter.locator('[data-archive-kind="problem"]').count()>0);
     await chapter.locator('[data-id="'+prefix+'-K01"]').click();
     assert.match(await page.locator('#mathReadingBody').innerText(),/先算一个例子/);
     assert.equal(await page.locator('#mathPrivateNote').evaluate(e=>getComputedStyle(e).resize),'none');

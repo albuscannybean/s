@@ -13,7 +13,8 @@ try{
   assert.ok(await page.locator('#mathArchive [data-archive-kind="course"]').count()>=4);
   await page.locator('.math-main-nav [data-math-nav="knowledge"]').click();
   await page.locator('.knowledge-form-tabs label').filter({hasText:'概念与定义'}).click();
-  assert.match(await page.locator('#mathArchiveCount').innerText(),/23 \/ 66/);
+  assert.match(await page.locator('#mathArchiveCount').innerText(),/\d+ \/ 255/);
+  assert.ok(await page.locator('#mathArchiveResults .catalog-row').count()<255);
   await page.locator('[data-catalog-filter="facet"]').selectOption('structure');
   assert.ok(await page.locator('#mathArchiveResults [data-id="ALG-K01"]').isVisible());
   await page.locator('[data-catalog-filter="facet"]').selectOption('');await page.locator('.knowledge-form-tabs label').filter({hasText:'全部知识'}).click();
@@ -27,6 +28,8 @@ try{
   await page.setViewportSize({width:1440,height:1000});
   assert.equal(await page.locator('#navigator').isVisible(),false);
   await page.locator('.math-main-nav [data-math-nav="courses"]').click();await page.locator('[data-archive-kind="course"][data-id="course-analysis-2"]').click();
+  await page.locator('#courseChapterJump').selectOption('course-analysis-13');
+  await page.locator('#course-analysis-13 .course-lesson').first().getByText(/本节专题/).click();
   await page.locator('#mathArchive [data-id="ANA-UC-K02"]').click();
   assert.ok(await page.locator('#documentTabs [data-tab-key]').count()>=2,'Public course and knowledge receive real document tabs');
   await page.locator('#mathPrivateNote').fill('UI 重整保留的私人批注');await page.waitForFunction(()=>lmnWorkspace.mathArchive.timers.size===0);

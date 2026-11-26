@@ -1,31 +1,30 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {TEXTBOOKS} from '../packages/learning/textbooks.js';
+import {TEXTBOOK_CHAPTERS} from '../packages/learning/textbook-lessons.js';
 import {MATH_COURSES,MATH_PROBLEMS,MATH_KNOWLEDGE,MATH_METHODS} from '../packages/learning/math-content.js';
 import {semesterPredictions} from '../packages/learning/semester-content.js';
 import {MATH_DISCOVERY_CASES} from '../packages/learning/math-discovery.js';
 import {renderMathToString} from '../packages/ui/math-markup.js';
 import {parsePlotExpression} from '../packages/structure-engine/plotting.js';
 
-test('all seven source editions have stable section and exercise locators',()=>{
-  assert.deepEqual(TEXTBOOKS.map(b=>b.chapters.flatMap(c=>c.sections).length),[42,34,43,43,35,25,23]);
-  for (const book of TEXTBOOKS) {
-    assert.match(book.sha256,/^[a-f0-9]{64}$/);
-    const ids=new Set();
-    for (const chapter of book.chapters) {
-      if (/^\d+$/.test(chapter.number)) assert.equal(chapter.practice.length,2);
-      if (chapter.plot) {
-        assert.ok(parsePlotExpression(chapter.plot[0]));
-        assert.ok(renderMathToString(chapter.plot[1]).ok);
-      }
-      for (const section of chapter.sections) {
-        assert.ok(!ids.has(section.number));ids.add(section.number);
-        assert.ok(section.guide);
-        for (const page of [section.page,section.exercisePage,...Object.values(section.exercises??{})].filter(p=>p!==undefined))
-          assert.ok(Number.isInteger(page)&&page>=section.page&&page<=book.pages,book.id+' '+section.number);
-        if (section.exercises) assert.deepEqual(Object.keys(section.exercises).map(Number),Array.from({length:Object.keys(section.exercises).length},(_,i)=>i+1));
-      }
-    }
+test('each source section maps to one course reading and a native exercise',()=>{
+  assert.equal(TEXTBOOK_CHAPTERS.length,47);
+  const groups=MATH_COURSES.flatMap(course=>course.chapters.flatMap(chapter=>chapter.groups));
+  assert.equal(groups.length,245);
+  assert.equal(MATH_PROBLEMS.filter(p=>p.source.kind==='adapted').length,35);
+  assert.equal(new Set(MATH_KNOWLEDGE.map(item=>item.code)).size,MATH_KNOWLEDGE.length);
+  assert.equal(new Set(MATH_PROBLEMS.map(item=>item.code)).size,MATH_PROBLEMS.length);
+  for(const group of groups){
+    const unit=MATH_KNOWLEDGE.find(item=>item.id===group.id);
+    assert.ok(unit.source.page>0&&unit.body.length>45);
+    assert.ok(unit.relatedIds.every(key=>MATH_KNOWLEDGE.some(k=>k.id===key)));
+    const problem=MATH_PROBLEMS.find(item=>item.id===group.problemIds[0]);
+    assert.deepEqual(problem.knowledgeIds,[unit.id]);
+    assert.match(problem.code,new RegExp('^'+unit.code.replace('.','\\.')+'-P01$'));
+  }
+  for(const chapter of TEXTBOOK_CHAPTERS)if(chapter.plot){
+    assert.ok(parsePlotExpression(chapter.plot[0]));
+    assert.ok(renderMathToString(chapter.plot[1]).ok);
   }
 });
 
@@ -43,7 +42,7 @@ test('all authored textbook, archive and prediction expressions compile with the
     }
     if(value.replace(/\$\$[\s\S]*?\$\$|\$[^$\n]+\$/g,'').includes('$')) errors.push('Unpaired delimiter in '+value);
   }
-  visit([TEXTBOOKS,MATH_COURSES,MATH_KNOWLEDGE,MATH_METHODS,MATH_PROBLEMS,semesterPredictions,MATH_DISCOVERY_CASES]);
+  visit([TEXTBOOK_CHAPTERS,MATH_COURSES,MATH_KNOWLEDGE,MATH_METHODS,MATH_PROBLEMS,semesterPredictions,MATH_DISCOVERY_CASES]);
   assert.deepEqual(errors,[]);
   assert.ok(checked.size>700);
 });

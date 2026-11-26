@@ -8,10 +8,13 @@ export async function checkConnectedMathPath(page){
   assert.ok(await page.locator('#mathArchiveResults [data-id="ANA-UC-K05"]').isVisible());
   await page.locator('#mathArchiveResults [data-id="ANA-UC-K05"]').click();
   await page.locator('#mathArchive .route-heading [data-path-action="course"]').click();
-  assert.equal(await page.locator('.math-chapter-card .chapter-stage').count(),4);
-  assert.equal(await page.locator('.math-chapter-card [data-archive-kind="knowledge"]').count(),10);
-  assert.equal(await page.locator('.math-chapter-card [data-archive-kind="problem"]').count(),20);
-  await page.locator('.math-chapter-card [data-id="ANA-UC-K07"]').click();
+  await page.locator('#courseChapterJump').selectOption('course-analysis-13');
+  const chapter=page.locator('#course-analysis-13');
+  assert.equal(await chapter.locator('[data-archive-kind="knowledge"]').count(),10);
+  assert.equal(await chapter.locator('[data-archive-kind="problem"]').count(),22);
+  const integration=chapter.locator('.course-lesson').filter({has:page.locator('[data-id="ANA-UC-K07"]')});
+  await integration.getByText(/本节专题/).click();
+  await integration.locator('[data-id="ANA-UC-K07"]').click();
   const route=page.locator('#mathArchive .concept-route');
   assert.match(await route.innerText(),/一致收敛与逐项积分/);
   await route.locator('[data-path-action="discovery"]').click();

@@ -18,7 +18,8 @@ test('the chapter includes every unit once, with prerequisites before its readin
       assert.equal(resolveUnit(view,target,id),unit,id+' / '+view);
     }
   }
-  assert.deepEqual([...visited].sort(),MATH_COURSES[0].chapters[0].knowledgeIds.map(k=>'ANA-UC-'+k).sort());
+  const chapter=MATH_COURSES.flatMap(course=>course.chapters).find(item=>item.id==='course-analysis-13');
+  assert.deepEqual([...visited].sort(),[...chapter.knowledgeIds].sort());
 });
 
 test('the approximation lab distinguishes the endpoint jump from the integral error',()=>{

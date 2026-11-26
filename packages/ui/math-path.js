@@ -1,5 +1,5 @@
 import {inlineMathHtml} from './math-markup.js';
-import {chapterStages,chapterUnits,pathUnits,pathUnit,resolveUnit,powerErrors} from '../learning/math-path.js';
+import {chapterUnits,pathUnits,pathUnit,resolveUnit,powerErrors} from '../learning/math-path.js';
 import {mathCourseById,mathKnowledgeById,mathProblemById,mathMethodById} from '../learning/math-content.js';
 import {mathDiscoveryById} from '../learning/math-discovery.js';
 
@@ -7,21 +7,11 @@ const stages={discovery:'观察样本',knowledge:'读概念',method:'学方法',
 const trailKey='lmn:math-analysis:reading-trail';
 const sectionId='course-analysis-2';
 const button=(action,text,id='')=>`<button type="button" data-path-action="${action}" data-path-id="${id}">${inlineMathHtml(text)}</button>`;
-const order=unit=>String(chapterUnits.indexOf(unit)+1).padStart(2,'0');
 const stageId=(unit,stage)=>stage==='discovery'?unit.discovery:unit[stage]?.id||'';
-const groupOf=unit=>chapterStages.find(group=>group.units.includes(unit.knowledge.id.slice(-3)));
 function validVisit(v){
   if(!v||!Object.hasOwn(stages,v.stage)||!pathUnit(v.unit))return false;
   if(v.stage==='applied')return v.id==='';
   return Boolean(({discovery:mathDiscoveryById,knowledge:mathKnowledgeById,method:mathMethodById,problem:mathProblemById})[v.stage]?.(v.id));
-}
-
-export function groupedConcepts(items,card){
-  const shown=new Set(items.map(item=>item.id));
-  return chapterStages.map((group,i)=>{
-    const units=group.units.map(short=>pathUnit('ANA-UC-'+short)).filter(unit=>shown.has(unit.knowledge.id));
-    return units.length?`<section class="chapter-stage"><header><span>第 ${i+1} 节</span><div><h3>${group.title}</h3><p>${inlineMathHtml(group.question)}</p></div></header><div class="chapter-units">${units.map(unit=>card(unit.knowledge,order(unit))).join('')}</div></section>`:'';
-  }).join('');
 }
 
 export class MathPath{
@@ -80,11 +70,12 @@ export class MathPath{
   route(stage){
     const unit=this.unit;
     const course=mathCourseById(unit.knowledge.courseId);
-    const linkedStages=Object.entries(stages).filter(([key])=>key==='applied'?!course.semester:stageId(unit,key));
+    const linkedStages=Object.entries(stages).filter(([key])=>key==='applied'?unit.discovery:stageId(unit,key));
     const steps=linkedStages.map(([key,label])=>key===stage?`<span aria-current="step">${label}</span>`:button(key,label,stageId(unit,key))).join('');
     const units=pathUnits.filter(candidate=>candidate.knowledge.courseId===course.id);
     const next=units[units.indexOf(unit)+1];
-    const location=course.semester?(course.chapters.find(chapter=>chapter.id===unit.knowledge.chapterId)?.title||course.title):groupOf(unit).title+' / '+order(unit);
+    const chapter=course.chapters.find(item=>item.id===unit.knowledge.chapterId);
+    const location=chapter?.title??course.title;
     return `<nav class="concept-route" aria-label="当前概念的学习路径"><div class="route-heading">${button('course',course.title,course.id)}<span>${inlineMathHtml(location)} · ${inlineMathHtml(unit.knowledge.title)}</span></div><p>${inlineMathHtml(unit.question)}</p><div class="route-steps">${steps}${button('records','我的学习与复习')}</div><div class="route-next">${next?button('knowledge','下一单元 · '+next.knowledge.title,next.knowledge.id):button('course','回看全章目录',course.id)}</div></nav>`;
   }
   home(){
