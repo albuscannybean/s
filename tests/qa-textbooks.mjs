@@ -44,6 +44,23 @@ try {
     return {sections,chapters,plots,formulas};
   });
   assert.equal(index.sections,245);assert.equal(index.chapters,47);assert.equal(index.plots,5);
+  for(const width of [1440,390]) {
+    await page.setViewportSize({width,height:900});
+    await page.locator('.math-main-nav [data-math-nav=courses]').click();
+    const strip=page.locator('.document-bar');
+    const before=(await strip.boundingBox()).width;
+    const add=page.locator('#documentAddSlot button');
+    await add.click();
+    const firstWidth=(await page.locator('.browser-tab').first().boundingBox()).width;
+    for(let i=0;i<12;i++)await add.click();
+    const after=await strip.boundingBox(),button=await add.boundingBox();
+    assert.ok(Math.abs(before-after.width)<=1,JSON.stringify({width,before,after}));
+    assert.ok(button.x+button.width<=after.x+after.width+1);
+    assert.ok(button.y>=after.y&&button.y+button.height<=after.y+after.height+1);
+    assert.ok((await page.locator('.browser-tab').first().boundingBox()).width<=firstWidth);
+    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
+    if(width===1440)assert.ok((await page.locator('.browser-tab').first().boundingBox()).width<firstWidth);
+  }
   const leaks=await page.evaluate(async()=>{
     const {MATH_KNOWLEDGE,MATH_METHODS,MATH_PROBLEMS}=await import('../../packages/learning/math-content.js');
     const issues=[];
@@ -63,23 +80,6 @@ try {
     return issues;
   });
   assert.deepEqual(leaks,[]);
-  for(const width of [1440,390]) {
-    await page.setViewportSize({width,height:900});
-    await page.locator('.math-main-nav [data-math-nav=courses]').click();
-    const strip=page.locator('.document-bar');
-    const before=(await strip.boundingBox()).width;
-    const add=page.locator('#documentAddSlot button');
-    await add.click();
-    const firstWidth=(await page.locator('.browser-tab').first().boundingBox()).width;
-    for(let i=0;i<12;i++)await add.click();
-    const after=await strip.boundingBox(),button=await add.boundingBox();
-    assert.ok(Math.abs(before-after.width)<=1,JSON.stringify({width,before,after}));
-    assert.ok(button.x+button.width<=after.x+after.width+1);
-    assert.ok(button.y>=after.y&&button.y+button.height<=after.y+after.height+1);
-    assert.ok((await page.locator('.browser-tab').first().boundingBox()).width<=firstWidth);
-    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
-    if(width===1440)assert.ok((await page.locator('.browser-tab').first().boundingBox()).width<firstWidth);
-  }
   assert.deepEqual(errors,[]);
   console.log(JSON.stringify({...index,viewports:[1440,390],errors}));
 } finally {await browser.close();}
