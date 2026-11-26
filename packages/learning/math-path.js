@@ -1,5 +1,5 @@
 import {semesterKnowledge,semesterMethods,semesterProblems} from './semester-content.js';
-import {mathKnowledgeById, mathProblemById, mathMethodById} from './math-content.js';
+import {MATH_COURSES,mathKnowledgeById,mathProblemById,mathMethodById} from './math-content.js';
 
 export const chapterStages = [
   {title:'从逐点观察到统一定义', question:'选择项数 N 时，能否让它与观察点无关？', units:['K01','K02','K03']},
@@ -28,11 +28,17 @@ export const chapterUnits = chapterStages.flatMap(group=>group.units).map(short=
     method:mathMethodById('ANA-UC-'+method), problem:mathProblemById('ANA-UC-'+problem), question};
 });
 const semesterUnits=semesterKnowledge.map(knowledge=>({
-  knowledge, method:semesterMethods.find(item=>item.knowledgeIds.includes(knowledge.id)),
+  knowledge:mathKnowledgeById(knowledge.id), method:semesterMethods.find(item=>item.knowledgeIds.includes(knowledge.id)),
   problem:semesterProblems.find(item=>item.knowledgeIds.includes(knowledge.id)),
   question:knowledge.summary
 }));
-export const pathUnits=[...chapterUnits,...semesterUnits];
+const existingPaths=new Map([...chapterUnits,...semesterUnits].map(item=>[item.knowledge.id,item]));
+export const pathUnits=MATH_COURSES.flatMap(course=>course.chapters.flatMap(chapter=>chapter.groups.flatMap(group=>
+  group.knowledgeIds.map(id=>{
+    const knowledge=mathKnowledgeById(id);
+    return existingPaths.get(id)??{knowledge,problem:mathProblemById(group.problemIds[0]),question:knowledge.summary};
+  })
+)));
 export const pathUnit = id=>pathUnits.find(u=>u.knowledge.id===id);
 export function resolveUnit(view,id,previous){
   if(view==='knowledge')return pathUnit(id);

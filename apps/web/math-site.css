@@ -268,19 +268,18 @@
 
 .knowledge-form-tabs{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px;padding:0;border:0}.knowledge-form-tabs label{position:relative;display:flex;cursor:pointer}.knowledge-form-tabs input{position:absolute;opacity:0;width:1px;height:1px}.knowledge-form-tabs span{display:flex;align-items:center;min-height:36px;padding:6px 14px;border:1px solid var(--line);border-radius:7px;background:var(--paper);color:var(--ink);font-size:13px;line-height:1.5}.knowledge-form-tabs input:checked+span{background:var(--green);border-color:var(--green);color:var(--ui-on-accent)}.knowledge-form-tabs input:focus-visible+span{outline:2px solid var(--green);outline-offset:3px}.knowledge-form-tabs label:hover span{border-color:var(--green)}.course-heading{margin-bottom:12px}.math-chapter-card>summary b{min-width:0;overflow-wrap:anywhere}.math-archive .catalog-search .math-archive-filters label{flex:1 1 auto}
 
-.textbook-reader { margin:12px 0 20px; }
-.textbook-reader h3,.textbook-practice h4 { margin:0 0 10px; }
-.textbook-controls { display:flex; flex-wrap:wrap; gap:8px 16px; }
-.textbook-controls label { flex:1 1 200px; display:grid; gap:4px; color:var(--muted); }
-.textbook-controls select { width:100%; min-width:0; color:var(--ink); }
-.textbook-file { margin:12px 0; color:var(--muted); }
-.textbook-reader summary { cursor:pointer; padding-block:5px; }
-.textbook-sections { border-block:1px solid var(--line); }
-.textbook-sections>details+details { border-top:1px solid var(--line); }
-.textbook-sections>details>summary { padding:10px 4px; }
-.textbook-sections>details>summary small { color:var(--muted); margin-inline:7px 12px; }
-.textbook-sections>details>div { padding:0 12px 12px; }
-.textbook-reader p { line-height:1.75; overflow-wrap:anywhere; }
-.textbook-sources { display:flex; gap:4px 14px; flex-wrap:wrap; }
-.textbook-sources a { padding-block:5px; color:var(--green); }
-.textbook-practice { margin:16px 0; }
+.course-lesson { padding:8px 0; }
+.course-lesson + .course-lesson { border-top:1px solid var(--line); }
+.course-lesson > .math-item-card { width:100%; }
+.course-lesson > .chapter-related { margin:4px 0 0 12px; border:0; }
+.course-source { color:var(--muted); font-size:var(--text-meta); margin-top:20px; }
+.math-course-return { margin:8px 0 12px; }
+.catalog-id { overflow-wrap:anywhere; }
+.course-heading h1 { margin:0; font-size:var(--text-title); }
+.course-chapter-jump { display:flex; align-items:center; gap:8px; margin-left:auto; min-width:0; color:var(--muted); font-size:var(--text-meta); }
+.course-chapter-jump select { width:min(260px,46vw); min-width:0; }
+@media(max-width:520px) {
+  .course-heading { flex-wrap:wrap; }
+  .course-chapter-jump { width:100%; }
+  .course-chapter-jump select { flex:1; }
+}

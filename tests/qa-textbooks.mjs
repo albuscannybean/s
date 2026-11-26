@@ -5,81 +5,79 @@ const browser=await chromium.launch({headless:true,executablePath:process.env.LM
 const url=process.env.LMN_QA_URL||'http://127.0.0.1:4174/apps/web/';
 try {
   const page=await browser.newPage({viewport:{width:1440,height:960}});
-  const errors=[];page.on('pageerror',e=>errors.push(e.message));
-  await page.goto(url,{waitUntil:'networkidle'});
-  await page.waitForFunction(()=>!!window.lmnWorkspace);
-  assert.equal(await page.locator('#globalSearch').count(),0);
-  await page.locator('[data-math-nav=knowledge]').first().click();
-  await page.locator('#mathSearch').fill('格林函数');
-  const results=page.locator('#textbookMatches');
-  await results.locator(':scope > summary').click();
-  await results.locator('details > summary').click();
-  await results.getByRole('button',{name:/格林函数/}).click();
-  const reader=page.locator('#textbookReader');
-  assert.match(await reader.locator('.textbook-sections > details[open]').innerText(),/PDF 226/);
-  const index=await page.evaluate(async()=>{
-    const {TEXTBOOKS}=await import('../../packages/learning/textbooks.js');
-    let sections=0,chapters=0,plots=0,formulas=0;
-    const routes={algebra:'algebra',ode:'ode',prob:'probability',analysis:'analysis-3',a1:'analysis-3',a2:'analysis-3',a3:'analysis-3'};
-    for(const book of TEXTBOOKS){
-      window.lmnWorkspace.openMathArchive('course','course-'+routes[book.id]);
-      const root=document.querySelector('#textbookReader');
-      const [selectBook,selectChapter]=root.querySelectorAll('select');
-      selectBook.value=book.id;selectBook.dispatchEvent(new Event('change'));
-      for(const chapter of book.chapters){
-        selectChapter.value=chapter.number;selectChapter.dispatchEvent(new Event('change'));
-        const rows=root.querySelectorAll('.textbook-sections > details');
-        if(rows.length!==chapter.sections.length) throw Error(book.id+' '+chapter.number);
-        if(root.querySelector('.math-render-error')) throw Error('KaTeX '+book.id+' '+chapter.number);
-        sections+=rows.length;chapters++;formulas+=root.querySelectorAll('.katex').length;
-        if(chapter.plot) {
-          const plot=[...root.querySelectorAll('summary')].find(el=>el.textContent==='用函数图检验').parentElement;
-          plot.open=true;
-          await new Promise(resolve=>setTimeout(resolve,40));
-          if(!plot.querySelector('svg')||!plot.querySelector('.document-plot-controls .katex'))throw Error('figure '+book.id);
-          plots++;
-        }
-      }
-    }
-    return {sections,chapters,plots,formulas};
-  });
-  assert.equal(index.sections,245);assert.equal(index.chapters,47);assert.equal(index.plots,5);
-  for(const width of [1440,390]) {
-    await page.setViewportSize({width,height:900});
-    await page.locator('.math-main-nav [data-math-nav=courses]').click();
-    const strip=page.locator('.document-bar');
-    const before=(await strip.boundingBox()).width;
-    const add=page.locator('#documentAddSlot button');
-    await add.click();
-    const firstWidth=(await page.locator('.browser-tab').first().boundingBox()).width;
-    for(let i=0;i<12;i++)await add.click();
-    const after=await strip.boundingBox(),button=await add.boundingBox();
-    assert.ok(Math.abs(before-after.width)<=1,JSON.stringify({width,before,after}));
-    assert.ok(button.x+button.width<=after.x+after.width+1);
-    assert.ok(button.y>=after.y&&button.y+button.height<=after.y+after.height+1);
-    assert.ok((await page.locator('.browser-tab').first().boundingBox()).width<=firstWidth);
-    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
-    if(width===1440)assert.ok((await page.locator('.browser-tab').first().boundingBox()).width<firstWidth);
+  const errors=[];page.on('pageerror',error=>errors.push(error.message));
+  const response=await page.goto(url,{waitUntil:'networkidle'});
+  assert.equal(response.status(),200);
+  if(process.env.LMN_EXPECTED_SHA){
+    const release=await page.request.get(new URL('release.json',url).href,{headers:{'Cache-Control':'no-cache'}});
+    assert.equal((await release.json()).commit,process.env.LMN_EXPECTED_SHA);
   }
-  const leaks=await page.evaluate(async()=>{
-    const {MATH_KNOWLEDGE,MATH_METHODS,MATH_PROBLEMS}=await import('../../packages/learning/math-content.js');
-    const issues=[];
+  await page.waitForFunction(()=>!!window.lmnWorkspace);
+  const nav=kind=>page.locator('.math-main-nav [data-math-nav='+kind+']');
+  assert.equal(await page.locator('#globalSearch').count(),0);
+  const strip=page.locator('.document-bar');
+  const initial=(await strip.boundingBox()).width;
+  const add=page.locator('#documentAddSlot button');
+  await add.click();
+  const first=page.locator('.browser-tab').first(),tabWidth=(await first.boundingBox()).width;
+  for(let i=0;i<12;i++)await add.click();
+  assert.ok(Math.abs((await strip.boundingBox()).width-initial)<=1);
+  assert.ok((await first.boundingBox()).width<tabWidth);
+
+  await nav('knowledge').click();
+  await page.locator('[data-catalog-filter=course]').selectOption('course-analysis-3');
+  await page.locator('[data-catalog-filter=chapter]').selectOption('course-a3-10');
+  await page.locator('#mathSearch').fill('勒贝格空间');
+  await page.locator('#mathArchiveResults [data-id="MATH-A3-K10-4"]').click();
+  assert.equal(await page.getByRole('heading',{name:'勒贝格空间',exact:true}).count(),1);
+  assert.ok(await page.locator('#mathReadingBody .katex').count()>0);
+  await page.locator('[data-math-archive-action=chapter]').click();
+  assert.ok(await page.locator('#course-a3-10').evaluate(el=>el.open));
+  assert.equal(await page.locator('#textbookReader,#textbookMatches,input[accept*="pdf"]').count(),0);
+  await page.locator('#course-a3-10 .course-lesson').filter({hasText:'换元法则'}).getByText(/本节练习/).click();
+  await page.getByRole('button',{name:/正定二次型的高斯积分/}).click();
+  assert.match(await page.locator('.course-source').innerText(),/习题 8.1/);
+  assert.ok(await page.locator('#mathReadingBody .katex').count()>0);
+  await page.locator('[data-math-archive-action=start]').click();
+  assert.ok(await page.locator('#studyQuestion .katex').count()>0);
+  await page.locator('#studyDraft').fill('先正交对角化，再按特征值缩放。');
+  await page.locator('[data-study-action=submit]').click();
+  await page.locator('[data-study-action=hint]').click();
+  assert.ok(await page.locator('#studyHints .study-hint').count());
+
+  const inventory=await page.evaluate(async()=>{
+    const {MATH_COURSES,MATH_KNOWLEDGE,MATH_PROBLEMS,MATH_METHODS}=await import('../../packages/learning/math-content.js');
+    for(const course of MATH_COURSES){
+      lmnWorkspace.openMathArchive('course',course.id);
+      if(document.querySelectorAll('.math-chapter-card').length!==course.chapters.length)throw Error(course.id);
+      if(document.querySelectorAll('.course-lesson').length!==course.chapters.reduce((n,c)=>n+c.groups.length,0))throw Error('Missing sections in '+course.id);
+    }
     for(const [view,items] of [['knowledge',MATH_KNOWLEDGE],['method',MATH_METHODS],['problem',MATH_PROBLEMS]]){
       for(const {id} of items){
         lmnWorkspace.openMathArchive(view,id);
         const root=document.querySelector('#mathArchiveContent');
+        const reader=root.querySelector('#mathReadingBody,#mathMethodAction');
+        if(!reader?.textContent.trim())throw Error('Missing reading '+id);
         const text=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
         while(text.nextNode()){
           const node=text.currentNode;
           if(node.parentElement.closest('.katex,select,input,textarea,code,svg'))continue;
-          if(/\$[^$]+\$/.test(node.textContent)){issues.push(id);break;}
+          if(/\$[^$]+\$/.test(node.textContent))throw Error('Unrendered formula in '+id+' '+node.textContent.slice(0,80));
         }
-        if(root.querySelector('.math-render-error'))issues.push(id);
+        if(root.querySelector('.math-render-error,.document-plot-error'))throw Error('Render error '+id);
       }
     }
-    return issues;
+    return [MATH_COURSES.length,MATH_KNOWLEDGE.length,MATH_PROBLEMS.length,MATH_METHODS.length];
   });
-  assert.deepEqual(leaks,[]);
+  assert.deepEqual(inventory,[6,255,356,58]);
+
+  await page.setViewportSize({width:390,height:844});
+  await nav('courses').click();
+  await page.locator('[data-archive-kind=course][data-id=course-ode]').click();
+  await page.locator('#courseChapterJump').selectOption('course-ode-2');
+  await page.locator('#course-ode-2 [data-id=ODE-K01]').click();
+  await page.locator('.document-plot svg').first().waitFor({state:'attached'});
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
   assert.deepEqual(errors,[]);
-  console.log(JSON.stringify({...index,viewports:[1440,390],errors}));
-} finally {await browser.close();}
+  console.log(JSON.stringify({inventory,errors}));
+}finally{await browser.close()}

@@ -1,21 +1,21 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {KNOWLEDGE_FORMS,CONCEPT_FACETS,knowledgeClassification,METHOD_ACTION_CATEGORIES,PROBLEM_TASK_CATEGORIES,MATH_CONTENT_VERSION,MATH_COURSES,MATH_KNOWLEDGE,MATH_METHODS,MATH_PROBLEMS,mathKnowledgeById,mathProblemById,mathProblemsForKnowledge,searchMathContent,validateMathContent} from '../packages/learning/math-content.js';
+import {KNOWLEDGE_FORMS,CONCEPT_FACETS,knowledgeClassification,METHOD_ACTION_CATEGORIES,problemTaskCategory,MATH_CONTENT_VERSION,MATH_COURSES,MATH_KNOWLEDGE,MATH_METHODS,MATH_PROBLEMS,mathKnowledgeById,mathProblemById,mathProblemsForKnowledge,searchMathContent,validateMathContent} from '../packages/learning/math-content.js';
 import {createStudySession,revealStudyHint,studyContextPacket,submitStudyAttempt,updateStudyDraft,validateStudyArchive,exportStudyArchive} from '../packages/learning/study-session.js';
 import {renderMathToString} from '../packages/ui/math-markup.js';
 
 test('published courses include complete concepts, original problems and methods with valid references',()=>{
-  assert.equal(MATH_CONTENT_VERSION,'math-content/1');assert.equal(MATH_COURSES.length,5);
-  assert.equal(MATH_KNOWLEDGE.length,66);assert.equal(MATH_PROBLEMS.length,76);assert.equal(MATH_METHODS.length,58);
+  assert.equal(MATH_CONTENT_VERSION,'math-content/1');assert.equal(MATH_COURSES.length,6);
+  assert.equal(MATH_KNOWLEDGE.length,255);assert.equal(MATH_PROBLEMS.length,356);assert.equal(MATH_METHODS.length,58);
   for(const course of MATH_COURSES.filter(x=>x.semester)){
-    assert.equal(course.chapters.length,7);
+    assert.ok(course.chapters.length>=4);
     for(const chapter of course.chapters){
-      assert.equal(chapter.knowledgeIds.length,2);assert.equal(chapter.problemIds.length,2);
+      assert.ok(chapter.knowledgeIds.length>0&&chapter.problemIds.length>=chapter.groups.length);
       for(const id of chapter.knowledgeIds){const k=mathKnowledgeById(id);assert.equal(k.chapterId,chapter.id);assert.ok(mathProblemsForKnowledge(id).some(p=>p.chapterId===chapter.id));}
     }
   }
   assert.deepEqual(validateMathContent(),[]);
-  assert.ok(MATH_KNOWLEDGE.every(item=>item.example||item.body.length>300));
+  assert.ok(MATH_KNOWLEDGE.every(item=>item.source?.book&&item.body.includes(':::')));
   assert.ok(MATH_PROBLEMS.every(item=>item.solution.trim()&&item.hints.length>=1&&item.knowledgeIds.length>=1));
   assert.ok(mathProblemsForKnowledge('ANA-UC-K02').length>=10);
 });
@@ -61,7 +61,7 @@ test('every published knowledge unit has a reviewed content form and concept fac
 
 
 test('all method and problem records have curated action or task categories',()=>{
-  assert.equal(Object.keys(METHOD_ACTION_CATEGORIES).length,MATH_METHODS.length);assert.equal(Object.keys(PROBLEM_TASK_CATEGORIES).length,MATH_PROBLEMS.length);
+  assert.equal(Object.keys(METHOD_ACTION_CATEGORIES).length,MATH_METHODS.length);
   for(const m of MATH_METHODS)assert.ok(METHOD_ACTION_CATEGORIES[m.id],m.id);
-  for(const p of MATH_PROBLEMS)assert.ok(PROBLEM_TASK_CATEGORIES[p.id],p.id);
+  for(const p of MATH_PROBLEMS)assert.notEqual(problemTaskCategory(p),'未分类',p.id);
 });

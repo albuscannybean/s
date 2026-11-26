@@ -1,15 +1,16 @@
+import {buildCurriculum} from './curriculum.js';
 import {semesterCourses,semesterKnowledge,semesterMethods,semesterProblems} from './semester-content.js';
 
 // Versioned, original, publicly readable teaching content. These IDs must remain stable.
 // User Knowledge records and study sessions are deliberately stored separately.
 export const MATH_CONTENT_VERSION='math-content/1';
-export const MATH_COURSES=Object.freeze([{
+const originalCourses=Object.freeze([{
   id:'course-analysis-2',title:'数学分析（二）',description:'从函数列与函数项级数出发，理解极限运算为何需要额外的统一控制。',
   chapters:[{id:'chapter-uniform',title:'函数列：逐点收敛与一致收敛',description:'10 篇知识档案、20 道原创习题、5 个解题方法',status:'published',knowledgeIds:['K01','K02','K03','K04','K05','K06','K07','K08','K09','K10'],problemIds:Array.from({length:20},(_,i)=>`P${String(i+1).padStart(2,'0')}`)}]
 },...semesterCourses]);
 
 const k=(id,title,kind,summary,body,prerequisites=[],tags=[])=>({id:`ANA-UC-${id}`,title,kind,summary,body,prerequisites:prerequisites.map(x=>`ANA-UC-${x}`),tags,courseId:'course-analysis-2',chapterId:'chapter-uniform'});
-export const MATH_KNOWLEDGE=Object.freeze([
+const originalKnowledge=Object.freeze([
   k('K01','函数列与逐点收敛','definition','先固定一个点，再观察数列如何变化。',String.raw`# 问题从哪里来？
 给定一列函数 $f_1,f_2,\ldots$，我们不仅想知道每个函数的性质，还想知道 $n$ 增大时是否出现一个共同的极限函数。
 
@@ -157,7 +158,7 @@ $|\sin(nx)/n|\le1/n$ 对所有实数 $x$ 成立，所以 $\sin(nx)/n$ 在整个 
 ]);
 
 const m=(id,title,trigger,action,reason,boundary,knowledgeIds)=>({id:`ANA-UC-${id}`,title,trigger,action,reason,boundary,knowledgeIds:knowledgeIds.map(x=>`ANA-UC-${x}`)});
-export const MATH_METHODS=Object.freeze([
+const originalMethods=Object.freeze([
   m('M01','量词展开与否定','题目要求证明定义或构造非一致收敛反例。',String.raw`写清 $\varepsilon,N,n,x$ 的顺序；反例需固定一个 $\varepsilon_0$，让任意 $N$ 都失败。`,'精确识别 $N$ 是否允许依赖 $x$。','固定一个“坏点”通常无法反驳已经逐点收敛的函数列。',['K02','K03']),
   m('M02','上确界转化','全定义域的误差可直接求上界或上确界。',String.raw`计算或估计 $e_n=\sup_{x\in E}|f_n-f|$，检查 $e_n\to0$。`,'把无穷多个点的误差转化为一个数列。','上确界可能不取到，也可能为无穷大。',['K04']),
   m('M03','移动点与尖峰反例','逐点极限成立，但误差集中在随 $n$ 移动的位置。',String.raw`构造 $x_n\in E$，使 $|f_n(x_n)-f(x_n)|\ge\varepsilon_0>0$。`,'它直接实现了一致收敛定义的逻辑否定。','必须先弄清真正的极限函数，不能让 $x_n$ 替代固定点的逐点检验。',['K03','K08']),
@@ -170,7 +171,7 @@ const p=(number,title,type,difficulty,prompt,knowledge,methods,hints,solution,tr
   id:`ANA-UC-P${String(number).padStart(2,'0')}`,title,type,difficulty,prompt,knowledgeIds:knowledge.map(x=>`ANA-UC-K${String(x).padStart(2,'0')}`),methodIds:methods.map(x=>`ANA-UC-M${String(x).padStart(2,'0')}`),hints,solution,transfer,
   courseId:'course-analysis-2',chapterId:'chapter-uniform',source:{kind:'original',attribution:'数学 · LMN 教学项目',license:'original'}
 });
-export const MATH_PROBLEMS=Object.freeze([
+const originalProblems=Object.freeze([
   p(1,'两种收敛的量词差别','概念辨析',1,String.raw`分别写出逐点收敛与一致收敛的 $\varepsilon$–$N$ 定义。解释哪一个量词顺序发生改变，以及为什么不能交换。`,[1,2,3],[1],['先想清 $N$ 是否允许依赖 $x$。',String.raw`比较 $\forall x\,\exists N$ 和 $\exists N\,\forall x$。`],String.raw`逐点：$\forall x\in E\,\forall\varepsilon>0\,\exists N(\varepsilon,x)\,\forall n\ge N:|f_n(x)-f(x)|<\varepsilon$。一致：$\forall\varepsilon>0\,\exists N(\varepsilon)\,\forall n\ge N\,\forall x\in E$，同一不等式成立。前者给每个点各自的起始位置；后者要求所有点共用一个起始位置。`,String.raw`用一句话否定一致收敛定义，并举出 $x^n$ 的证据。`),
   p(2,'经典反例：$x^n$ 在 $[0,1)$','反例构造',2,String.raw`证明 $f_n(x)=x^n$ 在 $[0,1)$ 上逐点趋零，但不一致趋零。请同时尝试定义法与上确界法。`,[1,2,3,4,8],[1,2,3],['对固定 $0\le x<1$，$x^n$ 的极限是什么？','取 $x_n=2^{-1/n}$，检查 $x_n^n$。','上确界 $\sup_{0\le x<1}x^n$ 是否随着 $n$ 缩小？'],String.raw`每个固定 $x<1$ 均有 $x^n\to0$。但 $\sup_{x\in[0,1)}x^n=1$，不趋零，故不一致收敛。或者取 $\varepsilon_0=1/2$、$x_n=2^{-1/n}\in[0,1)$，则任意 $n$ 都有 $x_n^n=1/2$，直接否定一致收敛的严格小于号。`,String.raw`若把定义域改为 $[0,a]$（$a<1$），还能构造这种反例吗？`),
   p(3,'限制定义域后的 $x^n$','证明训练',2,String.raw`固定 $0<a<1$。证明 $f_n(x)=x^n$ 在 $[0,a]$ 上一致收敛到零，并给出明确的 $N(\varepsilon)$。`,[2,4,9,10],[2,4],['先寻找对所有 $x\in[0,a]$ 成立的估计。','利用 $0\le x^n\le a^n$。'],String.raw`对 $x\in[0,a]$，有 $|x^n|\le a^n$，且 $a^n\to0$。对 $0<\varepsilon<1$，可取任意正整数 $N>\log\varepsilon/\log a$（由于 $\log a<0$），使 $n\ge N$ 时 $a^n<\varepsilon$；当 $\varepsilon\ge1$ 时取 $N=1$ 即可。`,String.raw`把 $[0,a]$ 改为 $[-a,a]$，估计需怎样修改？`),
@@ -194,18 +195,27 @@ export const MATH_PROBLEMS=Object.freeze([
   ...semesterProblems
 ]);
 
+const curriculum=buildCurriculum(originalCourses,originalKnowledge,originalProblems,originalMethods);
+export const MATH_COURSES=Object.freeze(curriculum.courses);
+export const MATH_KNOWLEDGE=Object.freeze(curriculum.knowledge);
+export const MATH_PROBLEMS=Object.freeze(curriculum.problems);
+export const MATH_METHODS=Object.freeze(curriculum.methods);
+
 export const chapterItemId=id=>id.includes('-')?id:`ANA-UC-${id}`;
-export const mathKnowledgeById=id=>MATH_KNOWLEDGE.find(x=>x.id===id)??null;
-export const mathProblemById=id=>MATH_PROBLEMS.find(x=>x.id===id)??null;
-export const mathMethodById=id=>MATH_METHODS.find(x=>x.id===id)??null;
-export const mathCourseById=id=>MATH_COURSES.find(x=>x.id===id)??null;
+const byId=items=>new Map(items.map(item=>[item.id,item]));
+const knowledgeIndex=byId(MATH_KNOWLEDGE),problemIndex=byId(MATH_PROBLEMS),methodIndex=byId(MATH_METHODS),courseIndex=byId(MATH_COURSES);
+export const mathKnowledgeById=id=>knowledgeIndex.get(id)??null;
+export const mathProblemById=id=>problemIndex.get(id)??null;
+export const mathMethodById=id=>methodIndex.get(id)??null;
+export const mathCourseById=id=>courseIndex.get(id)??null;
 export const mathProblemsForKnowledge=id=>MATH_PROBLEMS.filter(x=>x.knowledgeIds.includes(id));
 export const mathProblemsForMethod=id=>MATH_PROBLEMS.filter(x=>x.methodIds.includes(id));
 export function searchMathContent(items,{text='',difficulty='',type=''}={}){
-  const query=String(text).trim().toLowerCase().replaceAll('柯西','cauchy');return items.filter(item=>{
+  const normalized=value=>String(value).normalize('NFKC').toLowerCase().replaceAll('柯西','cauchy');
+  const query=normalized(text).trim();return items.filter(item=>{
     if(difficulty&&String(item.difficulty)!==String(difficulty))return false;
     if(type&&item.type!==type)return false;
-    const haystack=[item.id,item.title,item.summary,item.prompt,item.body,item.type,item.trigger,item.category,mathCourseById(item.courseId??'course-analysis-2')?.title,item.action,item.reason,item.boundary,...(item.tags??[])].filter(Boolean).join(' ').toLowerCase();
+    const haystack=normalized([item.id,item.code,item.title,item.summary,item.prompt,item.body,item.type,item.trigger,item.category,mathCourseById(item.courseId??'course-analysis-2')?.title,item.action,item.reason,item.boundary,...(item.tags??[])].filter(Boolean).join(' '));
     return !query||haystack.includes(query);
   });
 }
@@ -732,7 +742,7 @@ export const KNOWLEDGE_CLASSIFICATION = Object.freeze({
     ]
   }
 });
-export const knowledgeClassification = item => KNOWLEDGE_CLASSIFICATION[typeof item==='string'?item:item.id]??null;
+export const knowledgeClassification = item => KNOWLEDGE_CLASSIFICATION[typeof item==='string'?item:item.id]??(typeof item==='string'?mathKnowledgeById(item)?.classification:item.classification)??null;
 
 // Curated primary action categories; keep original source labels and stable IDs.
 export const METHOD_ACTION_CATEGORIES = Object.freeze({
