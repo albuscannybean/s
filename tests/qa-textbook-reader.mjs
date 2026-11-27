@@ -56,15 +56,16 @@ try {
   await page.locator('[data-archive-kind="course"][data-id="course-algebra"]').click();
   const reader = page.locator('#courseBook');
   const fixturePDF = bundle ? null : fixture();
-  if (!bundle) {
-    await page.evaluate(async hash => {
-      lmnWorkspace.mathArchive.leaveCourse();
-      const { mountTextbookReader } = await import('../../packages/ui/textbook-reader.js');
-      lmnWorkspace.mathArchive.bookReader = mountTextbookReader(document.querySelector('#courseBook'), {
-        books: [{ id: 'qa-book', title: 'QA book', sha256: hash, pages: 2, chapters: [] }]
-      });
-    }, createHash('sha256').update(fixturePDF).digest('hex'));
-  }
+  await page.waitForFunction(()=>document.querySelector('[data-course-reading=ALG-K01] .course-original-prose'));
+  await page.evaluate(async hash => {
+    lmnWorkspace.mathArchive.leaveCourse();
+    const { mountTextbookReader } = await import('../../packages/ui/textbook-reader.js');
+    const host=document.querySelector('#courseBook');
+    host.closest('section').hidden=false;
+    lmnWorkspace.mathArchive.bookReader = mountTextbookReader(host, hash ? {
+      books: [{ id: 'qa-book', title: 'QA book', sha256: hash, pages: 2, chapters: [] }]
+    } : { bookId: 'algebra' });
+  }, fixturePDF ? createHash('sha256').update(fixturePDF).digest('hex') : null);
   const attach = reader.locator('[data-files]');
   await attach.setInputFiles(bundle || { name: 'fixture.pdf', mimeType: 'application/pdf', buffer: fixturePDF });
   const text = reader.locator('.textLayer span').filter({ hasText: bundle ? /半群|群/ : 'Definitions and examples' }).first();
@@ -101,6 +102,7 @@ try {
     await mkdir('qa-output', { recursive: true });
     await page.screenshot({ path: 'qa-output/private-textbook-mobile.png' });
     await page.reload({ waitUntil: 'networkidle' });
+    await page.getByText('已连接的原页与旧批注',{exact:true}).click();
     await reader.locator('.book-highlights span').first().waitFor();
     for (const [course, edition, pages] of [
       ['course-ode', 'ode', '264'], ['course-probability', 'prob', '478'],
@@ -109,6 +111,7 @@ try {
     ]) {
       await page.locator('.math-main-nav [data-math-nav="courses"]').click();
       await page.locator('[data-archive-kind="course"][data-id="' + course + '"]').click();
+      await page.getByText('已连接的原页与旧批注',{exact:true}).click();
       await reader.locator('[data-book]').selectOption(edition);
       await reader.locator('.textLayer').waitFor();
       await page.waitForFunction(() => !document.querySelector('.book-paper').hasAttribute('aria-busy'));

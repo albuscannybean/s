@@ -30,6 +30,7 @@ async function run(store, mode, action) {
 }
 
 export const getTextbook = id => run('editions', 'readonly', store => store.get(id));
+export const hasTextbook = id => run('editions', 'readonly', store => store.getKey(id)).then(Boolean);
 export const pageNotes = (edition, page) => run('notes', 'readonly', store => store.index('page').getAll([edition, page]));
 export const savePageNote = note => run('notes', 'readwrite', store => store.put(note));
 export const deletePageNote = id => run('notes', 'readwrite', store => store.delete(id));

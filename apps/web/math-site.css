@@ -312,6 +312,12 @@
 .course-guide { margin-block:var(--space-4); }
 .course-guide > summary { border-block:1px solid var(--line); padding:var(--space-3) var(--space-2); }
 .course-guide > .course-chapter-jump { margin-block:var(--space-3); }
+.course-original-text { margin-block:var(--space-4); }
+.course-original-text > h4 { margin:0; font-size:var(--text-section); }
+.course-original-prose { font-family:Georgia,"Noto Serif CJK SC","Songti SC",SimSun,serif; font-size:1.08rem; line-height:1.95; overflow-wrap:anywhere; }
+.course-original-prose p { margin:0 0 var(--space-3); }
+.course-original-source { color:var(--muted); margin-block:var(--space-2) var(--space-4); font-size:var(--text-meta); }
+.course-reading-companion { margin-block:var(--space-3); }
 .book-toolbar { display:flex; align-items:center; flex-wrap:wrap; gap:var(--space-2) var(--space-3); padding-block:var(--space-2); }
 .book-controls { position:sticky; top:0; z-index:3; background:var(--canvas); }
 .book-toolbar[hidden],.book-scroll[hidden],.book-notes[hidden],.book-selection[hidden] { display:none; }

@@ -80,16 +80,19 @@ function blockAnchor(text,index){
 export function mountParagraphNotes(body,{readNotes,saveNotes}){
   const documentRef=body.ownerDocument;
   const savedNotes=readNotes();
+  const notesByAnchor=new Map(savedNotes.map(note=>[note.anchor,note]));
   const blocks=[...body.children].filter(node=>node.matches('p,blockquote,ol,ul,.study-block,.math-display'));
+  // Read all excerpts before wrapping any paragraphs, so long chapters don't force a layout per annotation.
+  const excerpts=blocks.map(block=>block.querySelector('.document-plot')?null:excerptText(block));
   const occurrences=new Map(),matched=new Set();
   blocks.forEach((block,index)=>{
-    if(block.querySelector('.document-plot'))return;
-    const excerpt=excerptText(block);
+    const excerpt=excerpts[index];
+    if(excerpt===null)return;
     const occurrence=occurrences.get(excerpt)??0;
     occurrences.set(excerpt,occurrence+1);
     const anchor=blockAnchor(excerpt,occurrence);
     matched.add(anchor);
-    const current=savedNotes.find(note=>note.anchor===anchor);
+    const current=notesByAnchor.get(anchor);
     const wrap=documentRef.createElement('div');wrap.className='reading-paragraph';
     block.before(wrap);wrap.append(block);
     const marker=button(wrap,current?.text?'批注':'＋',()=>openNote());
