@@ -80,6 +80,7 @@ try {
   await page.setViewportSize({width:390,height:844});
   await nav('courses').click();
   await page.locator('[data-archive-kind=course][data-id=course-ode]').click();
+  await page.locator('.reading-panel-left > summary').click();
   await page.locator('#courseChapterJump').selectOption('course-ode-2');
   await page.locator('#course-ode-2 [data-id=ODE-K01]').click();
   await page.locator('.document-plot svg').first().waitFor({state:'attached'});

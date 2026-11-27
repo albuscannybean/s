@@ -14,12 +14,20 @@ import {TEXTBOOK_EDITIONS,textbookForSource} from '../learning/textbook-editions
 import {mountTextbookReader} from './textbook-reader.js';
 import {courseTextManifest,mountCourseOriginal} from './course-original.js';
 import {hasTextbook} from './textbook-shelf.js';
+import {connectCourseReading} from './course-navigation.js';
+import {mountReadingFrame,readingLink,readingPanel} from './reading-frame.js';
+import {readProgress} from '../learning/reading-progress.js';
+import {EXPERIMENTS,experimentById,experimentFor} from '../learning/math-experiments.js';
+import {mountExperiment} from './experiment-view.js';
+import {bindLearningBackup} from './learning-backup.js';
+import {METHOD_EXAMPLES} from '../learning/method-examples.js';
 
 const $=selector=>document.querySelector(selector);
 const h=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const viewNames={courses:'课程',course:'课程',discovery:'例子与实验',problems:'题库',problem:'题库',knowledge:'知识库',methods:'方法库',method:'方法库',search:'全站数学检索',about:'关于'};
 const masteryLabels=['未学习','初步理解','提示下完成','独立完成','可迁移运用'];
 const annotationId=id=>`math-note:${id}`;
+const lessonIds=new Set(MATH_COURSES.flatMap(course=>course.chapters.flatMap(chapter=>chapter.groups.map(group=>group.id))));
 const originalButton=(unit)=>textbookForSource(unit.source)?`<button type="button" data-math-archive-action="book" data-book-unit="${h(unit.id)}">阅读本节教材原页</button>`:'';
 const archiveButton=(kind,id,title,detail='')=>`<button type="button" class="math-item-card" data-archive-kind="${h(kind)}" data-id="${h(id)}"><span class="math-item-title" data-math-inline="${h(title)}"></span><small data-math-inline="${h(detail)}"></small><span class="math-item-arrow" aria-hidden="true">↗</span></button>`;
 const renderInlineTitles=root=>{for(const item of root.querySelectorAll('[data-math-inline]')){item.replaceChildren();appendInlineContent(item,item.dataset.mathInline)}};
@@ -27,7 +35,7 @@ function download(name,value){const url=URL.createObjectURL(new Blob([JSON.strin
 
 export class MathArchive{
   constructor(controller){this.controller=controller;this.annotations=new Map();this.collections=new MathCollections();this.catalogFilters={};this.search={problems:'',knowledge:'',methods:'',search:''};this.filters={difficulty:'',type:''};this.timers=new Map();this.notice='';this.discoverySelectedId=RIGOR_SAMPLE_ID;this.rigorDate=null;}
-  async load(){for(const note of await list('mathAnnotations'))this.annotations.set(note.id,note);this.bind()}
+  async load(){for(const note of await list('mathAnnotations'))this.annotations.set(note.id,note);this.bind();bindLearningBackup(this)}
   bind(){const root=$('#mathArchive');root.addEventListener('click',event=>{
     const plot=event.target.closest('#discoveryPlotPrimary svg');
     if(plot){
@@ -132,7 +140,7 @@ export class MathArchive{
     if(immediate)save();else this.timers.set(key,setTimeout(save,400));
     this.showNotice('私人批注已更新，将保存在当前浏览器中。');
   }
-  validAnnotationTarget(id){return Boolean(mathKnowledgeById(id)||mathProblemById(id)||mathMethodById(id)||mathDiscoveryById(id)||rigorDateFromSubject(id))}
+  validAnnotationTarget(id){return Boolean(mathKnowledgeById(id)||mathProblemById(id)||mathMethodById(id)||mathDiscoveryById(id)||experimentById(id)||rigorDateFromSubject(id))}
   renderRigorTasks(){
     const id=rigorDailySubject($('#rigorDailyDate').value);
     const tasks=this.annotations.get(annotationId(id))?.rigorTasks;
@@ -196,7 +204,10 @@ export class MathArchive{
     const text=`# ${problem.title}\n编号：${problem.id}\n\n${problem.prompt}\n\n关联知识：${problem.knowledgeIds.map(k=>mathKnowledgeById(k)?.title).join('、')}\n\n请作为数学学习教练，先给我最小提示，不要立即展示完整解答。`;
     try{await navigator.clipboard.writeText(text);this.showNotice('已复制题目和 AI 辅导请求（不包含答案）。')}catch{this.showNotice('浏览器禁止剪贴板操作，请进入解题工作台下载 AI 请求。')}
   }
-  leaveCourse(){this.bookReader?.destroy();this.bookReader=null}
+  leaveCourse(){
+    this.disconnectCourse?.();this.disconnectCourse=null;
+    this.bookReader?.destroy();this.bookReader=null;
+  }
   render(){const documentId=this.controller.document;if(!documentId.startsWith('math-archive:'))return;
     const [,view,id='']=documentId.split(':'),root=$('#mathArchive');if(!root)return;
     this.leaveCourse();
@@ -207,9 +218,11 @@ export class MathArchive{
       :`<h1>${h(title)}</h1>`;
     root.innerHTML=`<div class="math-archive-shell"><header class="math-archive-page-head">${heading}</header><div id="mathArchiveContent"></div><footer class="math-archive-footer"><button type="button" data-math-archive-action="export">导出讲解和习题批注 JSON</button><button type="button" data-math-archive-action="import">导入个人批注</button><input type="file" class="hidden" id="mathAnnotationsImport" accept=".json,application/json"><button type="button" data-math-archive-action="toolbox">打开知识工具箱</button><p id="mathArchiveStatus" role="status" aria-live="polite">${h(this.notice||'课程内容随网站版本更新；个人批注仅保存在本浏览器，请定期备份。')}</p></footer></div>`;
     if(view==='courses')this.renderCourses();else if(view==='course')this.renderCourse(id);else if(view==='discovery')this.renderDiscoveries(id);else if(view==='search'||view==='problems'||view==='knowledge'&&!id||view==='methods')this.renderList(view);else if(view==='problem')this.renderProblem(id);else if(view==='method')this.renderMethod(id);else if(view==='about')this.renderAbout();else this.renderKnowledge(id);
+    if(id&&['knowledge','method','problem'].includes(view))this.arrangeDetailFrame(view,id);
     if(id&&['discovery','knowledge','method','problem'].includes(view)){
       const route=this.controller.mathPath.forPage(view,id||this.discoverySelectedId);
       if(view==='problem')$('#mathProblemResources')?.insertAdjacentHTML('beforeend',route);
+      else if(view==='knowledge'||view==='method')$('.reading-panel-right')?.insertAdjacentHTML('beforeend',route);
       else $('#mathArchiveContent').insertAdjacentHTML('afterbegin',route);
     }
     if(id&&['knowledge','method','problem'].includes(view)){
@@ -246,6 +259,71 @@ export class MathArchive{
   renderCourses(){
     const catalog=(courses)=>courses.map(course=>`<button type="button" class="course-tile" data-archive-kind="course" data-id="${course.id}">${icon(course.icon||'book')}<span><b>${h(course.title)}</b><small>${h(course.chapters.length+' 章 · '+course.chapters.reduce((n,c)=>n+c.knowledgeIds.length,0)+' 个知识单元')}</small></span><span aria-hidden="true">›</span></button>`).join('');
     $('#mathArchiveContent').innerHTML=`<h2 class="catalog-heading">本学期课程</h2><div class="course-grid">${catalog(MATH_COURSES.filter(course=>course.semester))}</div><h2 class="catalog-heading">分析基础</h2><div class="course-grid">${catalog(MATH_COURSES.filter(course=>!course.semester))}</div>`;
+  }
+  renderPersonalReading(){
+    const recent=$('#mathRecentReading'),items=$('#mathPersonalItems');
+    if(!recent||!items)return;
+    recent.replaceChildren();
+    items.replaceChildren();
+    const progress=Object.entries(readProgress()).sort(([,a],[,b])=>(b?.at??0)-(a?.at??0));
+    for(const [id,state] of progress){
+      const course=mathCourseById(id),unit=mathKnowledgeById(state?.unitId);
+      if(course&&unit)recent.append(readingLink(course.title+' · '+unit.title,()=>this.controller.openMathArchive('course',id)));
+    }
+    if(!recent.childElementCount){
+      recent.append(readingLink('浏览课程',()=>this.controller.openMathArchive('courses')));
+    }
+    const titles={knowledge:mathKnowledgeById,method:mathMethodById,problem:mathProblemById,discovery:id=>mathDiscoveryById(id)||experimentById(id)};
+    const add=(parent,id)=>{
+      for(const [kind,lookup] of Object.entries(titles)){
+        const item=lookup(id);
+        if(item){parent.append(readingLink(item.title,()=>this.controller.openMathArchive(kind,id)));return;}
+      }
+    };
+    for(const folder of this.collections.read().filter(folder=>folder.items.length)){
+      const collection=document.createElement('details');
+      const name=document.createElement('summary');
+      name.textContent=folder.name;
+      collection.append(name);
+      for(const id of folder.items)add(collection,id);
+      if(collection.children.length>1)items.append(collection);
+    }
+    const notes=document.createElement('details');
+    const label=document.createElement('summary');label.textContent='批注与猜想';notes.append(label);
+    for(const note of [...this.annotations.values()].sort((a,b)=>String(b.updatedAt).localeCompare(a.updatedAt))){
+      if(note.body||note.paragraphs?.length||note.originalParagraphs?.length||note.conjecture||note.observation)add(notes,note.subjectId);
+    }
+    if(notes.children.length>1)items.append(notes);
+    if(!items.childElementCount)items.textContent='在知识、方法或题目中收藏条目或添加批注后，这里会显示记录。';
+  }
+  arrangeDetailFrame(view,id){
+    const main=$('#mathArchiveContent .math-reading-main');
+    if(!main)return;
+    const item=view==='knowledge'?mathKnowledgeById(id):view==='problem'?mathProblemById(id):mathMethodById(id);
+    const title={knowledge:'知识库',method:'方法库',problem:'题库'}[view];
+    const list={knowledge:'knowledge',method:'methods',problem:'problems'}[view];
+    const back=readingLink(title,()=>this.controller.openMathArchive(list));
+    const contact=main.querySelector('.math-course-return');
+    const course=mathCourseById(item?.courseId??mathKnowledgeById(item?.knowledgeIds?.[0])?.courseId);
+    const left=readingPanel('目录','left',back);
+    if(contact)left.append(contact);
+    else if(course)left.append(readingLink(course.title,()=>this.controller.openMathArchive('course',course.id)));
+    const frame=main.parentElement;
+    frame.classList.remove('math-reading-layout','math-problem-page');
+    const current=frame.querySelector('.math-reading-side,#mathProblemResources');
+    const right=readingPanel('相关资料与笔记','right');
+    if(current){
+      const solution=current.querySelector('.math-optional-solution');
+      if(solution)main.append(solution);
+      const children=current.id==='mathProblemResources'?[...current.children].filter(node=>node.tagName!=='SUMMARY'):[...current.children];
+      current.replaceChildren(...children);
+      if(current.tagName==='DETAILS'){
+        for(const node of children)right.append(node);
+        right.id=current.id;
+        current.remove();
+      }else right.append(current);
+    }
+    mountReadingFrame(main,left,right);
   }
   renderCourse(id){
     const course=mathCourseById(id);if(!course){this.notFound();return}
@@ -321,13 +399,13 @@ export class MathArchive{
       });
       if(destination)$('#mathArchive').scrollTop=0;
     }
-    for(const chapter of $('#mathArchiveContent').querySelectorAll('.math-chapter-card')){
-      const load=()=>{
-        if(!chapter.open||chapter.dataset.readingMounted)return;
-        chapter.dataset.readingMounted='true';
-        for(const content of chapter.querySelectorAll('[data-course-reading]')){
+    const mounted=new WeakMap();
+    const readSection=content=>{
+          if(mounted.has(content))return mounted.get(content);
           const unit=mathKnowledgeById(content.dataset.courseReading);
+          const chapter=content.closest('.math-chapter-card');
           const heading=document.createElement('h3');
+          heading.tabIndex=-1;
           appendInlineContent(heading,unit.title);
           content.append(heading);
           const source=document.createElement('p');source.className='chapter-reading-reference';
@@ -337,9 +415,10 @@ export class MathArchive{
           paper.className='math-reading-body';
           content.append(paper);
           this.mountReading(paper,unit);
-          this.mountOriginalReading(paper,unit,()=>{
+          const originalReady=this.mountOriginalReading(paper,unit,()=>{
             const guideText=document.createElement('details');
             guideText.className='course-reading-companion';
+            guideText.dataset.readingGuide='';
             const summary=document.createElement('summary');
             summary.textContent='站内讲解';
             paper.before(guideText);
@@ -357,21 +436,20 @@ export class MathArchive{
           action.dataset.archiveKind='problem';action.dataset.id=exercise.id;
           practice.append(prompt,task,action);
           content.append(practice);
-        }
-      };
-      chapter.addEventListener('toggle',load);load();
-    }
-    $('#courseChapterJump').onchange=event=>{
-      const chapter=document.getElementById(event.target.value);
-      if(chapter){chapter.open=true;chapter.scrollIntoView({block:'start'});}
+          this.mountInlineExperiment(content,unit.id);
+          mounted.set(content,originalReady);
+          return originalReady;
     };
-    if(active)requestAnimationFrame(()=>document.getElementById(active)?.scrollIntoView({block:'start'}));
+    this.disconnectCourse=connectCourseReading({
+      course,guide,archive:$('#mathArchive'),controller:this.controller,activeChapter:active,onRead:readSection,
+      experimentFor:id=>experimentFor(id)||MATH_DISCOVERY_CASES.find(sample=>sample.knowledgeIds.includes(id))
+    });
   }
   mountOriginalReading(body,unit,onDisplay){
     const original=document.createElement('section');original.className='course-original-text';original.hidden=true;
     body.before(original);
     const note=()=>this.annotations.get(annotationId(unit.id));
-    void mountCourseOriginal(original,unit,{
+    return mountCourseOriginal(original,unit,{
       readLocalText:()=>note()?.sourceText,
       readNotes:()=>note()?.originalParagraphs??[],
       saveNotes:originalParagraphs=>this.updateAnnotation(unit.id,{originalParagraphs}),
@@ -446,7 +524,12 @@ export class MathArchive{
     return `<p class="course-source">${h(source.book)} · §${h(source.section)}${h(reference)} · PDF 页 ${h(source.page)}</p>`;
   }
   catalogItems(section){
-    return ({problems:MATH_PROBLEMS,knowledge:MATH_KNOWLEDGE,methods:MATH_METHODS})[section]??[...MATH_PROBLEMS,...MATH_KNOWLEDGE,...MATH_METHODS];
+    return ({problems:MATH_PROBLEMS,knowledge:MATH_KNOWLEDGE,methods:MATH_METHODS})[section]??[
+      ...MATH_COURSES.map(course=>({...course,kind:'course',courseId:course.id})),
+      ...MATH_PROBLEMS,...MATH_KNOWLEDGE,...MATH_METHODS,
+      ...EXPERIMENTS.map(item=>({...item,kind:'discovery',summary:item.course,courseId:mathKnowledgeById(item.knowledgeId)?.courseId})),
+      ...MATH_DISCOVERY_CASES.map(item=>({...item,kind:'discovery',summary:item.description,courseId:'course-analysis-2'}))
+    ];
   }
   methodCategory(item){
     return methodActionCategory(item);
@@ -459,7 +542,8 @@ export class MathArchive{
     const selectedCourse=mathCourseById(state.course);
     const chapters=selectedCourse?select('章节','chapter',selectedCourse.chapters.map(chapter=>[chapter.id,chapter.title.replace(/\$([^$]+)\$/g,'$1')])):'';
     const categories=section==='methods'?select('方法类型','category',[...new Set(MATH_METHODS.map(item=>this.methodCategory(item)))].map(name=>[name,name])):'';
-    const classification=section==='knowledge'?select('概念特征','facet',Object.entries(CONCEPT_FACETS).map(([key,[label]])=>[key,label])):'';
+    const classification=section==='knowledge'?select('条目范围','entry',[['lesson','课程小节'],['entity','知识专题']])
+      +select('概念特征','facet',Object.entries(CONCEPT_FACETS).map(([key,[label]])=>[key,label])):'';
     const folders=select('收藏夹','folder',this.collections.read().map(folder=>[folder.name,folder.name]));
     const formTabs=section==='knowledge'?`<fieldset class="knowledge-form-tabs"><legend class="math-sr-only">知识主类</legend>${[['','全部知识'],...Object.entries(KNOWLEDGE_FORMS).map(([key,[label]])=>[key,label])].map(([key,label])=>`<label><input type="radio" name="knowledge-form" data-section="knowledge" data-catalog-filter="form" value="${key}" ${key===(state.form??'')?'checked':''}><span>${h(label)}</span></label>`).join('')}</fieldset>`:'';
     const problems=section==='problems'?`<label>难度<select id="mathDifficulty"><option value="">全部</option>${[1,2,3,4].map(level=>`<option value="${level}" ${this.filters.difficulty===String(level)?'selected':''}>${level}</option>`).join('')}</select></label>${select('任务类型','task',[...new Set(MATH_PROBLEMS.map(problemTaskCategory))].map(name=>[name,name]))}`:'';
@@ -469,19 +553,20 @@ export class MathArchive{
   renderListResults(section){
     const root=$('#mathArchiveResults'),count=$('#mathArchiveCount');if(!root||!count)return;
     const items=this.catalogItems(section),state=this.catalogFilters[section]??{};
-    const courseId=item=>item.courseId??'course-analysis-2';
+    const courseId=item=>item.courseId??mathKnowledgeById(item.knowledgeIds?.[0])?.courseId??'course-analysis-2';
     const folderItems=this.collections.read().find(folder=>folder.name===state.folder)?.items??[];
     const results=searchMathContent(items,{text:this.search[section],...(section==='problems'?this.filters:{})}).filter(item=>
-      (!state.course||state.course===courseId(item))&&(!state.chapter||state.chapter===item.chapterId)&&(!state.category||state.category===this.methodCategory(item))&&(!state.folder||folderItems.includes(item.id))&&(!state.task||state.task===problemTaskCategory(item))&&(!state.form||knowledgeClassification(item)?.form===state.form)&&(!state.facet||knowledgeClassification(item)?.facets.includes(state.facet)));
+      (!state.course||state.course===courseId(item))&&(!state.chapter||state.chapter===item.chapterId)&&(!state.category||state.category===this.methodCategory(item))&&(!state.folder||folderItems.includes(item.id))&&(!state.task||state.task===problemTaskCategory(item))&&(!state.form||knowledgeClassification(item)?.form===state.form)&&(!state.facet||knowledgeClassification(item)?.facets.includes(state.facet))
+      &&(!state.entry||(state.entry==='lesson')===lessonIds.has(item.id)));
     const explanation=$('#knowledgeClassExplanation');if(explanation){
       const info=[state.form?KNOWLEDGE_FORMS[state.form]:null,state.facet?CONCEPT_FACETS[state.facet]:null].filter(Boolean);
       explanation.innerHTML='<p>'+ (info.length?info.map(([label,description])=>'<b>'+h(label)+'</b>：'+h(description)).join('<br>'):'知识主类按单元的主要用途区分；概念特征描述其中数学对象的性质，可以重叠。课程只是另一种检索维度。')+'</p><details><summary>查看分类依据</summary><div class="class-reference">'+[...Object.values(KNOWLEDGE_FORMS),...Object.values(CONCEPT_FACETS)].map(([label,description])=>'<div><b>'+h(label)+'</b><span>'+h(description)+'</span></div>').join('')+'</div></details>';
     }
     count.textContent=`${results.length} / ${items.length} 个条目`;
     const rows=entries=>entries.map(item=>{
-      const kind=item.prompt?'problem':item.body?'knowledge':'method';
+      const kind=item.kind==='course'||item.kind==='discovery'?item.kind:item.prompt?'problem':item.body?'knowledge':'method';
       const cls=item.body?knowledgeClassification(item):null;
-      const meta=cls?KNOWLEDGE_FORMS[cls.form][0]+' · '+cls.facets.map(key=>CONCEPT_FACETS[key][0]).join(' / '):item.prompt?problemTaskCategory(item)+' · 难度 '+item.difficulty:this.methodCategory(item)+' · '+(item.trigger??'');
+      const meta=kind==='course'?'课程目录':kind==='discovery'?'数学实验':cls?KNOWLEDGE_FORMS[cls.form][0]+' · '+cls.facets.map(key=>CONCEPT_FACETS[key][0]).join(' / '):item.prompt?problemTaskCategory(item)+' · 难度 '+item.difficulty:this.methodCategory(item)+' · '+(item.trigger??'');
       return `<button type="button" class="math-item-card catalog-row" data-archive-kind="${kind}" data-id="${item.id}"><span class="catalog-id">${h(item.code??item.id)}</span><span><strong data-math-inline="${h(item.title)}"></strong><small data-math-inline="${h(meta)}"></small></span><span class="catalog-subject">${h(mathCourseById(courseId(item))?.title)}</span><span aria-hidden="true">›</span></button>`;
     }).join('');
     if(section==='knowledge')root.innerHTML=rows(results);
@@ -494,6 +579,7 @@ export class MathArchive{
   renderKnowledge(id){const knowledge=mathKnowledgeById(id);if(!knowledge){this.notFound();return}const related=mathProblemsForKnowledge(id),classification=knowledgeClassification(knowledge);
     $('#mathArchiveContent').innerHTML=`<article class="math-reading-layout"><div class="math-reading-main"><div class="math-reading-paper"><span class="math-kicker">知识 · ${h(knowledge.code??knowledge.id)} · ${h(classification?KNOWLEDGE_FORMS[classification.form][0]:knowledge.kind)}</span><h2 data-math-inline="${h(knowledge.title)}"></h2><p class="math-reading-summary"><span data-math-inline="${h(knowledge.summary)}"></span>${classification?`<span class="knowledge-facets">${classification.facets.map(key=>`<span>${h(CONCEPT_FACETS[key][0])}</span>`).join('')}</span>`:''}</p><div class="math-reading-body" id="mathReadingBody"></div></div><section class="math-reading-paper"><h3>关联习题</h3><div class="math-compact-grid">${related.map(item=>archiveButton('problem',item.id,item.title,`难度 ${item.difficulty} · ${item.type}`)).join('')}</div></section></div><aside class="math-reading-side"><section class="math-reading-paper"><h3>前置知识</h3>${knowledge.prerequisites.length?knowledge.prerequisites.map(x=>archiveButton('knowledge',x,mathKnowledgeById(x)?.title??x)).join(''):'<p>本专题的基础入口。</p>'}<h3>学习证据</h3><p>${h(this.evidence(knowledge.id))}</p></section>${this.annotationSection(knowledge.id)}</aside></article>`;
     this.mountReading($('#mathReadingBody'),knowledge,{editable:true});
+    this.mountInlineExperiment($('#mathReadingBody').parentElement,id);
     this.mountOriginalReading($('#mathReadingBody'),knowledge,()=>{
       const originalButton=$('#mathArchiveContent [data-math-archive-action="book"]');
       if(originalButton)originalButton.hidden=true;
@@ -541,18 +627,29 @@ export class MathArchive{
   renderMethod(id){const method=mathMethodById(id);if(!method){this.notFound();return}
     $('#mathArchiveContent').innerHTML=`<article class="math-reading-layout"><div class="math-reading-main"><div class="math-reading-paper"><span class="math-kicker">方法档案 · ${h(id)} · ${h(methodActionCategory(method))}</span><h2 data-math-inline="${h(method.title)}"></h2><dl class="math-method-definition"><dt>触发条件</dt><dd id="mathMethodTrigger"></dd><dt>核心动作</dt><dd id="mathMethodAction"></dd><dt>有效原因</dt><dd id="mathMethodReason"></dd><dt>适用边界</dt><dd id="mathMethodBoundary"></dd></dl></div><section class="math-reading-paper"><h3>使用此方法的习题</h3><div class="math-compact-grid">${mathProblemsForMethod(id).map(item=>archiveButton('problem',item.id,item.title,`难度 ${item.difficulty}`)).join('')}</div></section></div><aside class="math-reading-side"><section class="math-reading-paper"><h3>相关知识</h3>${method.knowledgeIds.map(x=>archiveButton('knowledge',x,mathKnowledgeById(x)?.title??x)).join('')}</section>${this.annotationSection(id)}</aside></article>`;
     for(const [selector,text]of [['#mathMethodTrigger',method.trigger],['#mathMethodAction',method.action],['#mathMethodReason',method.reason],['#mathMethodBoundary',method.boundary]])renderStudyMarkdown($(selector),text);
+    if(METHOD_EXAMPLES[id]){
+      const example=document.createElement('section');example.className='math-reading-paper';
+      const title=document.createElement('h3'),body=document.createElement('div');
+      title.textContent='算例与变式';body.className='math-reading-body';
+      example.append(title,body);$('.math-reading-main .math-reading-paper').after(example);
+      renderStudyMarkdown(body,METHOD_EXAMPLES[id]);
+    }
   }
   renderDiscoveries(id=''){
     if(!id){
       const root=$('#mathArchiveContent');
       const worked=MATH_KNOWLEDGE.filter(item=>item.example&&item.id.endsWith('K01'));
-      root.innerHTML=`<h2 class="catalog-heading">按课程看算例</h2><div class="course-grid">${worked.map(item=>{
+      root.innerHTML=`<h2 class="catalog-heading">参数实验</h2><div class="course-grid">${EXPERIMENTS.map(item=>
+        `<button type="button" class="course-tile" data-archive-kind="discovery" data-id="${h(item.id)}">${icon('curve')}<span><b>${h(item.title)}</b><small>${h(item.course)}</small></span></button>`).join('')}</div>
+        <h2 class="catalog-heading">按课程看算例</h2><div class="course-grid">${worked.map(item=>{
         const course=mathCourseById(item.courseId);
         return `<button type="button" class="course-tile" data-archive-kind="knowledge" data-id="${item.id}">${icon(course.icon)}<span><b>${inlineMathHtml(item.title)}</b><small>${h(course.title)}</small></span><span aria-hidden="true">›</span></button>`;
       }).join('')}</div><div class="experiment-heading"><h2 class="catalog-heading">交互实验 · 函数列</h2><button type="button" data-math-archive-action="lab">打开计算与结构工具</button></div><div class="course-grid">${MATH_DISCOVERY_CASES.map(item=>
         `<button type="button" class="course-tile math-discovery-sample" data-discovery-case="${item.id}">${icon('curve')}<span><b>${inlineMathHtml(item.title)}</b><small>${inlineMathHtml('$'+item.latex+'$')}</small></span><span aria-hidden="true">›</span></button>`).join('')}</div>`;
       return;
     }
+    const experiment=experimentById(id);
+    if(experiment){this.bindExperiment($('#mathArchiveContent'),experiment);return}
     const selected=mathDiscoveryById(id);
     if(!selected){this.notFound();return}
     this.discoverySelectedId=selected.id;
@@ -569,6 +666,27 @@ export class MathArchive{
       this.renderRigorTasks();
     }
     updateDiscoveryFigures($('#mathArchive'));
+  }
+  bindExperiment(root,experiment){
+    mountExperiment(root,experiment,{
+      note:this.annotations.get(annotationId(experiment.id))?.conjecture,
+      save:conjecture=>this.updateAnnotation(experiment.id,{conjecture}),
+      open:(kind,id)=>this.controller.openMathArchive(kind,id)
+    });
+  }
+  mountInlineExperiment(parent,id){
+    const experiment=experimentFor(id);
+    if(!experiment)return;
+    const details=document.createElement('details');
+    details.className='course-reading-companion';
+    const title=document.createElement('summary');
+    title.textContent='交互实验 · '+experiment.title;
+    const body=document.createElement('div');
+    details.append(title,body);
+    details.addEventListener('toggle',()=>{
+      if(details.open&&!body.firstChild)this.bindExperiment(body,experiment);
+    });
+    parent.append(details);
   }
   copyDiscoveryContext(){
     const root=$('#mathArchive'),packet=buildDiscoveryPacket(root);if(!packet)return;

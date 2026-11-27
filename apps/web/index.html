@@ -49,8 +49,11 @@
 <link rel="modulepreload" href="../../packages/learning/curriculum.js">
 <link rel="modulepreload" href="../../packages/learning/math-content.js">
 <link rel="modulepreload" href="../../packages/learning/math-discovery.js">
+<link rel="modulepreload" href="../../packages/learning/math-experiments.js">
 <link rel="modulepreload" href="../../packages/learning/math-path.js">
 <link rel="modulepreload" href="../../packages/learning/math-rigor.js">
+<link rel="modulepreload" href="../../packages/learning/method-examples.js">
+<link rel="modulepreload" href="../../packages/learning/reading-progress.js">
 <link rel="modulepreload" href="../../packages/learning/semester-content.js">
 <link rel="modulepreload" href="../../packages/learning/study-session.js">
 <link rel="modulepreload" href="../../packages/learning/textbook-editions.js">
@@ -110,10 +113,13 @@
 <link rel="modulepreload" href="../../packages/ui/command-registry.js">
 <link rel="modulepreload" href="../../packages/ui/content-library-actions.js">
 <link rel="modulepreload" href="../../packages/ui/content-preview.js">
+<link rel="modulepreload" href="../../packages/ui/course-navigation.js">
 <link rel="modulepreload" href="../../packages/ui/course-original.js">
 <link rel="modulepreload" href="../../packages/ui/document-editor.js">
+<link rel="modulepreload" href="../../packages/ui/experiment-view.js">
 <link rel="modulepreload" href="../../packages/ui/knowledge-navigator.js">
 <link rel="modulepreload" href="../../packages/ui/knowledge-reading.js">
+<link rel="modulepreload" href="../../packages/ui/learning-backup.js">
 <link rel="modulepreload" href="../../packages/ui/learning-notes.js">
 <link rel="modulepreload" href="../../packages/ui/library-model.js">
 <link rel="modulepreload" href="../../packages/ui/localization.js">
@@ -127,6 +133,7 @@
 <link rel="modulepreload" href="../../packages/ui/object-interaction-contract.js">
 <link rel="modulepreload" href="../../packages/ui/portable-media.js">
 <link rel="modulepreload" href="../../packages/ui/reading-editor.js">
+<link rel="modulepreload" href="../../packages/ui/reading-frame.js">
 <link rel="modulepreload" href="../../packages/ui/structure-library-actions.js">
 <link rel="modulepreload" href="../../packages/ui/structure-map.js">
 <link rel="modulepreload" href="../../packages/ui/structure-renderer.js">
@@ -147,8 +154,9 @@
   <header class="topbar math-site-topbar">
     <div class="math-masthead">
       <nav id="breadcrumbs" class="hidden" aria-label="知识路径"></nav>
-      <button class="brand math-brand" type="button" data-math-nav="courses" aria-label="数学 LMN 课程目录"><span class="math-brand-symbol">数</span><span class="math-brand-copy"><b>数学 <span class="brand-dot">·</span> LMN</b><small>观察 · 归纳 · 理解 · 应用</small></span><em class="math-release-tag">V5.1.4 · 内容版</em></button>
+      <button class="brand math-brand" type="button" data-math-nav="courses" aria-label="数学 LMN 课程目录"><span class="math-brand-symbol">数</span><span class="math-brand-copy"><b>数学 <span class="brand-dot">·</span> LMN</b><small>观察 · 归纳 · 理解 · 应用</small></span><em class="math-release-tag">V6.0 · 学习版</em></button>
       <div class="math-header-actions">
+        <button id="mathSearchEntry" type="button" data-math-nav="search" aria-label="搜索数学内容"><svg class="site-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="10.8" cy="10.8" r="5.8"/><path d="m15 15 4.7 4.7"/></svg><span>搜索</span></button>
 
         <details id="mathToolbox" class="shell-menu"><summary id="mathToolboxToggle" aria-label="资料工具与外观设置" aria-controls="mathToolboxPanel" aria-expanded="false"><svg class="site-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14 6 4 4M3 21l6-6m3-12a6 6 0 0 0-5 8L2 16a3 3 0 0 0 4 4l5-5a6 6 0 0 0 8-5l-4 3-4-4 3-4Z"/></svg><span>资料工具</span><span data-site-icon="chevron"></span></summary>
           <div id="mathToolboxPanel" class="shell-menu-panel hidden">
@@ -164,7 +172,8 @@
       <button type="button" data-math-nav="knowledge"><svg class="site-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5.5C6 4 9 4.3 12 6v15c-3-1.7-6-2-9-.5zM21 5.5C18 4 15 4.3 12 6v15c3-1.7 6-2 9-.5z"/></svg><span>知识库</span></button>
       <button type="button" data-math-nav="methods"><svg class="site-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="5" r="2"/><circle cx="18" cy="19" r="2"/><circle cx="18" cy="5" r="2"/><path d="M8 5h8M6 7v7a5 5 0 0 0 5 5h5"/></svg><span>方法库</span></button>
       <button type="button" data-math-nav="problems"><svg class="site-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg><span>题库</span></button>
-      <button type="button" data-math-nav="discovery"><svg class="site-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m15.8 8.2-2.4 5.2-5.2 2.4 2.4-5.2z"/></svg><span>实验</span></button>
+      <button type="button" data-math-nav="discovery"><svg class="site-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m15.8 8.2-2.4 5.2-5.2 2.4 2.4-5.2z"/></svg><span>数学实验</span></button>
+      <button type="button" data-math-nav="sessions"><span data-site-icon="clock"></span><span>我的学习</span></button>
     </nav>
   </header>
 
@@ -206,11 +215,15 @@
     <section id="welcome" class="welcome math-home">
       <div class="math-home-layout math-home-single">
         <div class="math-home-main">
-          <div class="math-home-intro">
-            <span class="math-kicker">私人学习记录</span>
-            <h1>我的学习</h1>
-            <p>继续上次的学习，处理到期复习，管理个人笔记和课程。</p>
-          </div>
+          <div class="math-home-intro"><h1>我的学习</h1></div>
+          <section class="math-surface" aria-labelledby="mathRecentReadingTitle"><h2 id="mathRecentReadingTitle">最近阅读</h2><div id="mathRecentReading"></div></section>
+          <details class="math-surface" id="mathPersonalCollections"><summary>收藏与批注</summary><div id="mathPersonalItems"></div></details>
+          <details class="math-surface" id="mathLearningBackup">
+            <summary>学习备份与恢复</summary>
+            <p>备份知识、结构、学习会话、网页和原页批注、收藏与阅读进度。PDF 文件仍存于本机书架。</p>
+            <div class="study-actions"><button type="button" data-backup-export>导出学习备份</button><label>选择备份<input type="file" accept=".json,application/json"></label><button type="button" data-backup-restore disabled>确认合并</button></div>
+            <p role="status"></p>
+          </details>
           <section class="math-surface learning-launch" aria-labelledby="learningLaunchTitle"><div class="math-section-head"><h2 id="learningLaunchTitle">选择一个具体问题</h2><button type="button" data-path-action="records">继续独立解题 / 到期复习</button></div><p>先尝试，遇到困难再阅读算例。每道题都连接原有提示、参考解答和迁移练习。</p><div class="learning-challenges"><article><span class="math-kicker">近世代数</span><h3>为什么模 8 加法中的 2 和 3 生成不同大小的子群？</h3><div class="challenge-actions"><button type="button" class="primary" data-path-action="problem" data-path-id="ALG-P02">先试问题</button><button type="button" data-path-action="knowledge" data-path-id="ALG-K02">看算例</button></div></article><article><span class="math-kicker">常微分方程</span><h3>为什么分离变量可能漏掉一个解？</h3><div class="challenge-actions"><button type="button" class="primary" data-path-action="problem" data-path-id="ODE-P01">先试问题</button><button type="button" data-path-action="knowledge" data-path-id="ODE-K01">看算例</button></div></article><article><span class="math-kicker">概率论</span><h3>至少一次正面与第一次正面，为什么答案不同？</h3><div class="challenge-actions"><button type="button" class="primary" data-path-action="problem" data-path-id="PROB-P01">先试问题</button><button type="button" data-path-action="knowledge" data-path-id="PROB-K01">看算例</button></div></article><article><span class="math-kicker">数学分析（三）</span><h3>所有直线路径极限相同，能证明二元极限存在吗？</h3><div class="challenge-actions"><button type="button" class="primary" data-path-action="problem" data-path-id="AN3-P01">先试问题</button><button type="button" data-path-action="knowledge" data-path-id="AN3-K01">看算例</button></div></article></div><div class="learning-tools"><button type="button" data-path-action="lab">数学实验室</button><button type="button" data-path-action="research">我的知识研究空间</button></div></section>
           <section class="math-surface semester-home"><div class="math-section-head"><h2>本学期课程</h2><button type="button" data-math-nav="courses">全部课程</button></div><div id="semesterHome" class="course-grid"></div></section>
           <section class="math-surface path-home"><div class="math-section-head"><div><h2>从这里找概念</h2></div><button type="button" data-path-action="records">学习记录与复习</button></div>

@@ -98,7 +98,12 @@ class WorkspaceController{
   applyPreferences(){const shell=$('#appShell');if(!shell)return;this.preferences.theme=this.preferences.theme==='dark'?'dark':'light';delete this.preferences.canvas;delete this.preferences.accent;this.preferences.reduceMotion=globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches??false;for(const[name,value]of Object.entries(this.preferences))shell.dataset[name]=String(value);document.documentElement.dataset.theme=this.preferences.theme;document.documentElement.dataset.font=this.preferences.font;document.documentElement.lang=this.preferences.language;const fontSize=Math.max(11,Math.min(22,Number(this.preferences.fontSize)||14));document.documentElement.style.setProperty('--ui-font-size',`${fontSize}px`);document.documentElement.style.setProperty('--navigator-width',`${Math.max(220,Math.min(620,Number(this.preferences.navigatorWidth)||300))}px`);document.documentElement.style.fontSize=`${fontSize}px`;shell.style.fontSize=`${fontSize}px`;shell.classList.toggle('status-hidden',this.preferences.statusbar===false);syncNavigatorState(this);this.drawMinimap?.()}
   cyclePreference(key,values){const current=values.indexOf(this.preferences[key]);this.preferences[key]=values[(current+1)%values.length];this.savePreferences();this.renderAll()}
   togglePreference(key){this.preferences[key]=!this.preferences[key];this.savePreferences();this.renderAll()}
-  observeSize(){this.resizeObserver=new ResizeObserver(()=>this.scheduler.request('resize'));this.resizeObserver.observe($('#canvasViewport'))}
+  observeSize(){
+    this.resizeObserver=new ResizeObserver(()=>this.scheduler.request('resize'));
+    this.resizeObserver.observe($('#canvasViewport'));
+    this.tabSizeObserver=new ResizeObserver(()=>this.keepActiveTabVisible());
+    this.tabSizeObserver.observe($('#documentTabs'));
+  }
 
   bindUI(){
     this.mathPath=new MathPath(this);this.mathPath.bind();
@@ -193,10 +198,10 @@ class WorkspaceController{
   openMathToolbox(force){const details=$('#mathToolbox'),panel=$('#mathToolboxPanel'),button=$('#mathToolboxToggle');const next=typeof force==='boolean'?force:!details.open;details.open=next;panel.classList.toggle('hidden',!next);button.setAttribute('aria-expanded',String(next))}
   navigateMathSection(section){
     if(section==='home')return this.openMathArchive('courses');
-    if(section==='sessions'){this.openMathToolbox(false);return this.openMathHome('studySessionsHomeTitle');}
+    if(section==='sessions'){this.openMathToolbox(false);return this.openMathHome();}
     if(['courses','discovery','problems','knowledge','methods','about'].includes(section))return this.openMathArchive(section);
     if(section==='library')return this.openLibrary();
-    if(section==='search')return this.openSearchWorkbench();
+    if(section==='search'){this.openMathArchive('search');$('#mathSearch')?.focus();return}
     if(section==='import')return this.openImport();
   }
   runMathHomeAction(action){
@@ -236,6 +241,7 @@ class WorkspaceController{
   }
   renderLearningHome(){
     this.mathPath.home();
+    this.mathArchive?.renderPersonalReading();
     const featured=$('#mathFeaturedProblems');if(featured){const items=MATH_PROBLEMS.filter(item=>['ANA-UC-P02','ANA-UC-P03','ANA-UC-P07'].includes(item.id));featured.innerHTML=items.map(item=>`<button type="button" data-featured-problem="${escapeHtml(item.id)}"><span>${escapeHtml(item.type)} · 难度 ${item.difficulty}</span><b data-featured-title="${escapeHtml(item.id)}"></b><small>${escapeHtml(item.id)} · 进入题目档案 →</small></button>`).join('');for(const element of featured.querySelectorAll('[data-featured-title]'))appendInlineContent(element,items.find(item=>item.id===element.dataset.featuredTitle)?.title??'')}
     this.renderStudyCatalog();
     this.studyWorkbench?.renderHome();
@@ -458,9 +464,17 @@ class WorkspaceController{
     const visible=[...new Map(this.openTabs.filter(tab=>this.validOpenTab(tab)).map(tab=>[tab.key,tab])).values()];
     for(const tab of visible){const descriptor=this.describeOpenTab(tab);if(descriptor)root.append(this.browserTabButton(tab,descriptor))}
     const add=document.createElement('button');add.className='document-tab add';add.type='button';add.title=t('新建标签页');add.setAttribute('aria-label','新建标签页');add.textContent='+';add.onclick=()=>this.openNewTab();$('#documentAddSlot').replaceChildren(add);
-    $('#openDocumentsButton').classList.toggle('hidden',visible.length<2)
+    $('#openDocumentsButton').classList.toggle('hidden',visible.length<2);
+    this.keepActiveTabVisible();
   }
-  browserTabButton(tab,descriptor){const button=document.createElement('button');button.type='button';button.className='document-tab browser-tab';button.classList.toggle('active',this.activeTabKey===tab.key);button.title=descriptor.label;button.draggable=true;button.dataset.tabKey=tab.key;button.innerHTML=ui`<i>${escapeHtml(descriptor.icon)}</i><span>${escapeHtml(descriptor.label)}</span><b class="tab-close" title="关闭标签页">×</b>`;button.onclick=event=>{if(event.target.closest('.tab-close'))return;this.activateTab(tab.key)};button.querySelector('.tab-close').onclick=event=>{event.stopPropagation();this.closeDocument(tab.key)};button.ondragstart=event=>{event.dataTransfer.effectAllowed='move';event.dataTransfer.setData('application/x-lmn-tab',tab.key)};button.ondragover=event=>{if(event.dataTransfer.types.includes('application/x-lmn-tab'))event.preventDefault()};button.ondrop=event=>{event.preventDefault();const sourceKey=event.dataTransfer.getData('application/x-lmn-tab'),from=this.openTabs.findIndex(item=>item.key===sourceKey),to=this.openTabs.findIndex(item=>item.key===tab.key);if(from<0||to<0||from===to)return;const[moved]=this.openTabs.splice(from,1);this.openTabs.splice(to,0,moved);this.renderBrowserTabs()};button.oncontextmenu=event=>{event.preventDefault();this.openBrowserTabMenu(tab,event)};return button}
+  keepActiveTabVisible(){
+    const strip=$('#documentTabs'),active=strip?.querySelector('.browser-tab.active');
+    if(!active||!strip.clientWidth)return;
+    const view=strip.getBoundingClientRect(),tab=active.getBoundingClientRect();
+    if(tab.left<view.left)strip.scrollLeft+=tab.left-view.left;
+    else if(tab.right>view.right)strip.scrollLeft+=tab.right-view.right;
+  }
+  browserTabButton(tab,descriptor){const button=document.createElement('button');button.type='button';button.className='document-tab browser-tab';button.classList.toggle('active',this.activeTabKey===tab.key);button.title=descriptor.label;button.draggable=true;button.dataset.tabKey=tab.key;button.innerHTML=ui`<i>${escapeHtml(descriptor.icon)}</i><span>${escapeHtml(descriptor.label)}</span><b class="tab-close" title="关闭标签页">×</b>`;const tabLabel=button.querySelector("span");tabLabel.replaceChildren();appendInlineContent(tabLabel,descriptor.label);button.onclick=event=>{if(event.target.closest('.tab-close'))return;this.activateTab(tab.key)};button.querySelector('.tab-close').onclick=event=>{event.stopPropagation();this.closeDocument(tab.key)};button.ondragstart=event=>{event.dataTransfer.effectAllowed='move';event.dataTransfer.setData('application/x-lmn-tab',tab.key)};button.ondragover=event=>{if(event.dataTransfer.types.includes('application/x-lmn-tab'))event.preventDefault()};button.ondrop=event=>{event.preventDefault();const sourceKey=event.dataTransfer.getData('application/x-lmn-tab'),from=this.openTabs.findIndex(item=>item.key===sourceKey),to=this.openTabs.findIndex(item=>item.key===tab.key);if(from<0||to<0||from===to)return;const[moved]=this.openTabs.splice(from,1);this.openTabs.splice(to,0,moved);this.renderBrowserTabs()};button.oncontextmenu=event=>{event.preventDefault();this.openBrowserTabMenu(tab,event)};return button}
   openBrowserTabMenu(tab,event){const index=this.openTabs.findIndex(item=>item.key===tab.key);this.showContextMenu(event.clientX,event.clientY,[{icon:'×',label:t('关闭'),action:()=>this.closeDocument(tab.key)},{icon:'⊘',label:t('关闭其他'),action:()=>{for(const other of [...this.openTabs])if(other.key!==tab.key)this.closeDocument(other.key);this.activateDocument(tab.id,true,tab.knowledgeId)}},{icon:'→',label:t('关闭右侧'),disabled:index<0||index===this.openTabs.length-1,action:()=>{for(const other of [...this.openTabs.slice(index+1)])this.closeDocument(other.key)}}])}
   openBrowserDocumentsMenu(event){const rect=event.currentTarget.getBoundingClientRect(),items=[{heading:t('打开的文档')}];for(const tab of this.openTabs){const descriptor=this.describeOpenTab(tab);if(!descriptor)continue;items.push({icon:this.activeTabKey===tab.key?'✓':descriptor.icon,label:descriptor.label,action:()=>this.activateDocument(tab.id,true,tab.knowledgeId)})}items.push({separator:true},{icon:'+',label:t('新建标签页'),action:()=>this.openNewTab()});this.showContextMenu(rect.right-250,rect.bottom+4,items)}
   startWriting(){if(!this.knowledge)return;this.dismissedEmpty.add(this.currentKnowledgeId);$('#notesDocument').classList.remove('blank-empty');$('#blankKnowledgeEmpty').classList.add('hidden');this.renderKnowledgeNotesEditor()}

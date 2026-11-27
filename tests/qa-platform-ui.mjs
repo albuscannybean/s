@@ -9,7 +9,7 @@ const page=await browser.newPage({viewport:{width:1440,height:1000},serviceWorke
 page.on('pageerror',error=>errors.push(error.message));await mkdir('qa-output',{recursive:true});
 try{
   await page.goto(process.env.LMN_QA_URL||'http://127.0.0.1:4174/apps/web/',{waitUntil:'networkidle'});await page.waitForFunction(()=>!!globalThis.lmnWorkspace);
-  assert.deepEqual(await page.locator('.math-main-nav button').allTextContents(),['课程','知识库','方法库','题库','实验']);
+  assert.deepEqual(await page.locator('.math-main-nav button').allTextContents(),['课程','知识库','方法库','题库','数学实验','我的学习']);
   assert.ok(await page.locator('#mathArchive [data-archive-kind="course"]').count()>=4);
   await page.locator('.math-main-nav [data-math-nav="knowledge"]').click();
   await page.locator('.knowledge-form-tabs label').filter({hasText:'概念与定义'}).click();
@@ -21,7 +21,7 @@ try{
   await page.locator('.math-main-nav [data-math-nav="courses"]').click();
   result.chrome=await page.evaluate(()=>{const nav=document.querySelector('.math-main-nav'),card=nav.querySelector('button');return{background:getComputedStyle(document.querySelector('#welcome')).backgroundColor,ink:getComputedStyle(document.querySelector('#welcome')).color,brand:getComputedStyle(document.querySelector('.math-brand-symbol')).backgroundColor,masthead:document.querySelector('.math-masthead').getBoundingClientRect().height,gap:getComputedStyle(nav).gap,radius:getComputedStyle(card).borderRadius,tabsTop:document.querySelector('.document-bar').getBoundingClientRect().top,navBottom:nav.getBoundingClientRect().bottom,workspaceX:document.querySelector('#workspace').getBoundingClientRect().x}});
   // Neutral canvas for the white theme, with the reference site's indigo and dimensions.
-  assert.equal(result.chrome.background,'rgb(243, 244, 247)');assert.equal(result.chrome.brand,'rgb(53, 59, 112)');assert.equal(result.chrome.masthead,94);assert.equal(result.chrome.gap,'8px');assert.equal(result.chrome.radius,'10px');assert.equal(result.chrome.workspaceX,0);assert.equal(result.chrome.tabsTop,result.chrome.navBottom);
+  assert.equal(result.chrome.background,'rgb(243, 244, 247)');assert.equal(result.chrome.brand,'rgb(53, 59, 112)');assert.equal(result.chrome.masthead,58);assert.equal(result.chrome.gap,'8px');assert.equal(result.chrome.radius,'4px');assert.equal(result.chrome.workspaceX,0);assert.equal(result.chrome.tabsTop,result.chrome.navBottom);
   await page.setViewportSize({width:1920,height:1000});
   const insets=await page.evaluate(()=>['.math-brand','.math-main-nav button','#mathArchive .math-archive-shell'].map(selector=>Math.round(document.querySelector(selector).getBoundingClientRect().left)));
   assert.deepEqual(insets,[248,248,248]);
