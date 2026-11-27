@@ -8,6 +8,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: 20 }
+      - run: npm install --ignore-scripts --omit=optional
       - run: npm run build:web
       - run: npm test
       - run: mkdir -p site/apps && cp -r apps/web site/apps/ && cp -r packages site/
@@ -19,7 +20,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: 20 }
-      - run: npm install --no-save playwright@1.62.1
+      - run: npm install --ignore-scripts --omit=optional --no-save playwright@1.62.1
       - run: npx playwright install --with-deps chromium
       - run: npm run build:web
       - run: node tests/local-server.mjs 4174 > /tmp/lmn-server.log 2>&1 &
@@ -29,6 +30,7 @@ jobs:
       - run: node tests/qa-math-release.mjs
       - run: node tests/qa-math-content.mjs
       - run: node tests/qa-textbooks.mjs
+      - run: node tests/qa-textbook-reader.mjs
       - run: node tests/qa-platform-ui.mjs
       - run: node tests/qa-cache-refresh.mjs
       - run: node tests/qa-structure-map.mjs
