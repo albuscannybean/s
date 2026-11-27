@@ -35,7 +35,9 @@ try {
   assert.ok(await page.locator('#mathReadingBody .katex').count()>0);
   await page.locator('[data-math-archive-action=chapter]').click();
   assert.ok(await page.locator('#course-a3-10').evaluate(el=>el.open));
-  assert.equal(await page.locator('#textbookReader,#textbookMatches,input[accept*="pdf"]').count(),0);
+  assert.equal(await page.locator('#textbookReader,#textbookMatches').count(),0);
+  assert.equal(await page.locator('#courseBook input[accept*="pdf"]').count(),1);
+  assert.equal(await page.locator('#courseBook [data-book]').inputValue(),'a3');
   await page.locator('#course-a3-10 .course-lesson').filter({hasText:'换元法则'}).getByText(/本节练习/).click();
   await page.getByRole('button',{name:/正定二次型的高斯积分/}).click();
   assert.match(await page.locator('.course-source').innerText(),/习题 8.1/);

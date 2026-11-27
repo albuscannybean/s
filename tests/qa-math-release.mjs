@@ -64,6 +64,7 @@ try{
   assert.match(await page.locator('.study-records').textContent(),/离线保留的独立尝试/);
   await page.locator('[data-study-action="hint"]').click();assert.match(await page.locator('#studyHints').textContent(),/固定/);
   await page.screenshot({path:'qa-output/math-release-offline-study.png'});
+  await page.locator('.study-problem-resources > summary').click();
   await page.locator('[data-study-action="knowledge"][data-value="ANA-UC-K02"]').click();
   assert.ok(await page.locator('#mathReadingBody .katex').count()>0);result.offlineContent=true;
   assert.deepEqual(errors,[]);result.offlineStudy=true;result.errors=errors;

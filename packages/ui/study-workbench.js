@@ -89,8 +89,12 @@ export class StudyWorkbench {
     const task=session.task,ownAttempts=session.attempts.filter(item=>item.task===task),hints=session.hints.filter(item=>item.task===task),feedback=session.feedback.filter(item=>item.attemptId===ownAttempts.at(-1)?.id);
     const taskPrompt=problem?(task==='main'?problem.prompt:task==='transfer'?problem.transfer:`不看答案，重新独立完成：${problem.prompt}`):lesson?.[task]??(task==='main'?`独立说明或解决这个问题：${session.title}`:task==='transfer'?'请改变一个条件，自己构造新的例子并验证结论。':'不看笔记复述核心定义、思路及适用边界。');
     const feedbackText=this.feedbackInput.get(session.id)??'',preview=this.feedbackPreview.get(session.id);
+    const resourcesOpen=root.querySelector('.study-problem-resources[open]')?.dataset.session===session.id;
+    const started=session.attempts.some(item=>item.task==='main');
+    root.classList.toggle('study-guided-problem',!!problem);
     root.innerHTML=`
-      <header class="study-workbench-header"><div><p class="eyebrow">${problem?`题库 · ${html(problem.id)} · ${html(problem.type)}`:`学习会话 · ${html(session.mode)}`}</p><h1>${html(session.title)}</h1><p>先独立思考 → 最小提示与反馈 → 重新尝试 → 迁移与复习。每次提交都会留下可检验的原始记录。</p></div><button type="button" data-study-action="${problem?'problem':'home'}" ${problem?`data-value="${html(problem.id)}"`:''}>${problem?'返回题目档案':'返回学习首页'}</button></header>
+      <header class="study-workbench-header"><div><p class="eyebrow">${problem?`题库 · ${html(problem.id)}`:`学习会话 · ${html(session.mode)}`}</p><h1>${html(session.title)}</h1>${problem?'':'<p>先独立思考 → 最小提示与反馈 → 重新尝试 → 迁移与复习。每次提交都会留下可检验的原始记录。</p>'}</div><button type="button" data-study-action="${problem?'problem':'home'}" ${problem?`data-value="${html(problem.id)}"`:''}>${problem?'返回题目':'返回学习首页'}</button></header>
+      ${problem?`<p class="study-phase">${task==='transfer'?'3 · 迁移练习':task==='review'?'3 · 延迟回忆':started?'2 · 核对与修正':'1 · 独立作答'}</p>`:''}
       <nav class="study-workbench-steps" aria-label="学习阶段"><button type="button" class="${task==='main'?'active':''}" data-study-action="stage" data-value="main">1 · 自主理解</button><button type="button" class="${task==='transfer'?'active':''}" data-study-action="stage" data-value="transfer" ${session.attempts.some(item=>item.task==='main')?'':'disabled'}>2 · 迁移检验</button><button type="button" class="${task==='review'?'active':''}" data-study-action="stage" data-value="review" ${session.status==='review'?'':'disabled'}>3 · 延迟回忆</button></nav>
       <div class="study-workbench-grid"><section class="study-task-panel"><h2>本轮任务 · ${taskName[task]}</h2><div class="study-question" id="studyQuestion"></div>
         <section class="study-definition"><h3>${problem?'相关知识 · 可随时查阅':'学习目标'}</h3>${problem?problem.knowledgeIds.map(id=>`<button type="button" class="study-knowledge-link" data-study-action="knowledge" data-value="${html(id)}">${html(mathKnowledgeById(id)?.title??id)} ↗</button>`).join(''):lesson?'辨认量词差异 → 用一个序列反驳错误直觉 → 迁移到收敛成立的情形':'以定义、例子与独立推理建立可检验的理解。'}</section>
@@ -100,7 +104,7 @@ export class StudyWorkbench {
         <details class="study-records"><summary>历史尝试（${session.attempts.length} 条）与 AI 反馈（${session.feedback.length} 条）</summary>${session.attempts.map((a,index)=>`<article><h4>第 ${index+1} 次 · ${taskName[a.task]} · ${day(a.createdAt)} · 使用提示 ${a.hintCount} 次</h4><pre>${html(a.content)}</pre>${session.feedback.filter(f=>f.attemptId===a.id).map(f=>`<div class="study-record-feedback"><b>导入的反馈</b><p>${html(f.summary)}</p><p>下一步：${html(f.nextAction)}</p></div>`).join('')}</article>`).join('')||'<p>尚无尝试。</p>'}</details>
       </section><div class="study-practice-column"><section class="study-writing-panel"><header><div><h2>先写下自己的想法</h2><small>支持 Markdown 与 LaTeX（如 $\\forall x$）；草稿自动保存</small></div><span>${ownAttempts.length} 次已提交</span></header>
           <label for="studyDraft">草稿 / 证明 / 反例</label><textarea id="studyDraft" rows="10" placeholder="先用自己的话解释。哪里不确定，也请明确写出……">${html(session.draft)}</textarea>
-          <div class="study-actions"><button type="button" class="primary" data-study-action="submit">保存本轮独立尝试</button><button type="button" data-study-action="preview">预览公式与正文</button></div><div class="study-draft-preview hidden" id="studyDraftPreview"></div></section>
+          <div class="study-actions"><button type="button" class="primary" data-study-action="submit">${problem?'提交本轮尝试':'保存本轮独立尝试'}</button><button type="button" data-study-action="preview">预览正文</button></div><div class="study-draft-preview hidden" id="studyDraftPreview"></div></section>
         <section class="study-hint-panel"><header><div><h2>逐层提示</h2><p>先提交一次自己的尝试，才会解锁提示。提示使用次数会保留。</p></div><button type="button" data-study-action="hint" ${!guidedHints.length||task!=='main'||!ownAttempts.length||hints.length>=guidedHints.length?'disabled':''}>${!guidedHints.length?'本题暂无内置提示':hints.length===guidedHints.length?'提示已全部展示':`查看第 ${hints.length+1} 层提示`}</button></header><div id="studyHints"></div></section>
         ${problem?`<section class="study-solution-panel"><h2>参考解答与自我校验</h2>${session.attempts.length?`<details><summary>展开经过校核的参考解答</summary><div id="studySolution"></div></details>`:'<p>请先保存至少一次独立尝试，然后才能查看完整参考解答。</p>'}<p>参考解答是对照材料，不等于你的独立掌握程度。</p></section>`:''}
         <section class="study-ai-panel"><header><div><h2>AI 辅导 · 导出与导入</h2><p>网站尚未连接在线模型。将上下文交给 AI，再把反馈 JSON 粘贴回来；只有确认后才入档。</p></div></header>
@@ -115,7 +119,23 @@ export class StudyWorkbench {
           <div class="study-actions"><button type="button" data-study-action="stage" data-value="transfer" ${session.attempts.some(item=>item.task==='main')?'':'disabled'}>开始迁移检验</button><button type="button" data-study-action="finish" ${session.attempts.some(item=>item.task==='main')?'':'disabled'}>${session.status==='review'?'重新安排明日复习':'结束本次学习，安排明日复习'}</button><button type="button" data-study-action="notes">将学习成果整理为知识笔记</button></div>
           ${session.status==='review'?`<p>下次复习：${html(day(session.dueAt))}。不看提示提交一份回忆尝试后，再选择本轮回忆结果。</p><div class="study-actions"><button type="button" data-study-action="review" data-value="yes" ${session.attempts.filter(a=>a.task==='review').length>session.reviews.length?'':'disabled'}>独立回忆成功</button><button type="button" data-study-action="review" data-value="no" ${session.attempts.filter(a=>a.task==='review').length>session.reviews.length?'':'disabled'}>仍需补足</button></div>`:''}
         </section></div></div>`;
-    if(problem)root.querySelector('.study-finish-panel').insertAdjacentHTML('beforeend',this.controller.mathPath.forPage('problem',problem.id));
+    if(problem){
+      const extras=document.createElement('details');
+      extras.className='study-problem-resources';extras.dataset.session=session.id;
+      extras.open=resourcesOpen;
+      extras.innerHTML='<summary>查阅资料与学习记录</summary>';
+      for(const selector of ['.study-definition','.study-evidence','.study-records','.study-ai-panel']){
+        extras.append(root.querySelector(selector));
+      }
+      root.append(extras);
+      root.querySelector('.study-hint-panel').hidden=!started||task!=='main';
+      root.querySelector('.study-solution-panel').hidden=!started||task!=='main';
+      const finish=root.querySelector('.study-finish-panel');
+      finish.hidden=!started;
+      if(session.status==='review'||task==='transfer')finish.querySelector('.study-actions').insertAdjacentHTML('afterbegin','<button type="button" data-study-action="stage" data-value="main">回到原题</button>');
+      if(session.status==='review'&&task!=='review')finish.querySelector('.study-actions').insertAdjacentHTML('beforeend','<button type="button" data-study-action="stage" data-value="review">开始延迟回忆</button>');
+      if(session.status==='review')finish.insertAdjacentHTML('beforeend',this.controller.mathPath.forPage('problem',problem.id));
+    }
     const heading=root.querySelector('.study-workbench-header h1');heading.replaceChildren();appendInlineContent(heading,session.title);
     renderStudyMarkdown($('#studyQuestion'),taskPrompt);
     for(const hint of hints){const box=document.createElement('div');box.className='study-hint';const heading=document.createElement('strong');heading.textContent=`第 ${hint.level} 层提示`;box.append(heading);const body=document.createElement('div');renderStudyMarkdown(body,guidedHints[hint.level-1]??'');box.append(body);$('#studyHints').append(box)}

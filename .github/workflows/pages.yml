@@ -42,6 +42,7 @@ jobs:
 
       - name: Build production site
         run: |
+          npm install --ignore-scripts --omit=optional
           npm run build:web
           npm test
           mkdir -p site/apps
@@ -82,6 +83,7 @@ jobs:
         if: steps.preview.outputs.enabled == 'true'
         working-directory: preview-src
         run: |
+          npm install --ignore-scripts --omit=optional
           npm run build:web
           npm test
 

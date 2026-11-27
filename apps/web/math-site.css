@@ -150,9 +150,10 @@
 
 /* One centered content column for the public shell, chapter pages and learning desk. */
 #appShell { --page-inset:max(28px, calc((100% - 1480px) / 2 + 28px)); }
-.math-masthead,.math-main-nav,.math-home.welcome,.applied-home,.math-archive,.study-workbench {
+.math-masthead,.math-main-nav,.math-home.welcome,.applied-home,.math-archive,.study-workbench,.new-tab-page {
   box-sizing:border-box; padding-inline:var(--page-inset);
 }
+.new-tab-page .new-tab-content { box-sizing:border-box; width:min(880px,100%); padding-inline:0; }
 .shell-menu-panel { width:min(340px,calc(100vw - 32px)); padding:8px 16px; gap:0; max-height:calc(100dvh - 96px); overflow:auto; }
 .shell-menu-panel section { padding:8px 0; display:grid; gap:2px; }
 .shell-menu-panel section+section { border-top:1px solid var(--line); }
@@ -305,6 +306,56 @@
 .reading-toolbox > summary { color:var(--green); cursor:pointer; line-height:32px; }
 .reading-tool-options { display:grid; gap:var(--space-1); position:absolute; z-index:3; inset-inline-end:0; min-width:124px; background:var(--elevated); border:1px solid var(--line); padding:var(--space-2); box-shadow:var(--shadow-2); }
 .reading-floating-toolbox { position:fixed; z-index:12; inset-inline-end:var(--page-inset); bottom:40px; box-shadow:var(--shadow-2); background:var(--elevated); }
+
+.course-book { margin-block:var(--space-4); }
+.course-book h2 { margin:0 0 var(--space-3); font-size:var(--text-section); }
+.course-guide { margin-block:var(--space-4); }
+.course-guide > summary { border-block:1px solid var(--line); padding:var(--space-3) var(--space-2); }
+.course-guide > .course-chapter-jump { margin-block:var(--space-3); }
+.book-toolbar { display:flex; align-items:center; flex-wrap:wrap; gap:var(--space-2) var(--space-3); padding-block:var(--space-2); }
+.book-controls { position:sticky; top:0; z-index:3; background:var(--canvas); }
+.book-toolbar[hidden],.book-scroll[hidden],.book-notes[hidden],.book-selection[hidden] { display:none; }
+.book-toolbar label { display:flex; align-items:center; gap:var(--space-2); min-width:0; max-width:100%; }
+.book-toolbar select { min-width:0; max-width:100%; text-overflow:ellipsis; }
+.book-toolbar [data-page] { inline-size:5rem; }
+.book-scroll { overflow:auto; background:var(--ui-panel); border:1px solid var(--line); }
+.book-paper { position:relative; margin-inline:auto; isolation:isolate; --scale-round-x:1px; --scale-round-y:1px; }
+.book-paper canvas { position:absolute; inset:0; width:100%; height:100%; }
+.book-paper .textLayer { position:absolute; inset:0; overflow:clip; line-height:1; text-size-adjust:none; transform-origin:0 0; }
+.book-paper .textLayer :is(span,br) { position:absolute; color:transparent; white-space:pre; cursor:text; transform-origin:0 0; }
+.book-paper .textLayer .markedContent { display:contents; }
+.book-paper .textLayer:not(.book-ocr-layer) > :not(.markedContent),
+.book-paper .textLayer .markedContent span:not(.markedContent) {
+  font-size:calc(var(--total-scale-factor) * var(--font-height,0px) * var(--min-font-size,1));
+  transform:rotate(var(--rotate,0deg)) scaleX(var(--scale-x,1)) scale(calc(1 / var(--min-font-size,1)));
+}
+.book-paper .textLayer [role="img"] { user-select:none; }
+.book-paper .textLayer[data-main-rotation="90"] { transform:translateX(100%) rotate(90deg); }
+.book-paper .textLayer[data-main-rotation="180"] { transform:translate(100%,100%) rotate(180deg); }
+.book-paper .textLayer[data-main-rotation="270"] { transform:translateY(100%) rotate(270deg); }
+.book-paper .textLayer ::selection { color:transparent; background:color-mix(in srgb,var(--blue) 35%,transparent); }
+.book-highlights { position:absolute; inset:0; pointer-events:none; }
+.book-highlights span { position:absolute; background:color-mix(in srgb,var(--gold) 34%,transparent); }
+.book-selection { position:absolute; z-index:1; box-shadow:var(--shadow-2); background:var(--ui-overlay); }
+.book-status { color:var(--muted); font-size:var(--text-meta); margin-block:var(--space-2); }
+.book-status:empty { margin:0; }
+.book-notes { margin-block:var(--space-3); }
+.book-note-list article { padding-block:var(--space-2); border-bottom:1px solid var(--line); }
+.book-note-list button { max-width:100%; text-align:start; white-space:normal; overflow-wrap:anywhere; }
+.book-note-dialog { width:min(640px,calc(100% - var(--space-6))); }
+.book-note-dialog blockquote { margin:0 0 var(--space-3); padding-inline-start:var(--space-3); border-inline-start:2px solid var(--line-strong); max-height:9rem; overflow:auto; }
+.book-note-dialog textarea { resize:none; }
+.book-note-actions { display:flex; justify-content:flex-end; flex-wrap:wrap; gap:var(--space-2); }
+.book-note-error { color:var(--danger); }
+
+.math-problem-page,.study-guided-problem { width:min(100%,78ch); margin-inline:auto; }
+.math-problem-page .math-problem-resources,.study-guided-problem .study-problem-resources { margin-block:var(--space-3); border-block-start:1px solid var(--line); padding-block:var(--space-3); }
+.study-guided-problem .study-workbench-steps,.study-guided-problem .study-task-panel > h2 { display:none; }
+.study-guided-problem .study-workbench-grid,.study-guided-problem .study-practice-column { display:grid; grid-template-columns:minmax(0,1fr); }
+.study-guided-problem .study-task-panel,.study-guided-problem .study-writing-panel { box-shadow:none; }
+.study-guided-problem .study-task-panel { position:static; }
+.study-guided-problem .study-phase { color:var(--muted); margin-block:var(--space-3); }
+.study-guided-problem .study-hint-panel[hidden],.study-guided-problem .study-solution-panel[hidden],.study-guided-problem .study-finish-panel[hidden] { display:none; }
 .chapter-check,.course-original { margin-block:var(--space-3); padding:var(--space-2); border-block-start:1px solid var(--line); }
 .chapter-check > summary,.course-original > summary { cursor:pointer; color:var(--green); }
 .reading-source-panel[open] > div { margin-top:var(--space-3); }

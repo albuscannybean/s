@@ -11,3 +11,4 @@ outputs/
 node_modules/
 
 qa-output/
+apps/web/vendor/pdfjs/

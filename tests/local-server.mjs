@@ -3,7 +3,7 @@ import {createReadStream,statSync} from 'node:fs';
 import {extname,join,normalize,sep} from 'node:path';
 
 const portFlag=process.argv.indexOf('--port'),hostFlag=process.argv.indexOf('--host');
-const root=process.cwd(),port=Number(portFlag>=0?process.argv[portFlag+1]:(process.argv[2]??4174)),host=hostFlag>=0?process.argv[hostFlag+1]:'127.0.0.1',mime={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.mjs':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json; charset=utf-8','.webmanifest':'application/manifest+json; charset=utf-8','.svg':'image/svg+xml'};
+const root=process.cwd(),port=Number(portFlag>=0?process.argv[portFlag+1]:(process.argv[2]??4174)),host=hostFlag>=0?process.argv[hostFlag+1]:'127.0.0.1',mime={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.mjs':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json; charset=utf-8','.webmanifest':'application/manifest+json; charset=utf-8','.svg':'image/svg+xml','.wasm':'application/wasm'};
 http.createServer((request,response)=>{
   try{
     const pathname=decodeURIComponent(new URL(request.url,'http://localhost').pathname);
