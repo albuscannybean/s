@@ -20,7 +20,11 @@ const htmlUrl=new URL('apps/web/index.html',base),original=await readFile(htmlUr
 const preload='<!-- modulepreload:start -->\n'+[...modules].filter(p=>p!=='apps/web/app.js').sort().map(p=>'<link rel="modulepreload" href="'+(p.startsWith('apps/web/')?'./'+p.slice(9):'../../'+p)+'">').join('\n')+'\n<!-- modulepreload:end -->';
 await writeFile(htmlUrl,original.includes('<!-- modulepreload:start -->')?original.replace(/<!-- modulepreload:start -->[\s\S]*?<!-- modulepreload:end -->/,preload):original.replace('</head>',preload+'\n</head>'));
 async function walk(relative){const entries=await readdir(new URL(relative,base),{withFileTypes:true}),files=[];for(const entry of entries){const p=relative+entry.name;if(entry.isDirectory())files.push(...await walk(p+'/'));else files.push(p)}return files}
-const packages=(await walk('packages/')).filter(p=>/\.(js|css)$/.test(p)),appFiles=(await walk('apps/web/')).filter(p=>!p.endsWith('/sw.js')&&/\.(js|mjs|html|css|woff2|webmanifest|bcmap|wasm|icc|ttf|pfb|otf)$/.test(p));
+const packages=(await walk('packages/')).filter(p=>/\.(js|css)$/.test(p));
+const appFiles=(await walk('apps/web/')).filter(p=>!p.endsWith('/sw.js')&&(
+ /\.(js|mjs|html|css|woff2|webmanifest|bcmap|wasm|icc|ttf|pfb|otf)$/.test(p)
+ ||p.startsWith('apps/web/course-text/')&&/\.json(?:\.gz)?$/.test(p)
+));
 const assets=[...appFiles,...packages].sort(),hash=createHash('sha256');for(const file of assets){hash.update(file);hash.update(await readFile(new URL(file,base)))}
 hash.update(await readFile(new URL('tools/generate-web-assets.mjs',base)));
 const paths=['./',...assets.map(p=>p.startsWith('apps/web/')?'./'+p.slice(9):'../../'+p)];

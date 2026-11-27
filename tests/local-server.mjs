@@ -1,14 +1,24 @@
 import http from 'node:http';
 import {createReadStream,statSync} from 'node:fs';
-import {extname,join,normalize,sep} from 'node:path';
+import {extname,join,normalize,resolve,sep} from 'node:path';
 
 const portFlag=process.argv.indexOf('--port'),hostFlag=process.argv.indexOf('--host');
 const root=process.cwd(),port=Number(portFlag>=0?process.argv[portFlag+1]:(process.argv[2]??4174)),host=hostFlag>=0?process.argv[hostFlag+1]:'127.0.0.1',mime={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.mjs':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json; charset=utf-8','.webmanifest':'application/manifest+json; charset=utf-8','.svg':'image/svg+xml','.wasm':'application/wasm'};
+const personalText=process.env.LMN_LOCAL_TEXTBOOK_DIR;
+if(personalText&&host!=='127.0.0.1'&&host!=='::1')throw new Error('Personal textbook text requires a loopback address.');
 http.createServer((request,response)=>{
   try{
     const pathname=decodeURIComponent(new URL(request.url,'http://localhost').pathname);
     if(pathname==='/'){
       response.writeHead(302,{location:'/apps/web/'});response.end();return;
+    }
+    const book=/^\/apps\/web\/course-text\/(manifest|algebra|analysis|ode|prob|a1|a2|a3)\.json$/.exec(pathname);
+    if(personalText&&book){
+      const file=resolve(personalText,book[1]+'.json');
+      statSync(file);
+      response.writeHead(200,{'content-type':mime['.json'],'cache-control':'no-store'});
+      createReadStream(file).pipe(response);
+      return;
     }
     const relative=normalize(pathname).replace(/^[/\\]+/,'');
     let file=join(root,relative);
