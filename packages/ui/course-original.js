@@ -6,6 +6,7 @@ const location = new URL('../../apps/web/course-text/', import.meta.url);
 const schema = 'lmn-course-text/1';
 let manifest;
 let suffix = '.json';
+let publication;
 const editions = new Map();
 
 async function json(name) {
@@ -20,6 +21,7 @@ export function courseTextManifest() {
     .then(data => {
       if (data.format !== schema || !Array.isArray(data.editions)) return new Set();
       suffix = data.encoding === 'gzip' ? '.json.gz' : '.json';
+      publication = data.publication;
       return new Set(data.editions);
     })
     .catch(() => { manifest = null; return new Set(); });
@@ -99,8 +101,12 @@ export async function mountCourseOriginal(target, unit, { readLocalText, readNot
             }
           }
         }
-        const quality = section.reviewed ? '已校订' : section.scanned ? '扫描文字待校订' : '提取文字待校订';
-        show(edition.title + ' · ' + quality, prose);
+        const reviewed=section.reviewedPages?.length?'已校订 PDF 页 '+section.reviewedPages.join('、')+'，其余':'';
+        const quality = section.reviewed ? '已校订' : reviewed+(section.scanned ? '扫描文字待校订' : '提取文字待校订');
+        const first=section.pages[0][0],last=section.pages.at(-1)[0];
+        const pages='PDF 第 '+(first===last?first:first+'–'+last)+' 页';
+        const access=publication?.editions?.[edition.id]===edition.sha256?'已确认公开转载授权':'本机文字稿';
+        show([edition.title,pages,quality,access].join(' · '), prose);
         return;
       }
     } catch (error) {

@@ -10,7 +10,7 @@ const browser=await chromium.launch({
 const base=new URL(process.env.LMN_QA_URL||'http://127.0.0.1:4174/apps/web/');
 const legacy='lmn-v5.1.4-web-111111111111';
 const neighbor='lmn-v5.1.4-web-222222222222';
-const navLabels=['课程','知识库','方法库','题库','实验'];
+const navLabels=['课程','知识库','方法库','题库','数学实验','我的学习'];
 
 try{
   const context=await browser.newContext(),page=await context.newPage(),errors=[];

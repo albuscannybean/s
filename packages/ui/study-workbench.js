@@ -22,6 +22,14 @@ export class StudyWorkbench {
     if(immediate)this.save(session);else this.draftTimers.set(session.id,setTimeout(()=>{this.draftTimers.delete(session.id);this.save(this.sessions.find(item=>item.id===session.id))},350));
   }
   save(session){if(!session)return;const snapshot=structuredClone(session);this.saving=this.saving.catch(()=>{}).then(()=>put('studySessions',snapshot)).catch(error=>message(`保存失败：${error.message}。请先导出学习档案。`))}
+  async flushDrafts(){
+    for(const [id,timeout] of this.draftTimers){
+      clearTimeout(timeout);
+      this.save(this.sessions.find(session=>session.id===id));
+    }
+    this.draftTimers.clear();
+    await this.saving;
+  }
   bind(){
     const root=$('#studyWorkbenchBody');
     root.addEventListener('input',event=>{
@@ -120,6 +128,17 @@ export class StudyWorkbench {
           ${session.status==='review'?`<p>下次复习：${html(day(session.dueAt))}。不看提示提交一份回忆尝试后，再选择本轮回忆结果。</p><div class="study-actions"><button type="button" data-study-action="review" data-value="yes" ${session.attempts.filter(a=>a.task==='review').length>session.reviews.length?'':'disabled'}>独立回忆成功</button><button type="button" data-study-action="review" data-value="no" ${session.attempts.filter(a=>a.task==='review').length>session.reviews.length?'':'disabled'}>仍需补足</button></div>`:''}
         </section></div></div>`;
     if(problem){
+      if(!started&&task==='main'){
+        const reference=document.createElement('details');
+        reference.className='study-optional-reference';
+        reference.innerHTML='<summary>自选查阅提示与解答</summary><div class="math-reading-body"></div>';
+        reference.addEventListener('toggle',()=>{
+          const body=reference.lastElementChild;
+          if(reference.open&&!body.firstChild)renderStudyMarkdown(body,
+            '### 提示\n\n'+problem.hints.map((hint,index)=>(index+1)+'. '+hint).join('\n')+'\n\n### 参考解答\n\n'+problem.solution);
+        });
+        root.querySelector('.study-writing-panel').append(reference);
+      }
       const extras=document.createElement('details');
       extras.className='study-problem-resources';extras.dataset.session=session.id;
       extras.open=resourcesOpen;

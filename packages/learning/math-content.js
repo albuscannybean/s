@@ -210,13 +210,19 @@ export const mathMethodById=id=>methodIndex.get(id)??null;
 export const mathCourseById=id=>courseIndex.get(id)??null;
 export const mathProblemsForKnowledge=id=>MATH_PROBLEMS.filter(x=>x.knowledgeIds.includes(id));
 export const mathProblemsForMethod=id=>MATH_PROBLEMS.filter(x=>x.methodIds.includes(id));
+const normalizedSearch=value=>String(value).normalize('NFKC').toLowerCase().replaceAll('柯西','cauchy');
+const searchIndex=new WeakMap();
 export function searchMathContent(items,{text='',difficulty='',type=''}={}){
-  const normalized=value=>String(value).normalize('NFKC').toLowerCase().replaceAll('柯西','cauchy');
-  const query=normalized(text).trim();return items.filter(item=>{
+  const terms=normalizedSearch(text).trim().split(/\s+/).filter(Boolean);
+  return items.filter(item=>{
     if(difficulty&&String(item.difficulty)!==String(difficulty))return false;
     if(type&&item.type!==type)return false;
-    const haystack=normalized([item.id,item.code,item.title,item.summary,item.prompt,item.body,item.type,item.trigger,item.category,mathCourseById(item.courseId??'course-analysis-2')?.title,item.action,item.reason,item.boundary,...(item.tags??[])].filter(Boolean).join(' '));
-    return !query||haystack.includes(query);
+    if(!terms.length)return true;
+    if(!searchIndex.has(item))searchIndex.set(item,normalizedSearch([
+      item.id,item.code,item.title,item.summary,item.prompt,item.body,item.type,item.trigger,item.category,
+      mathCourseById(item.courseId??'course-analysis-2')?.title,item.action,item.reason,item.boundary,...(item.tags??[])
+    ].filter(Boolean).join(' ')));
+    return terms.every(term=>searchIndex.get(item).includes(term));
   });
 }
 export function validateMathContent(){

@@ -45,7 +45,7 @@ test('problem-first launch links to all four semester courses',()=>{
 });
 
 
-test('primary navigation exposes five direct modules without a homepage',()=>{
+test('primary navigation exposes six direct modules without a homepage',()=>{
   const nav=html.match(/<nav class="math-main-nav"[\s\S]*?<\/nav>/)[0];
-  assert.equal((nav.match(/<button /g)||[]).length,5);assert.doesNotMatch(nav,/data-math-nav="home"/);
+  assert.equal((nav.match(/<button /g)||[]).length,6);assert.doesNotMatch(nav,/data-math-nav="home"/);
 });

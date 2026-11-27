@@ -31,6 +31,7 @@ jobs:
       - run: node tests/qa-math-content.mjs
       - run: node tests/qa-textbooks.mjs
       - run: node tests/qa-course-original.mjs
+      - run: node tests/qa-v6-learning.mjs
       - run: node tests/qa-textbook-reader.mjs
       - run: node tests/qa-platform-ui.mjs
       - run: node tests/qa-cache-refresh.mjs

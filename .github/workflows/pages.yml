@@ -108,7 +108,7 @@ jobs:
           const htmlPath = 'preview-src/apps/web/index.html';
           let html = readFileSync(htmlPath, 'utf8');
           html = html.replace(/<title>[^<]*<\/title>/, '<title>数学 · LMN — V3 预览 · PR #17</title>');
-          html = html.replaceAll('V5.1.4 · 内容版', 'V3 预览 · PR #17');
+          html = html.replaceAll('V6.0 · 学习版', 'V3 预览 · PR #17');
           html = html.replace('<meta name="viewport"', '<meta name="robots" content="noindex, nofollow">\n  <meta name="viewport"');
           writeFileSync(htmlPath, html);
 
@@ -119,6 +119,8 @@ jobs:
           manifest.description = '数学 · LMN PR #17 公开预览版本；个人数据与正式网站隔离。';
           writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + '\n');
           NODE
+
+          (cd preview-src && node tools/generate-web-assets.mjs)
 
           # Publish the PR build under an isolated subpath of the existing Pages site.
           mkdir -p site/previews/math-v3/apps

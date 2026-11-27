@@ -32,8 +32,17 @@ async function run(store, mode, action) {
 export const getTextbook = id => run('editions', 'readonly', store => store.get(id));
 export const hasTextbook = id => run('editions', 'readonly', store => store.getKey(id)).then(Boolean);
 export const pageNotes = (edition, page) => run('notes', 'readonly', store => store.index('page').getAll([edition, page]));
+export const allPageNotes = () => run('notes', 'readonly', store => store.getAll());
 export const savePageNote = note => run('notes', 'readwrite', store => store.put(note));
 export const deletePageNote = id => run('notes', 'readwrite', store => store.delete(id));
+export function mergePageNotes(notes) {
+  return run('notes', 'readwrite', store => {
+    for (const note of notes) {
+      const existing=store.getKey(note.id);
+      existing.onsuccess=()=>{if(existing.result===undefined)store.add(note);};
+    }
+  });
+}
 
 async function identify(pdf, editions) {
   const digest = new Uint8Array(await crypto.subtle.digest('SHA-256', await pdf.arrayBuffer()));

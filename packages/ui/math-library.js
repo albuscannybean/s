@@ -36,5 +36,13 @@ export class MathCollections {
     folder.items=action==='remove'?folder.items.filter(item=>item!==id):[...new Set([...folder.items,id])];
     localStorage.setItem(storageKey,JSON.stringify(folders));
   }
+  merge(incoming){
+    const folders=new Map(this.read().map(folder=>[folder.name,new Set(folder.items)]));
+    for(const folder of incoming){
+      if(!folders.has(folder.name))folders.set(folder.name,new Set());
+      for(const id of folder.items)folders.get(folder.name).add(id);
+    }
+    localStorage.setItem(storageKey,JSON.stringify([...folders].map(([name,items])=>({name,items:[...items]}))));
+  }
 }
 
